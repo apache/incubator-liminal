@@ -32,22 +32,18 @@ class PythonTask(task.Task):
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
-        self.dag = dag
-        self.parent = parent
-        self.config = config
-        self.trigger_rule = trigger_rule
-        self.input_type = config['input_type']
-        self.input_path = config['input_path']
-        self.task_name = config['task']
+        super().__init__(dag, pipeline_name, parent, config, trigger_rule)
+
+        self.input_type = self.config['input_type']
+        self.input_path = self.config['input_path']
+        self.task_name = self.config['task']
         self.image = self.config['image']
-        self.resources = self.__resources_config(config)
-        self.env_vars = self.__env_vars(pipeline_name, config)
-        self.kubernetes_kwargs = self.__kubernetes_kwargs(
-            dag, self.env_vars, self.resources, self.task_name
-        )
-        self.cmds, self.arguments = self.__kubernetes_cmds_and_arguments(config)
+        self.resources = self.__kubernetes_resources()
+        self.env_vars = self.__env_vars()
+        self.kubernetes_kwargs = self.__kubernetes_kwargs()
+        self.cmds, self.arguments = self.__kubernetes_cmds_and_arguments()
         self.config_task_id = self.task_name + '_input'
-        self.executors = self.__executors(config)
+        self.executors = self.__executors()
 
     def setup(self):
         # TODO: build docker image if needed.
@@ -126,65 +122,62 @@ class PythonTask(task.Task):
 
             return end_task
 
-    @staticmethod
-    def __executors(config):
+    def __executors(self):
         executors = 1
-        if 'executors' in config:
-            executors = config['executors']
+        if 'executors' in self.config:
+            executors = self.config['executors']
         return executors
 
-    @staticmethod
-    def __kubernetes_cmds_and_arguments(config):
+    def __kubernetes_cmds_and_arguments(self):
         cmds = ['/bin/bash', '-c']
         arguments = [
             f'''sh container-setup.sh && \
-            {config['cmd']} && \
-            sh container-teardown.sh {config['output_path']}'''
+            {self.config['cmd']} && \
+            sh container-teardown.sh {self.config['output_path']}'''
         ]
         return cmds, arguments
 
-    @staticmethod
-    def __kubernetes_kwargs(dag, env_vars, resources, task_name):
+    def __kubernetes_kwargs(self):
         kubernetes_kwargs = {
             'namespace': Variable.get('kubernetes_namespace', default_var='default'),
-            'name': task_name.replace('_', '-'),
+            'name': self.task_name.replace('_', '-'),
             'in_cluster': Variable.get('in_kubernetes_cluster', default_var=False),
             'image_pull_policy': Variable.get('image_pull_policy', default_var='IfNotPresent'),
             'get_logs': True,
-            'env_vars': env_vars,
+            'env_vars': self.env_vars,
             'do_xcom_push': True,
             'is_delete_operator_pod': True,
             'startup_timeout_seconds': 300,
             'image_pull_secrets': 'regcred',
-            'resources': resources,
-            'dag': dag
+            'resources': self.resources,
+            'dag': self.dag
         }
         return kubernetes_kwargs
 
-    @staticmethod
-    def __env_vars(pipeline_name, config):
+    def __env_vars(self):
         env_vars = {}
-        if 'env_vars' in config:
-            env_vars = config['env_vars']
+        if 'env_vars' in self.config:
+            env_vars = self.config['env_vars']
         airflow_configuration_variable = Variable.get(
-            f'''{pipeline_name}_dag_configuration''',
+            f'''{self.pipeline_name}_dag_configuration''',
             default_var=None)
         if airflow_configuration_variable:
             airflow_configs = json.loads(airflow_configuration_variable)
-            environment_variables_key = f'''{self.pipeline}_environment_variables'''
+            environment_variables_key = f'''{self.pipeline_name}_environment_variables'''
             if environment_variables_key in airflow_configs:
                 env_vars = airflow_configs[environment_variables_key]
         return env_vars
 
-    @staticmethod
-    def __resources_config(config):
+    def __kubernetes_resources(self):
         resources = {}
-        if 'request_cpu' in config:
-            resources['request_cpu'] = config['request_cpu']
-        if 'request_memory' in config:
-            resources['request_memory'] = config['request_memory']
-        if 'limit_cpu' in config:
-            resources['limit_cpu'] = config['limit_cpu']
-        if 'limit_memory' in config:
-            resources['limit_memory'] = config['limit_memory']
+
+        if 'request_cpu' in self.config:
+            resources['request_cpu'] = self.config['request_cpu']
+        if 'request_memory' in self.config:
+            resources['request_memory'] = self.config['request_memory']
+        if 'limit_cpu' in self.config:
+            resources['limit_cpu'] = self.config['limit_cpu']
+        if 'limit_memory' in self.config:
+            resources['limit_memory'] = self.config['limit_memory']
+
         return resources

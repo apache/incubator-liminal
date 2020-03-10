@@ -15,31 +15,20 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""
-Base task.
-"""
+
+from rainbow.runners.airflow.model import task
 
 
-class Task:
+class JobEndTask(task.Task):
     """
-    Task.
+    # TODO: Job end task. Reports job end metrics.
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
-        self.dag = dag
-        self.pipeline_name = pipeline_name
-        self.parent = parent
-        self.config = config
-        self.trigger_rule = trigger_rule
+        super().__init__(dag, pipeline_name, parent, config, trigger_rule)
 
     def setup(self):
-        """
-        Setup method for task.
-        """
-        raise NotImplementedError()
+        pass
 
     def apply_task_to_dag(self):
-        """
-        Registers Airflow operator to parent task.
-        """
-        raise NotImplementedError()
+        pass

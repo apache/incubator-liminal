@@ -15,17 +15,15 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-# TODO: Iterate over each pipeline and create a DAG for it. \
-#  Within every pipeline iterate over tasks and apply them to DAG.
 
 import os
 import pprint
+from datetime import datetime
 
 import yaml
 from airflow import DAG
 
 from rainbow.runners.airflow.tasks.python import PythonTask
-from datetime import datetime
 
 
 def register_dags(path):
