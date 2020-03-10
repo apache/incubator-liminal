@@ -15,4 +15,24 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-# TODO: core
+"""
+Base task.
+"""
+
+
+class Task:
+    """
+    Task.
+    """
+
+    def setup(self):
+        """
+        Setup method for task.
+        """
+        raise NotImplementedError()
+
+    def apply_task_to_dag(self):
+        """
+        Registers Airflow operator to parent task.
+        """
+        raise NotImplementedError()

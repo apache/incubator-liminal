@@ -1,0 +1,51 @@
+
+---
+name: MyPipeline
+owner: Bosco Albert Baracus
+pipelines:
+  - pipeline: my_pipeline
+    start_date: 1970-01-01
+    timeout-minutes: 45
+    schedule: 0 * 1 * *
+    metrics-namespace: TestNamespace
+    tasks:
+      - task: my_static_config_task
+        type: python
+        description: my 1st ds task
+        image: mytask1artifactid
+        source: mytask1folder
+        env_vars:
+          env1: "a"
+          env2: "b"
+        input_type: static
+        input_path: "{\"configs\": [ { \"campaign_id\": 10 }, { \"campaign_id\": 20 } ]}"
+        output_path: 'baz'
+        cmd: 'foo bar'
+      - task: my_static_config_task2
+        type: python
+        description: my 1st ds task
+        image: mytask1artifactid
+        source: mytask1folder
+        env_vars:
+          env1: "a"
+          env2: "b"
+        input_type: static
+        input_path: "{\"configs\": [ { \"campaign_id\": 10 }, { \"campaign_id\": 20 } ]}"
+        output_path: 'baz'
+        cmd: 'foo bar'
+services:
+  - service:
+    name: myserver1
+    type: python-server
+    description: my python server
+    artifact-id: myserver1artifactid
+    source: myserver1logicfolder
+    endpoints:
+      - endpoint:
+        path: /myendpoint1
+        module: mymodule1
+        function: myfun1
+      - endpoint:
+        path: /myendpoint2
+        module: mymodule2
+        function: myfun2

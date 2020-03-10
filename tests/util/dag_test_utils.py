@@ -15,4 +15,19 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-# TODO: core
+
+
+from datetime import datetime
+
+from airflow import DAG
+
+
+def create_dag():
+    """
+    Test util to create a basic DAG for testing.
+    """
+
+    return DAG(
+        dag_id='test_dag',
+        default_args={'start_date': datetime(1970, 1, 1)}
+    )

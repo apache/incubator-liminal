@@ -16,11 +16,5 @@
 # specific language governing permissions and limitations
 # under the License.
 """
-Compiler for rainbows.
+TODO: compiler for rainbows.
 """
-import yaml
-
-
-def parse_yaml(path):
-    with open(path, 'r') as stream:
-        return yaml.safe_load(stream)
