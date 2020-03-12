@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from rainbow.runners.airflow.dag import rainbow_dags
+import unittest
 
 
 class Test(TestCase):
@@ -9,3 +10,7 @@ class Test(TestCase):
         self.assertEqual(len(dags), 1)
         # TODO: elaborate test
         pass
+
+
+if __name__ == '__main__':
+    unittest.main()

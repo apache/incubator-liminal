@@ -23,12 +23,12 @@ from datetime import datetime
 import yaml
 from airflow import DAG
 
-from rainbow.runners.airflow.build import build_rainbow
+from rainbow.runners.airflow.tasks.python import PythonTask
 
 
-def register_dags(path):
+def build_rainbow(path):
     """
-    TODO: doc for register_dags
+    TODO: doc for build_rainbow
     """
     files = []
     for r, d, f in os.walk(path):
@@ -41,7 +41,7 @@ def register_dags(path):
     dags = []
 
     for config_file in files:
-        print(f'Registering DAG for file: f{config_file}')
+        print(f'Building artifacts file: f{config_file}')
 
         with open(config_file) as stream:
             # TODO: validate config
@@ -67,15 +67,13 @@ def register_dags(path):
                     task_instance = get_task_class(task_type)(
                         dag, pipeline['pipeline'], parent if parent else None, task, 'all_success'
                     )
-                    parent = task_instance.apply_task_to_dag()
-
-                    print(f'{parent}{{{task_type}}}')
-
-                dags.append(dag)
-    return dags
+                    parent = task_instance.build()
 
 
-task_classes = build_rainbow.task_classes
+# TODO: task class registry
+task_classes = {
+    'python': PythonTask
+}
 
 
 def get_task_class(task_type):
@@ -83,6 +81,4 @@ def get_task_class(task_type):
 
 
 if __name__ == '__main__':
-    # TODO: configurable yaml dir
-    path = 'tests/runners/airflow/dag/rainbow'
-    register_dags(path)
+    register_dags('')

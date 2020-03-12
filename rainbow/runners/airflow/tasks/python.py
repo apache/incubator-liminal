@@ -16,10 +16,12 @@
 # specific language governing permissions and limitations
 # under the License.
 import json
+import os
 
 from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 
+from rainbow.docker.python import python_image
 from rainbow.runners.airflow.model import task
 from rainbow.runners.airflow.operators.kubernetes_pod_operator import \
     ConfigurableKubernetesPodOperator, \
@@ -45,9 +47,14 @@ class PythonTask(task.Task):
         self.config_task_id = self.task_name + '_input'
         self.executors = self.__executors()
 
-    def setup(self):
-        # TODO: build docker image if needed.
-        pass
+    def build(self):
+        if 'source' in self.config:
+            script_dir = os.path.dirname(__file__)
+
+            python_image.build(self.config['source'], self.image, [
+                os.path.join(script_dir, '../build/python/container-setup.sh'),
+                os.path.join(script_dir, '../build/python/container-teardown.sh')
+            ])
 
     def apply_task_to_dag(self):
 

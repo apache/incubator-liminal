@@ -32,9 +32,9 @@ class Task:
         self.config = config
         self.trigger_rule = trigger_rule
 
-    def setup(self):
+    def build(self):
         """
-        Setup method for task.
+        Build task's artifacts.
         """
         raise NotImplementedError()
 
