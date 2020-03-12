@@ -21,12 +21,11 @@ from rainbow.runners.airflow.model import task
 
 class JobStartTask(task.Task):
     """
-    # TODO: Job start task. Reports job start metrics.
+    Job start task. Reports job start metrics.
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
         super().__init__(dag, pipeline_name, parent, config, trigger_rule)
 
     def apply_task_to_dag(self):
-        # TODO: job start task
         pass

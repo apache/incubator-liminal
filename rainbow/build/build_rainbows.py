@@ -35,7 +35,6 @@ def build_rainbows(path):
         print(f'Building artifacts for file: {config_file}')
 
         with open(config_file) as stream:
-            # TODO: validate config
             config = yaml.safe_load(stream)
 
             for pipeline in config['pipelines']:
@@ -47,7 +46,6 @@ def build_rainbows(path):
                                         tag=task['image'])
 
 
-# TODO: build class registry
 build_classes = {
     'python': PythonImage
 }

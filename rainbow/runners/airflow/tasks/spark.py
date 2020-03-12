@@ -21,7 +21,7 @@ from rainbow.runners.airflow.model import task
 
 class SparkTask(task.Task):
     """
-    # TODO: Executes a Spark application.
+    Executes a Spark application.
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):

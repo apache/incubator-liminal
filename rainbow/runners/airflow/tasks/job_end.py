@@ -21,7 +21,7 @@ from rainbow.runners.airflow.model import task
 
 class JobEndTask(task.Task):
     """
-    # TODO: Job end task. Reports job end metrics.
+    Job end task. Reports job end metrics.
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):

@@ -21,7 +21,7 @@ from rainbow.runners.airflow.model import task
 
 class DeleteCloudFormationStackTask(task.Task):
     """
-    # TODO: Deletes cloud_formation stack.
+    Deletes cloud_formation stack.
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):

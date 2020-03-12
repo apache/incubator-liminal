@@ -38,7 +38,6 @@ def register_dags(configs_path):
         print(f'Registering DAG for file: f{config_file}')
 
         with open(config_file) as stream:
-            # TODO: validate config
             config = yaml.safe_load(stream)
 
             for pipeline in config['pipelines']:
@@ -48,7 +47,7 @@ def register_dags(configs_path):
                     'owner': config['owner'],
                     'start_date': datetime.combine(pipeline['start_date'], datetime.min.time())
                 }
-                # TODO: add all relevant airflow args
+
                 dag = DAG(
                     dag_id='test_dag',
                     default_args=default_args
@@ -67,7 +66,6 @@ def register_dags(configs_path):
     return dags
 
 
-# TODO: task class registry
 task_classes = {
     'python': PythonTask
 }

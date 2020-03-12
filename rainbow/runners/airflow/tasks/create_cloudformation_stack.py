@@ -21,7 +21,7 @@ from rainbow.runners.airflow.model import task
 
 class CreateCloudFormationStackTask(task.Task):
     """
-    # TODO: Creates cloud_formation stack.
+    Creates cloud_formation stack.
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
