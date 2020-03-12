@@ -19,8 +19,6 @@
 import unittest
 from unittest import TestCase
 
-import docker
-
 from rainbow.runners.airflow.operators.kubernetes_pod_operator import \
     ConfigurableKubernetesPodOperator
 from rainbow.runners.airflow.tasks import python

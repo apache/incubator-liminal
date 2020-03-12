@@ -21,7 +21,7 @@ import os
 import yaml
 
 from rainbow.core.util import files_util
-from rainbow.docker.python.python_image import PythonImage
+from rainbow.build.python.python_image import PythonImage
 
 
 def build_rainbows(path):

@@ -21,8 +21,10 @@ import os
 
 def find_config_files(path):
     files = []
+    print(path)
     for r, d, f in os.walk(path):
         for file in f:
+            print(os.path.basename(file))
             if os.path.basename(file) in ['rainbow.yml', 'rainbow.yaml']:
                 files.append(os.path.join(r, file))
     return files

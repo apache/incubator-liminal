@@ -20,6 +20,7 @@ from datetime import datetime
 
 import yaml
 from airflow import DAG
+from airflow.models import Variable
 
 from rainbow.core.util import files_util
 from rainbow.runners.airflow.tasks.python import PythonTask
@@ -35,7 +36,7 @@ def register_dags(configs_path):
     dags = []
 
     for config_file in config_files:
-        print(f'Registering DAG for file: f{config_file}')
+        print(f'Registering DAG for file: {config_file}')
 
         with open(config_file) as stream:
             config = yaml.safe_load(stream)
@@ -43,24 +44,35 @@ def register_dags(configs_path):
             for pipeline in config['pipelines']:
                 parent = None
 
+                pipeline_name = pipeline['pipeline']
+
                 default_args = {
                     'owner': config['owner'],
-                    'start_date': datetime.combine(pipeline['start_date'], datetime.min.time())
+                    'start_date': datetime.combine(pipeline['start_date'], datetime.min.time()),
+                    'depends_on_past': False,
                 }
 
                 dag = DAG(
-                    dag_id='test_dag',
-                    default_args=default_args
+                    dag_id=pipeline_name,
+                    default_args=default_args,
+                    catchup=False
                 )
+
+                trigger_rule = 'all_success'
+                if 'always_run' in config and config['always_run']:
+                    trigger_rule = 'all_done'
 
                 for task in pipeline['tasks']:
                     task_type = task['type']
                     task_instance = get_task_class(task_type)(
-                        dag, pipeline['pipeline'], parent if parent else None, task, 'all_success'
+                        dag, pipeline['pipeline'], parent if parent else None, task, trigger_rule
                     )
+
                     parent = task_instance.apply_task_to_dag()
 
-                    print(f'{parent}{{{task_type}}}')
+                print(f'{pipeline_name}: {dag.tasks}')
+
+                globals()[pipeline_name] = dag
 
                 dags.append(dag)
     return dags
@@ -75,7 +87,6 @@ def get_task_class(task_type):
     return task_classes[task_type]
 
 
-if __name__ == '__main__':
-    # TODO: configurable yaml dir
-    path = 'tests/runners/airflow/dag/rainbow'
-    register_dags(path)
+# TODO: configurable path
+path = Variable.get('rainbows_dir')
+register_dags(path)

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 USER_CONFIG_OUTPUT_FILE=$1
 if [ "$USER_CONFIG_OUTPUT_FILE" != "" ]; then

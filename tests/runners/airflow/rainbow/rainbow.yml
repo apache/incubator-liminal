@@ -35,8 +35,7 @@ pipelines:
           env2: "b"
         input_type: static
         input_path: "{\"configs\": [ { \"campaign_id\": 10 }, { \"campaign_id\": 20 } ]}"
-        output_path: 'baz'
-        cmd: 'foo bar'
+        cmd: 'python hello_world.py'
       - task: my_static_config_task2
         type: python
         description: my 1st ds task
@@ -47,8 +46,7 @@ pipelines:
           env2: "b"
         input_type: static
         input_path: "{\"configs\": [ { \"campaign_id\": 10 }, { \"campaign_id\": 20 } ]}"
-        output_path: 'baz'
-        cmd: 'foo bar'
+        cmd: 'python hello_world.py'
 services:
   - service:
     name: myserver1

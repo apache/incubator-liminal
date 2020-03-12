@@ -16,12 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 import json
-import os
 
 from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 
-from rainbow.docker.python import python_image
 from rainbow.runners.airflow.model import task
 from rainbow.runners.airflow.operators.kubernetes_pod_operator import \
     ConfigurableKubernetesPodOperator, \
@@ -136,10 +134,11 @@ class PythonTask(task.Task):
 
     def __kubernetes_cmds_and_arguments(self):
         cmds = ['/bin/bash', '-c']
+        output_path = self.config['output_path'] if 'output_path' in self.config else ''
         arguments = [
-            f'''sh container-setup.sh && \
-            {self.config['cmd']} && \
-            sh container-teardown.sh {self.config['output_path']}'''
+            f"sh container-setup.sh && " +
+            f"{self.config['cmd']} && " +
+            f"sh container-teardown.sh {output_path}"
         ]
         return cmds, arguments
 

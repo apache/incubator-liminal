@@ -19,7 +19,7 @@ from unittest import TestCase
 
 import docker
 
-from rainbow.docker.python.python_image import PythonImage
+from rainbow.build.python.python_image import PythonImage
 
 
 class TestPythonImage(TestCase):

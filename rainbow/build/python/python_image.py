@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import os
 import shutil
 import tempfile
@@ -24,7 +25,7 @@ import docker
 
 class PythonImage:
 
-    def build(self, base_path, relative_source_path, tag, extra_files=None):
+    def build(self, base_path, relative_source_path, tag):
         """
         TODO: pydoc
 
@@ -34,9 +35,6 @@ class PythonImage:
         :param extra_files:
         :return:
         """
-
-        if extra_files is None:
-            extra_files = []
 
         print(f'Building image {tag}')
 
@@ -51,15 +49,23 @@ class PythonImage:
             with open(requirements_file_path, 'w'):
                 pass
 
-        dockerfile_path = os.path.join(os.path.dirname(__file__), 'Dockerfile')
+        docker_files = [
+            os.path.join(os.path.dirname(__file__), 'Dockerfile'),
+            os.path.join(os.path.dirname(__file__), 'container-setup.sh'),
+            os.path.join(os.path.dirname(__file__), 'container-teardown.sh')
+        ]
 
-        for file in extra_files + [dockerfile_path]:
+        for file in docker_files:
             self.__copy_file(file, temp_dir)
 
         docker_client = docker.from_env()
+
+        # TODO: log docker output
         docker_client.images.build(path=temp_dir, tag=tag)
 
         docker_client.close()
+
+        print(temp_dir, os.listdir(temp_dir))
 
         shutil.rmtree(temp_dir)
 
