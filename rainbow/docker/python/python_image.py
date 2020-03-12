@@ -18,44 +18,57 @@
 import os
 import shutil
 import tempfile
+
 import docker
 
 
-def build(source_path, tag, extra_files=None):
-    if extra_files is None:
-        extra_files = []
+class PythonImage:
 
-    print(f'Building image {tag}')
+    def build(self, base_path, relative_source_path, tag, extra_files=None):
+        """
+        TODO: pydoc
 
-    temp_dir = tempfile.mkdtemp()
-    # Delete dir for shutil.copytree to work
-    os.rmdir(temp_dir)
+        :param base_path:
+        :param relative_source_path:
+        :param tag:
+        :param extra_files:
+        :return:
+        """
 
-    __copy_source(source_path, temp_dir)
+        if extra_files is None:
+            extra_files = []
 
-    requirements_file_path = os.path.join(temp_dir, 'requirements.txt')
-    if not os.path.exists(requirements_file_path):
-        with open(requirements_file_path, 'w'):
-            pass
+        print(f'Building image {tag}')
 
-    dockerfile_path = os.path.join(os.path.dirname(__file__), 'Dockerfile')
+        temp_dir = tempfile.mkdtemp()
+        # Delete dir for shutil.copytree to work
+        os.rmdir(temp_dir)
 
-    for file in extra_files + [dockerfile_path]:
-        __copy_file(file, temp_dir)
+        self.__copy_source(os.path.join(base_path, relative_source_path), temp_dir)
 
-    print(temp_dir, os.listdir(temp_dir))
+        requirements_file_path = os.path.join(temp_dir, 'requirements.txt')
+        if not os.path.exists(requirements_file_path):
+            with open(requirements_file_path, 'w'):
+                pass
 
-    docker_client = docker.from_env()
-    docker_client.images.build(path=temp_dir, tag=tag)
+        dockerfile_path = os.path.join(os.path.dirname(__file__), 'Dockerfile')
 
-    docker_client.close()
+        for file in extra_files + [dockerfile_path]:
+            self.__copy_file(file, temp_dir)
 
-    shutil.rmtree(temp_dir)
+        print(temp_dir, os.listdir(temp_dir))
 
+        docker_client = docker.from_env()
+        docker_client.images.build(path=temp_dir, tag=tag)
 
-def __copy_source(source_path, destination_path):
-    shutil.copytree(source_path, destination_path)
+        docker_client.close()
 
+        shutil.rmtree(temp_dir)
 
-def __copy_file(source_file_path, destination_file_path):
-    shutil.copy2(source_file_path, destination_file_path)
+    @staticmethod
+    def __copy_source(source_path, destination_path):
+        shutil.copytree(source_path, destination_path)
+
+    @staticmethod
+    def __copy_file(source_file_path, destination_file_path):
+        shutil.copy2(source_file_path, destination_file_path)

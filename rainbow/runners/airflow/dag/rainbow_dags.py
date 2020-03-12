@@ -16,38 +16,30 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import os
-import pprint
 from datetime import datetime
 
 import yaml
 from airflow import DAG
 
-from rainbow.runners.airflow.build import build_rainbow
+from rainbow.core.util import files_util
+from rainbow.runners.airflow.tasks.python import PythonTask
 
 
-def register_dags(path):
+def register_dags(configs_path):
     """
     TODO: doc for register_dags
     """
-    files = []
-    for r, d, f in os.walk(path):
-        for file in f:
-            if file[file.rfind('.') + 1:] in ['yml', 'yaml']:
-                files.append(os.path.join(r, file))
 
-    print(files)
+    config_files = files_util.find_config_files(configs_path)
 
     dags = []
 
-    for config_file in files:
+    for config_file in config_files:
         print(f'Registering DAG for file: f{config_file}')
 
         with open(config_file) as stream:
             # TODO: validate config
             config = yaml.safe_load(stream)
-            pp = pprint.PrettyPrinter(indent=4)
-            # pp.pprint(config)
 
             for pipeline in config['pipelines']:
                 parent = None
@@ -75,7 +67,10 @@ def register_dags(path):
     return dags
 
 
-task_classes = build_rainbow.task_classes
+# TODO: task class registry
+task_classes = {
+    'python': PythonTask
+}
 
 
 def get_task_class(task_type):

@@ -32,12 +32,6 @@ class Task:
         self.config = config
         self.trigger_rule = trigger_rule
 
-    def build(self):
-        """
-        Build task's artifacts.
-        """
-        raise NotImplementedError()
-
     def apply_task_to_dag(self):
         """
         Registers Airflow operator to parent task.

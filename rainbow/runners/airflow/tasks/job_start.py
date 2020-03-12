@@ -27,9 +27,6 @@ class JobStartTask(task.Task):
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
         super().__init__(dag, pipeline_name, parent, config, trigger_rule)
 
-    def build(self):
-        pass
-
     def apply_task_to_dag(self):
         # TODO: job start task
         pass

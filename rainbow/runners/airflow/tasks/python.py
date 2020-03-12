@@ -47,15 +47,6 @@ class PythonTask(task.Task):
         self.config_task_id = self.task_name + '_input'
         self.executors = self.__executors()
 
-    def build(self):
-        if 'source' in self.config:
-            script_dir = os.path.dirname(__file__)
-
-            python_image.build(self.config['source'], self.image, [
-                os.path.join(script_dir, '../build/python/container-setup.sh'),
-                os.path.join(script_dir, '../build/python/container-teardown.sh')
-            ])
-
     def apply_task_to_dag(self):
 
         config_task = None

@@ -6,7 +6,7 @@ import unittest
 
 class Test(TestCase):
     def test_register_dags(self):
-        dags = rainbow_dags.register_dags("tests/runners/airflow/dag/rainbow")
+        dags = rainbow_dags.register_dags('tests/runners/airflow/rainbow')
         self.assertEqual(len(dags), 1)
         # TODO: elaborate test
         pass
