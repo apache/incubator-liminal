@@ -2,7 +2,7 @@ import unittest
 from unittest import TestCase
 
 import docker
-from rainbow.build import build_rainbow
+from rainbow.build import build_rainbows
 
 
 class TestBuildRainbow(TestCase):
@@ -15,7 +15,7 @@ class TestBuildRainbow(TestCase):
             if len(docker_client.images.list(image_name)) > 0:
                 docker_client.images.remove(image=image_name)
 
-        build_rainbow.build_rainbow('tests/runners/airflow/rainbow')
+        build_rainbows.build_rainbows('tests/runners/airflow/rainbow')
 
         for image_name in image_names:
             docker_client.images.get(name=image_name)

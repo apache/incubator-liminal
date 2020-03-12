@@ -24,7 +24,7 @@ from rainbow.core.util import files_util
 from rainbow.docker.python.python_image import PythonImage
 
 
-def build_rainbow(path):
+def build_rainbows(path):
     """
     TODO: doc for build_rainbow
     """
@@ -32,7 +32,7 @@ def build_rainbow(path):
     config_files = files_util.find_config_files(path)
 
     for config_file in config_files:
-        print(f'Building artifacts file: f{config_file}')
+        print(f'Building artifacts for file: {config_file}')
 
         with open(config_file) as stream:
             # TODO: validate config

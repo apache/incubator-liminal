@@ -3,3 +3,4 @@ PyYAML
 docker==4.2.0
 apache-airflow==1.10.9
 docker-pycreds==0.4.0
+click==7.1.1
