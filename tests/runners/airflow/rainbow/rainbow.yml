@@ -28,7 +28,7 @@ pipelines:
       - task: my_static_config_task
         type: python
         description: my 1st ds task
-        image: my_image
+        image: rainbow_image
         source: hello_world
         env_vars:
           env1: "a"
@@ -40,7 +40,7 @@ pipelines:
       - task: my_static_config_task2
         type: python
         description: my 1st ds task
-        image: mytask1artifactid
+        image: rainbow_image2
         source: hello_world
         env_vars:
           env1: "a"

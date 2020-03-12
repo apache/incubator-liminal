@@ -15,24 +15,39 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from unittest import TestCase
 
 import docker
 
-from rainbow.docker.python import python_image
+from rainbow.docker.python.python_image import PythonImage
 
 
-def test_build(self):
-    config = self.__create_conf('my_task')
+class TestPythonImage(TestCase):
 
-    image_name = config['image']
+    def test_build(self):
+        config = self.__create_conf('my_task')
 
-    python_image.build('tests/runners/airflow/rainbow', 'hello_world', 'image_name')
+        image_name = config['image']
 
-    # TODO: elaborate test of image, validate input/output
+        PythonImage().build('tests/runners/airflow/rainbow', 'hello_world', 'image_name')
 
-    docker_client = docker.from_env()
-    docker_client.images.get(image_name)
-    container_log = docker_client.containers.run(image_name, "python hello_world.py")
-    docker_client.close()
+        # TODO: elaborate test of image, validate input/output
 
-    self.assertEqual("b'Hello world!\\n'", str(container_log))
+        docker_client = docker.from_env()
+        docker_client.images.get(image_name)
+        container_log = docker_client.containers.run(image_name, "python hello_world.py")
+        docker_client.close()
+
+        self.assertEqual("b'Hello world!\\n'", str(container_log))
+
+    @staticmethod
+    def __create_conf(task_id):
+        return {
+            'task': task_id,
+            'cmd': 'foo bar',
+            'image': 'rainbow_image',
+            'source': 'tests/runners/airflow/rainbow/hello_world',
+            'input_type': 'my_input_type',
+            'input_path': 'my_input',
+            'output_path': '/my_output.json'
+        }

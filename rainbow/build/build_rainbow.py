@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import os
 
 import yaml
@@ -46,10 +47,9 @@ def build_rainbow(path):
                                         tag=task['image'])
 
 
-# TODO: task class registry
+# TODO: build class registry
 build_classes = {
     'python': PythonImage
-
 }
 
 

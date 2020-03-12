@@ -56,8 +56,6 @@ class PythonImage:
         for file in extra_files + [dockerfile_path]:
             self.__copy_file(file, temp_dir)
 
-        print(temp_dir, os.listdir(temp_dir))
-
         docker_client = docker.from_env()
         docker_client.images.build(path=temp_dir, tag=tag)
 

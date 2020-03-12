@@ -51,7 +51,7 @@ class TestPythonTask(TestCase):
         return {
             'task': task_id,
             'cmd': 'foo bar',
-            'image': 'my_image',
+            'image': 'rainbow_image',
             'source': 'tests/runners/airflow/rainbow/hello_world',
             'input_type': 'my_input_type',
             'input_path': 'my_input',
