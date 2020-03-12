@@ -58,76 +58,84 @@ class PythonTask(task.Task):
 
     def apply_task_to_dag(self):
 
-        def create_pod_operator(task_id, task_split, image):
-            return ConfigurableKubernetesPodOperator(
-                task_id=task_id,
-                config_task_id=self.config_task_id,
-                task_split=task_split,
-                image=image,
-                cmds=self.cmds,
-                arguments=self.arguments,
-                **self.kubernetes_kwargs
-            )
-
         config_task = None
 
         if self.input_type in ['static', 'task']:
-            self.env_vars.update({'DATA_PIPELINE_INPUT': self.input_path})
-
-            config_task = ConfigureParallelExecutionOperator(
-                task_id=self.config_task_id,
-                image=self.image,
-                config_type=self.input_type,
-                config_path=self.input_path,
-                executors=self.executors,
-                **self.kubernetes_kwargs
-            )
+            config_task = self.__config_task(config_task)
 
         if self.executors == 1:
-            pod_task = create_pod_operator(
-                task_id=f'{self.task_name}',
-                task_split=0,
-                image=f'''{self.image}'''
-            )
-
-            first_task = pod_task
-
-            if config_task:
-                first_task = config_task
-                first_task.set_downstream(pod_task)
-
-            if self.parent:
-                self.parent.set_downstream(first_task)
-
-            return pod_task
+            return self.__apply_task_to_dag_single_executor(config_task)
         else:
-            if not config_task:
-                config_task = DummyOperator(
-                    task_id=self.config_task_id,
-                    trigger_rule=self.trigger_rule,
-                    dag=self.dag
-                )
+            return self.__apply_task_to_dag_multiple_executors(config_task)
 
-            end_task = DummyOperator(
-                task_id=self.task_name,
+    def __apply_task_to_dag_multiple_executors(self, config_task):
+        if not config_task:
+            config_task = DummyOperator(
+                task_id=self.config_task_id,
+                trigger_rule=self.trigger_rule,
                 dag=self.dag
             )
 
-            if self.parent:
-                self.parent.set_downstream(config_task)
+        end_task = DummyOperator(
+            task_id=self.task_name,
+            dag=self.dag
+        )
 
-                for i in range(self.executors):
-                    split_task = create_pod_operator(
-                        task_id=f'''{self.task_name}_{i}''',
-                        task_split=i,
-                        image=self.image
-                    )
+        if self.parent:
+            self.parent.set_downstream(config_task)
 
-                    config_task.set_downstream(split_task)
+            for i in range(self.executors):
+                split_task = self.__create_pod_operator(
+                    task_id=f'''{self.task_name}_{i}''',
+                    task_split=i,
+                    image=self.image
+                )
 
-                    split_task.set_downstream(end_task)
+                config_task.set_downstream(split_task)
 
-            return end_task
+                split_task.set_downstream(end_task)
+
+        return end_task
+
+    def __create_pod_operator(self, task_id, task_split, image):
+        return ConfigurableKubernetesPodOperator(
+            task_id=task_id,
+            config_task_id=self.config_task_id,
+            task_split=task_split,
+            image=image,
+            cmds=self.cmds,
+            arguments=self.arguments,
+            **self.kubernetes_kwargs
+        )
+
+    def __apply_task_to_dag_single_executor(self, config_task):
+        pod_task = self.__create_pod_operator(
+            task_id=f'{self.task_name}',
+            task_split=0,
+            image=f'''{self.image}'''
+        )
+
+        first_task = pod_task
+
+        if config_task:
+            first_task = config_task
+            first_task.set_downstream(pod_task)
+        if self.parent:
+            self.parent.set_downstream(first_task)
+
+        return pod_task
+
+    def __config_task(self, config_task):
+        self.env_vars.update({'DATA_PIPELINE_INPUT': self.input_path})
+        config_task = ConfigureParallelExecutionOperator(
+            task_id=self.config_task_id,
+            image=self.image,
+            config_type=self.input_type,
+            config_path=self.input_path,
+            executors=self.executors,
+            **self.kubernetes_kwargs
+        )
+        return config_task
 
     def __executors(self):
         executors = 1
