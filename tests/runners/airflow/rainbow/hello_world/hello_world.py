@@ -15,4 +15,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import json
+
 print('Hello world!')
+print()
+
+with open('/rainbow_input.json') as file:
+    print(json.loads(file.readline()))
+
+with open('/output.json', 'w') as file:
+    file.write(json.dumps({'a': 1, 'b': 2}))

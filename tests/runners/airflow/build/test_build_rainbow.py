@@ -9,7 +9,7 @@ class TestBuildRainbow(TestCase):
 
     def test_build_rainbow(self):
         docker_client = docker.client.from_env()
-        image_names = ['rainbow_image', 'rainbow_image2']
+        image_names = ['my_static_input_task_image', 'my_task_output_input_task_image']
 
         for image_name in image_names:
             if len(docker_client.images.list(image_name)) > 0:

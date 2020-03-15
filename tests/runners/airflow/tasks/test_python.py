@@ -19,8 +19,8 @@
 import unittest
 from unittest import TestCase
 
-from rainbow.runners.airflow.operators.kubernetes_pod_operator import \
-    ConfigurableKubernetesPodOperator
+from rainbow.runners.airflow.operators.kubernetes_pod_operator_with_input_output import \
+    KubernetesPodOperatorWithInputAndOutput
 from rainbow.runners.airflow.tasks import python
 from tests.util import dag_test_utils
 
@@ -41,7 +41,7 @@ class TestPythonTask(TestCase):
         self.assertEqual(len(dag.tasks), 1)
         dag_task0 = dag.tasks[0]
 
-        self.assertIsInstance(dag_task0, ConfigurableKubernetesPodOperator)
+        self.assertIsInstance(dag_task0, KubernetesPodOperatorWithInputAndOutput)
         self.assertEqual(dag_task0.task_id, task_id)
 
     @staticmethod

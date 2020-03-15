@@ -25,28 +25,41 @@ pipelines:
     schedule: 0 * 1 * *
     metrics-namespace: TestNamespace
     tasks:
-      - task: my_static_config_task
+      - task: my_static_input_task
         type: python
-        description: my 1st ds task
-        image: rainbow_image
+        description: static input task
+        image: my_static_input_task_image
         source: hello_world
         env_vars:
           env1: "a"
           env2: "b"
         input_type: static
-        input_path: "{\"configs\": [ { \"campaign_id\": 10 }, { \"campaign_id\": 20 } ]}"
-        cmd: 'python hello_world.py'
-      - task: my_static_config_task2
+        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
+        output_path: /output.json
+        cmd: python hello_world.py
+#      - task: my_parallelized_static_input_task
+#        type: python
+#        description: parallelized static input task
+#        image: my_static_input_task_image
+#        env_vars:
+#          env1: "a"
+#          env2: "b"
+#        input_type: static
+#        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
+#        split_input: True
+#        executors: 2
+#        cmd: python hello_world.py
+      - task: my_task_output_input_task
         type: python
-        description: my 1st ds task
-        image: rainbow_image2
+        description: parallelized static input task
+        image: my_task_output_input_task_image
         source: hello_world
         env_vars:
           env1: "a"
           env2: "b"
-        input_type: static
-        input_path: "{\"configs\": [ { \"campaign_id\": 10 }, { \"campaign_id\": 20 } ]}"
-        cmd: 'python hello_world.py'
+        input_type: task
+        input_path: my_static_input_task
+        cmd: python hello_world.py
 services:
   - service:
     name: myserver1

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo """$RAINBOW_INPUT""" > rainbow_input.json
+echo """$RAINBOW_INPUT""" > /rainbow_input.json
 
 AIRFLOW_RETURN_FILE=/airflow/xcom/return.json
 

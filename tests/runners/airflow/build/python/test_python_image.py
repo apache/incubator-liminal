@@ -29,16 +29,24 @@ class TestPythonImage(TestCase):
 
         image_name = config['image']
 
-        PythonImage().build('tests/runners/airflow/rainbow', 'hello_world', 'image_name')
+        PythonImage().build('tests/runners/airflow/rainbow', 'hello_world', image_name)
 
         # TODO: elaborate test of image, validate input/output
 
         docker_client = docker.from_env()
         docker_client.images.get(image_name)
-        container_log = docker_client.containers.run(image_name, "python hello_world.py")
+
+        cmd = 'export RAINBOW_INPUT="{}" && ' + \
+              'sh container-setup.sh && ' + \
+              'python hello_world.py && ' + \
+              'sh container-teardown.sh'
+        cmds = ['/bin/bash', '-c', cmd]
+
+        container_log = docker_client.containers.run(image_name, cmds)
+
         docker_client.close()
 
-        self.assertEqual("b'Hello world!\\n'", str(container_log))
+        self.assertEqual("b'Hello world!\\n\\n{}\\n'", str(container_log))
 
     @staticmethod
     def __create_conf(task_id):

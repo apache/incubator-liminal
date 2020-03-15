@@ -21,9 +21,9 @@ from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 
 from rainbow.runners.airflow.model import task
-from rainbow.runners.airflow.operators.kubernetes_pod_operator import \
-    ConfigurableKubernetesPodOperator, \
-    ConfigureParallelExecutionOperator
+from rainbow.runners.airflow.operators.kubernetes_pod_operator_with_input_output import \
+    KubernetesPodOperatorWithInputAndOutput, \
+    PrepareInputOperator
 
 
 class PythonTask(task.Task):
@@ -42,25 +42,24 @@ class PythonTask(task.Task):
         self.env_vars = self.__env_vars()
         self.kubernetes_kwargs = self.__kubernetes_kwargs()
         self.cmds, self.arguments = self.__kubernetes_cmds_and_arguments()
-        self.config_task_id = self.task_name + '_input'
+        self.input_task_id = self.task_name + '_input'
         self.executors = self.__executors()
 
     def apply_task_to_dag(self):
-
-        config_task = None
+        input_task = None
 
         if self.input_type in ['static', 'task']:
-            config_task = self.__config_task(config_task)
+            input_task = self.__input_task()
 
         if self.executors == 1:
-            return self.__apply_task_to_dag_single_executor(config_task)
+            return self.__apply_task_to_dag_single_executor(input_task)
         else:
-            return self.__apply_task_to_dag_multiple_executors(config_task)
+            return self.__apply_task_to_dag_multiple_executors(input_task)
 
-    def __apply_task_to_dag_multiple_executors(self, config_task):
-        if not config_task:
-            config_task = DummyOperator(
-                task_id=self.config_task_id,
+    def __apply_task_to_dag_multiple_executors(self, input_task):
+        if not input_task:
+            input_task = DummyOperator(
+                task_id=self.input_task_id,
                 trigger_rule=self.trigger_rule,
                 dag=self.dag
             )
@@ -71,7 +70,7 @@ class PythonTask(task.Task):
         )
 
         if self.parent:
-            self.parent.set_downstream(config_task)
+            self.parent.set_downstream(input_task)
 
             for i in range(self.executors):
                 split_task = self.__create_pod_operator(
@@ -80,51 +79,51 @@ class PythonTask(task.Task):
                     image=self.image
                 )
 
-                config_task.set_downstream(split_task)
+                input_task.set_downstream(split_task)
 
                 split_task.set_downstream(end_task)
 
         return end_task
 
     def __create_pod_operator(self, task_id, task_split, image):
-        return ConfigurableKubernetesPodOperator(
+        return KubernetesPodOperatorWithInputAndOutput(
             task_id=task_id,
-            config_task_id=self.config_task_id,
-            task_split=task_split,
+            input_task_id=self.input_task_id,
+            task_split=task_split if task_split else 0,
             image=image,
             cmds=self.cmds,
             arguments=self.arguments,
             **self.kubernetes_kwargs
         )
 
-    def __apply_task_to_dag_single_executor(self, config_task):
+    def __apply_task_to_dag_single_executor(self, input_task):
         pod_task = self.__create_pod_operator(
             task_id=f'{self.task_name}',
-            task_split=0,
+            task_split=None,
             image=f'''{self.image}'''
         )
 
         first_task = pod_task
 
-        if config_task:
-            first_task = config_task
+        if input_task:
+            first_task = input_task
             first_task.set_downstream(pod_task)
         if self.parent:
             self.parent.set_downstream(first_task)
 
         return pod_task
 
-    def __config_task(self, config_task):
-        self.env_vars.update({'DATA_PIPELINE_INPUT': self.input_path})
-        config_task = ConfigureParallelExecutionOperator(
-            task_id=self.config_task_id,
+    def __input_task(self):
+        return PrepareInputOperator(
+            task_id=self.input_task_id,
             image=self.image,
-            config_type=self.input_type,
-            config_path=self.input_path,
+            input_type=self.input_type,
+            input_path=self.input_path,
+            split_input=True if 'split_input' in self.config and
+                                self.config['split_input'] else False,
             executors=self.executors,
             **self.kubernetes_kwargs
         )
-        return config_task
 
     def __executors(self):
         executors = 1
