@@ -116,3 +116,7 @@ class ImageBuilder:
         File name and content pairs to create files from
         """
         return []
+
+
+class ServiceImageBuilderMixin(object):
+    pass

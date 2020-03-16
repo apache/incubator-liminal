@@ -20,9 +20,8 @@ import os
 
 import yaml
 
-from rainbow.build.http.python.python_server_image import PythonServerImageBuilder
-from rainbow.build.python.python_image import PythonImageBuilder
-from rainbow.core.util import files_util
+from rainbow.build.image.image_builder import ImageBuilder, ServiceImageBuilderMixin
+from rainbow.core.util import files_util, class_util
 
 
 def build_rainbows(path):
@@ -41,38 +40,62 @@ def build_rainbows(path):
 
             for pipeline in rainbow_config['pipelines']:
                 for task in pipeline['tasks']:
-                    builder_class = __get_task_build_class(task['type'])
-                    __build_image(base_path, task, builder_class)
+                    task_type = task['type']
+                    builder_class = __get_task_build_class(task_type)
+                    if builder_class:
+                        __build_image(base_path, task, builder_class)
+                    else:
+                        raise ValueError(f'No such task type: {task_type}')
 
                 for service in rainbow_config['services']:
-                    builder_class = __get_service_build_class(service['type'])
-                    __build_image(base_path, service, builder_class)
+                    service_type = service['type']
+                    builder_class = __get_service_build_class(service_type)
+                    if builder_class:
+                        __build_image(base_path, service, builder_class)
+                    else:
+                        raise ValueError(f'No such service type: {service_type}')
 
 
 def __build_image(base_path, builder_config, builder):
     if 'source' in builder_config:
-        server_builder_instance = builder(
+        builder_instance = builder(
             config=builder_config,
             base_path=base_path,
             relative_source_path=builder_config['source'],
             tag=builder_config['image'])
-        server_builder_instance.build()
+        builder_instance.build()
     else:
         print(f"No source provided for {builder_config['name']}, skipping.")
 
 
-__task_build_classes = {
-    'python': PythonImageBuilder,
-}
-
-__service_build_classes = {
-    'python_server': PythonServerImageBuilder
-}
-
-
 def __get_task_build_class(task_type):
-    return __task_build_classes[task_type]
+    return task_build_classes[task_type] if task_type in task_build_classes else None
 
 
-def __get_service_build_class(task_type):
-    return __service_build_classes[task_type]
+def __get_service_build_class(service_type):
+    return service_build_classes[service_type] if service_type in service_build_classes else None
+
+
+print(f'Loading image builder implementations..')
+
+# TODO: add configuration for user image builders package
+image_builders_package = 'rainbow/build/image'
+user_image_builders_package = 'TODO: user_image_builders_package'
+
+task_build_classes = class_util.find_subclasses_in_packages(
+    [image_builders_package, user_image_builders_package],
+    ImageBuilder)
+
+print(f'Finished loading image builder implementations: {task_build_classes}')
+
+print(f'Loading service image builder implementations..')
+
+# TODO: add configuration for user service image builders package
+service_builders_package = 'rainbow/build/service'
+user_service_builders_package = 'TODO: user_service_builders_package'
+
+service_build_classes = class_util.find_subclasses_in_packages(
+    [service_builders_package, user_service_builders_package],
+    ServiceImageBuilderMixin)
+
+print(f'Finished loading service image builder implementations: {service_build_classes}')

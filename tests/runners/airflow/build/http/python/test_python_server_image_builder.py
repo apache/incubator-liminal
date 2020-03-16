@@ -24,7 +24,7 @@ from unittest import TestCase
 
 import docker
 
-from rainbow.build.http.python.python_server_image import PythonServerImageBuilder
+from rainbow.build.service.python_server.python_server import PythonServerImageBuilder
 
 
 class TestPythonServer(TestCase):

@@ -22,8 +22,8 @@ import yaml
 from airflow import DAG
 from airflow.models import Variable
 
-from rainbow.core.util import files_util
-from rainbow.runners.airflow.tasks.python import PythonTask
+from rainbow.core.util import files_util, class_util
+from rainbow.runners.airflow.model.task import Task
 
 
 def register_dags(configs_path):
@@ -78,15 +78,19 @@ def register_dags(configs_path):
     return dags
 
 
-task_classes = {
-    'python': PythonTask
-}
+print(f'Loading task implementations..')
+
+# TODO: add configuration for user tasks package
+task_package = 'rainbow/runners/airflow/tasks'
+user_task_package = 'TODO: user_tasks_package'
+
+task_classes = class_util.find_subclasses_in_packages([task_package, user_task_package], Task)
+
+print(f'Finished loading task implementations: {task_classes}')
 
 
 def get_task_class(task_type):
     return task_classes[task_type]
 
 
-# TODO: configurable path
-path = Variable.get('rainbows_dir')
-register_dags(path)
+register_dags(Variable.get('rainbows_dir'))

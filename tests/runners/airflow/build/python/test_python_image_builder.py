@@ -19,10 +19,10 @@ from unittest import TestCase
 
 import docker
 
-from rainbow.build.python.python_image import PythonImageBuilder
+from rainbow.build.image.python.python import PythonImageBuilder
 
 
-class TestPythonImage(TestCase):
+class TestPythonImageBuilder(TestCase):
 
     def test_build(self):
         config = self.__create_conf('my_task')
