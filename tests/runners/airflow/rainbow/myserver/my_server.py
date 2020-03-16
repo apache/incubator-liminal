@@ -16,23 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import os
 
-from rainbow.build.image_builder import ImageBuilder
-
-
-class PythonImageBuilder(ImageBuilder):
-
-    def __init__(self, config, base_path, relative_source_path, tag):
-        super().__init__(config, base_path, relative_source_path, tag)
-
-    @staticmethod
-    def _dockerfile_path():
-        return os.path.join(os.path.dirname(__file__), 'Dockerfile')
-
-    @staticmethod
-    def _additional_files_from_paths():
-        return [
-            os.path.join(os.path.dirname(__file__), 'container-setup.sh'),
-            os.path.join(os.path.dirname(__file__), 'container-teardown.sh'),
-        ]
+def myendpoint1func():
+    return '1'

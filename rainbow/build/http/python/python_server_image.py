@@ -19,9 +19,10 @@
 import os
 
 from rainbow.build.image_builder import ImageBuilder
+import yaml
 
 
-class PythonImageBuilder(ImageBuilder):
+class PythonServerImageBuilder(ImageBuilder):
 
     def __init__(self, config, base_path, relative_source_path, tag):
         super().__init__(config, base_path, relative_source_path, tag)
@@ -33,6 +34,9 @@ class PythonImageBuilder(ImageBuilder):
     @staticmethod
     def _additional_files_from_paths():
         return [
-            os.path.join(os.path.dirname(__file__), 'container-setup.sh'),
-            os.path.join(os.path.dirname(__file__), 'container-teardown.sh'),
+            os.path.join(os.path.dirname(__file__), 'rainbow_python_server.py'),
+            os.path.join(os.path.dirname(__file__), 'python_server_requirements.txt')
         ]
+
+    def _additional_files_from_filename_content_pairs(self):
+        return [('service.yml', yaml.safe_dump(self.config))]

@@ -20,36 +20,59 @@ import os
 
 import yaml
 
+from rainbow.build.http.python.python_server_image import PythonServerImageBuilder
+from rainbow.build.python.python_image import PythonImageBuilder
 from rainbow.core.util import files_util
-from rainbow.build.python.python_image import PythonImage
 
 
 def build_rainbows(path):
     """
-    TODO: doc for build_rainbow
+    TODO: doc for build_rainbows
     """
-
     config_files = files_util.find_config_files(path)
 
     for config_file in config_files:
         print(f'Building artifacts for file: {config_file}')
 
+        base_path = os.path.dirname(config_file)
+
         with open(config_file) as stream:
-            config = yaml.safe_load(stream)
+            rainbow_config = yaml.safe_load(stream)
 
-            for pipeline in config['pipelines']:
+            for pipeline in rainbow_config['pipelines']:
                 for task in pipeline['tasks']:
-                    task_type = task['type']
-                    task_instance = get_build_class(task_type)()
-                    task_instance.build(base_path=os.path.dirname(config_file),
-                                        relative_source_path=task['source'],
-                                        tag=task['image'])
+                    builder_class = __get_task_build_class(task['type'])
+                    __build_image(base_path, task, builder_class)
+
+                for service in rainbow_config['services']:
+                    builder_class = __get_service_build_class(service['type'])
+                    __build_image(base_path, service, builder_class)
 
 
-build_classes = {
-    'python': PythonImage
+def __build_image(base_path, builder_config, builder):
+    if 'source' in builder_config:
+        server_builder_instance = builder(
+            config=builder_config,
+            base_path=base_path,
+            relative_source_path=builder_config['source'],
+            tag=builder_config['image'])
+        server_builder_instance.build()
+    else:
+        print(f"No source provided for {builder_config['name']}, skipping.")
+
+
+__task_build_classes = {
+    'python': PythonImageBuilder,
+}
+
+__service_build_classes = {
+    'python_server': PythonServerImageBuilder
 }
 
 
-def get_build_class(task_type):
-    return build_classes[task_type]
+def __get_task_build_class(task_type):
+    return __task_build_classes[task_type]
+
+
+def __get_service_build_class(task_type):
+    return __service_build_classes[task_type]

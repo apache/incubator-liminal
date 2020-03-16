@@ -19,7 +19,7 @@ from unittest import TestCase
 
 import docker
 
-from rainbow.build.python.python_image import PythonImage
+from rainbow.build.python.python_image import PythonImageBuilder
 
 
 class TestPythonImage(TestCase):
@@ -29,7 +29,12 @@ class TestPythonImage(TestCase):
 
         image_name = config['image']
 
-        PythonImage().build('tests/runners/airflow/rainbow', 'hello_world', image_name)
+        builder = PythonImageBuilder(config=config,
+                                     base_path='tests/runners/airflow/rainbow',
+                                     relative_source_path='helloworld',
+                                     tag=image_name)
+
+        builder.build()
 
         # TODO: elaborate test of image, validate input/output
 
@@ -54,7 +59,7 @@ class TestPythonImage(TestCase):
             'task': task_id,
             'cmd': 'foo bar',
             'image': 'rainbow_image',
-            'source': 'tests/runners/airflow/rainbow/hello_world',
+            'source': 'tests/runners/airflow/rainbow/helloworld',
             'input_type': 'my_input_type',
             'input_path': 'my_input',
             'output_path': '/my_output.json'

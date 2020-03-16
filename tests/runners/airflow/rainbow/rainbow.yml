@@ -29,14 +29,14 @@ pipelines:
         type: python
         description: static input task
         image: my_static_input_task_image
-        source: hello_world
+        source: helloworld
         env_vars:
           env1: "a"
           env2: "b"
         input_type: static
         input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
         output_path: /output.json
-        cmd: python hello_world.py
+        cmd: python -u helloworld.py
 #      - task: my_parallelized_static_input_task
 #        type: python
 #        description: parallelized static input task
@@ -48,31 +48,26 @@ pipelines:
 #        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
 #        split_input: True
 #        executors: 2
-#        cmd: python hello_world.py
+#        cmd: python -u helloworld.py
       - task: my_task_output_input_task
         type: python
         description: parallelized static input task
         image: my_task_output_input_task_image
-        source: hello_world
+        source: helloworld
         env_vars:
           env1: "a"
           env2: "b"
         input_type: task
         input_path: my_static_input_task
-        cmd: python hello_world.py
+        cmd: python -u helloworld.py
 services:
   - service:
-    name: myserver1
-    type: python-server
+    name: my_python_server
+    type: python_server
     description: my python server
-    artifact-id: myserver1artifactid
-    source: myserver1logicfolder
+    image: my_server_image
+    source: myserver
     endpoints:
-      - endpoint:
-        path: /myendpoint1
-        module: mymodule1
-        function: myfun1
-      - endpoint:
-        path: /myendpoint2
-        module: mymodule2
-        function: myfun2
+      - endpoint: /myendpoint1
+        module: myserver.my_server
+        function: myendpoint1func
