@@ -29,13 +29,14 @@ def find_subclasses_in_packages(packages, parent_class):
     """
     classes = {}
 
-    for package in [a for a in sys.path]:
-        for root, directories, files in os.walk(package):
+    for py_path in [a for a in sys.path]:
+        for root, directories, files in os.walk(py_path):
             for file in files:
                 file_path = os.path.join(root, file)
                 if any(p in file_path for p in packages) \
                         and file.endswith('.py') \
                         and '__pycache__' not in file_path:
+
                     spec = importlib.util.spec_from_file_location(file[:-3], file_path)
                     mod = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(mod)
@@ -43,7 +44,9 @@ def find_subclasses_in_packages(packages, parent_class):
                         if inspect.isclass(obj) and not obj.__name__.endswith('Mixin'):
                             module_name = mod.__name__
                             class_name = obj.__name__
-                            module = root[len(package) + 1:].replace('/', '.') + '.' + module_name
+                            parent_module = root[len(py_path) + 1:].replace('/', '.')
+                            module = parent_module.replace('airflow.dags.', '') + \
+                                     '.' + module_name
                             clazz = __get_class(module, class_name)
                             if issubclass(clazz, parent_class):
                                 classes.update({module_name: clazz})
