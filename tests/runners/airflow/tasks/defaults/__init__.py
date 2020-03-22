@@ -15,17 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-from rainbow.runners.airflow.model import task
-
-
-class JobStartTask(task.Task):
-    """
-    Job start task. Reports job start metrics.
-    """
-
-    def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
-        super().__init__(dag, pipeline_name, parent, config, trigger_rule)
-
-    def apply_task_to_dag(self):
-        pass

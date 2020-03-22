@@ -15,17 +15,25 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+"""
+Default base task.
+"""
+from abc import abstractmethod
 
-from rainbow.runners.airflow.model import task
+from rainbow.runners.airflow.model.task import Task
 
 
-class JobEndTask(task.Task):
+class DefaultTask(Task):
     """
-    Job end task. Reports job end metrics.
+    Default Base task.
     """
 
     def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
         super().__init__(dag, pipeline_name, parent, config, trigger_rule)
+        metrics = self.config.get('metrics', {})
+        self.metrics_namespace = metrics.get('namespace', '')
+        self.metrics_backends = metrics.get('backends', [])
 
+    @abstractmethod
     def apply_task_to_dag(self):
         pass

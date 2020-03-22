@@ -22,8 +22,11 @@ import yaml
 from airflow import DAG
 from airflow.models import Variable
 
-from rainbow.core.util import files_util, class_util
+from rainbow.core.util import class_util
+from rainbow.core.util import files_util
 from rainbow.runners.airflow.model.task import Task
+from rainbow.runners.airflow.tasks.defaults.job_end import JobEndTask
+from rainbow.runners.airflow.tasks.defaults.job_start import JobStartTask
 
 
 def register_dags(configs_path):
@@ -42,8 +45,6 @@ def register_dags(configs_path):
             config = yaml.safe_load(stream)
 
             for pipeline in config['pipelines']:
-                parent = None
-
                 pipeline_name = pipeline['pipeline']
 
                 default_args = {
@@ -58,6 +59,9 @@ def register_dags(configs_path):
                     catchup=False
                 )
 
+                job_start_task = JobStartTask(dag, pipeline_name, None, pipeline, 'all_success')
+                parent = job_start_task.apply_task_to_dag()
+
                 trigger_rule = 'all_success'
                 if 'always_run' in config and config['always_run']:
                     trigger_rule = 'all_done'
@@ -70,12 +74,15 @@ def register_dags(configs_path):
 
                     parent = task_instance.apply_task_to_dag()
 
-                print(f'{pipeline_name}: {dag.tasks}')
+                    job_end_task = JobEndTask(dag, pipeline_name, parent, pipeline, 'all_done')
+                    job_end_task.apply_task_to_dag()
 
-                globals()[pipeline_name] = dag
+                    print(f'{pipeline_name}: {dag.tasks}')
 
-                dags.append(dag)
-    return dags
+                    globals()[pipeline_name] = dag
+
+                    dags.append(dag)
+                    return dags
 
 
 print(f'Loading task implementations..')

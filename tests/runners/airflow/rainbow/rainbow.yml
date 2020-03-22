@@ -23,7 +23,9 @@ pipelines:
     start_date: 1970-01-01
     timeout-minutes: 45
     schedule: 0 * 1 * *
-    metrics-namespace: TestNamespace
+    metrics:
+     namespace: TestNamespace
+     backends: [ 'cloudwatch' ]
     tasks:
       - task: my_static_input_task
         type: python
@@ -36,7 +38,7 @@ pipelines:
         input_type: static
         input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
         output_path: /output.json
-        cmd: python -u helloworld.py
+        cmd: python -u hello_world.py
 #      - task: my_parallelized_static_input_task
 #        type: python
 #        description: parallelized static input task
@@ -59,7 +61,7 @@ pipelines:
           env2: "b"
         input_type: task
         input_path: my_static_input_task
-        cmd: python -u helloworld.py
+        cmd: python -u hello_world.py
 services:
   - service:
     name: my_python_server
