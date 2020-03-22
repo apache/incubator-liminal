@@ -15,7 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+import os
 import unittest
 from unittest import TestCase
 
@@ -25,7 +25,6 @@ from rainbow.build import build_rainbows
 
 
 class TestBuildRainbows(TestCase):
-
     __image_names = [
         'my_static_input_task_image',
         'my_task_output_input_task_image',
@@ -46,7 +45,7 @@ class TestBuildRainbows(TestCase):
                 self.docker_client.images.remove(image=image_name)
 
     def test_build_rainbow(self):
-        build_rainbows.build_rainbows('tests/runners/airflow/rainbow')
+        build_rainbows.build_rainbows(os.path.join(os.path.dirname(__file__), '../rainbow'))
 
         for image in self.__image_names:
             self.docker_client.images.get(image)

@@ -15,7 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+import os
 import threading
 import time
 import unittest
@@ -41,8 +41,9 @@ class TestPythonServer(TestCase):
         self.docker_client.close()
 
     def test_build_python_server(self):
+        base_path = os.path.join(os.path.dirname(__file__), '../../../rainbow')
         builder = PythonServerImageBuilder(config=self.config,
-                                           base_path='tests/runners/airflow/rainbow',
+                                           base_path=base_path,
                                            relative_source_path='myserver',
                                            tag=self.image_name)
 
@@ -87,7 +88,7 @@ class TestPythonServer(TestCase):
             'task': task_id,
             'cmd': 'foo bar',
             'image': 'rainbow_server_image',
-            'source': 'tests/runners/airflow/rainbow/myserver',
+            'source': 'baz',
             'input_type': 'my_input_type',
             'input_path': 'my_input',
             'output_path': '/my_output.json',

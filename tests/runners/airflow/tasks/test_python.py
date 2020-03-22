@@ -50,7 +50,7 @@ class TestPythonTask(TestCase):
             'task': task_id,
             'cmd': 'foo bar',
             'image': 'rainbow_image',
-            'source': 'tests/runners/airflow/rainbow/helloworld',
+            'source': 'baz',
             'input_type': 'my_input_type',
             'input_path': 'my_input',
             'output_path': '/my_output.json'

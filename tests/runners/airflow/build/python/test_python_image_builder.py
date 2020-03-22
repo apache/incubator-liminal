@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
 from unittest import TestCase
 
 import docker
@@ -29,8 +30,10 @@ class TestPythonImageBuilder(TestCase):
 
         image_name = config['image']
 
+        base_path = os.path.join(os.path.dirname(__file__), '../../rainbow')
+
         builder = PythonImageBuilder(config=config,
-                                     base_path='tests/runners/airflow/rainbow',
+                                     base_path=base_path,
                                      relative_source_path='helloworld',
                                      tag=image_name)
 
@@ -59,7 +62,7 @@ class TestPythonImageBuilder(TestCase):
             'task': task_id,
             'cmd': 'foo bar',
             'image': 'rainbow_image',
-            'source': 'tests/runners/airflow/rainbow/helloworld',
+            'source': 'baz',
             'input_type': 'my_input_type',
             'input_path': 'my_input',
             'output_path': '/my_output.json'
