@@ -40,12 +40,17 @@ def build_rainbows(path):
 
             for pipeline in rainbow_config['pipelines']:
                 for task in pipeline['tasks']:
-                    task_type = task['type']
-                    builder_class = __get_task_build_class(task_type)
-                    if builder_class:
-                        __build_image(base_path, task, builder_class)
+                    task_name = task['task']
+
+                    if 'source' in task:
+                        task_type = task['type']
+                        builder_class = __get_task_build_class(task_type)
+                        if builder_class:
+                            __build_image(base_path, task, builder_class)
+                        else:
+                            raise ValueError(f'No such task type: {task_type}')
                     else:
-                        raise ValueError(f'No such task type: {task_type}')
+                        print(f'No source configured for task {task_name}, skipping build..')
 
                 for service in rainbow_config['services']:
                     service_type = service['type']

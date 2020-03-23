@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import yaml
 from airflow import DAG
@@ -56,6 +56,7 @@ def register_dags(configs_path):
                 dag = DAG(
                     dag_id=pipeline_name,
                     default_args=default_args,
+                    dagrun_timeout=timedelta(minutes=pipeline['timeout_minutes']),
                     catchup=False
                 )
 
