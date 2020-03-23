@@ -53,7 +53,7 @@ pipelines:
         cmd: python -u helloworld.py
       - task: my_task_output_input_task
         type: python
-        description: parallelized static input task
+        description: task with input from other task's output
         image: my_task_output_input_task_image
         source: helloworld
         env_vars:

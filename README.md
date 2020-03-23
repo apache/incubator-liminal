@@ -54,7 +54,7 @@ pipelines:
         cmd: python -u helloworld.py
       - task: my_task_output_input_task
         type: python
-        description: parallelized static input task
+        description: task with input from other task's output
         image: my_task_output_input_task_image
         source: helloworld
         env_vars:
@@ -77,7 +77,11 @@ services:
 ```
 
 ## Example repository structure
-[Example repository structure](https://github.com/Natural-Intelligence/rainbow/tree/master/tests/runners/airflow/rainbow])
+
+[Example repository structure](
+https://github.com/Natural-Intelligence/rainbow/tree/master/tests/runners/airflow/rainbow]
+)
+
 # Installation
 
 TODO: installation.
