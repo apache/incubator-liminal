@@ -16,7 +16,7 @@ Using simple YAML configuration, create your own schedule data pipelines (a sequ
 perform), application servers,  and more.
 
 ## Example YAML config file
-
+```yaml
 name: MyPipeline
 owner: Bosco Albert Baracus
 pipelines:
@@ -74,6 +74,7 @@ services:
       - endpoint: /myendpoint1
         module: myserver.my_server
         function: myendpoint1func
+```
 
 # Installation
 
