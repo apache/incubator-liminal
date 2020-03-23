@@ -76,6 +76,8 @@ services:
         function: myendpoint1func
 ```
 
+## Example repository structure
+[Example repository structure](https://github.com/Natural-Intelligence/rainbow/tree/master/tests/runners/airflow/rainbow])
 # Installation
 
 TODO: installation.
