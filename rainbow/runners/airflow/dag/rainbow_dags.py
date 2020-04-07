@@ -31,7 +31,7 @@ from rainbow.runners.airflow.tasks.defaults.job_start import JobStartTask
 
 def register_dags(configs_path):
     """
-    TODO: doc for register_dags
+    Registers pipelines in rainbow yml files found in given path (recursively) as airflow DAGs.
     """
 
     config_files = files_util.find_config_files(configs_path)
@@ -75,15 +75,16 @@ def register_dags(configs_path):
 
                     parent = task_instance.apply_task_to_dag()
 
-                    job_end_task = JobEndTask(dag, pipeline_name, parent, pipeline, 'all_done')
-                    job_end_task.apply_task_to_dag()
+                job_end_task = JobEndTask(dag, pipeline_name, parent, pipeline, 'all_done')
+                job_end_task.apply_task_to_dag()
 
-                    print(f'{pipeline_name}: {dag.tasks}')
+                print(f'{pipeline_name}: {dag.tasks}')
 
-                    globals()[pipeline_name] = dag
+                globals()[pipeline_name] = dag
 
-                    dags.append(dag)
-                    return dags
+                dags.append(dag)
+
+            return dags
 
 
 print(f'Loading task implementations..')
