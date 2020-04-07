@@ -13,6 +13,8 @@ class Test(TestCase):
         self.assertEqual(len(dags), 1)
 
         test_pipeline = dags[0]
+
+        # TODO: elaborate tests to assert all dags have correct tasks
         self.assertEqual(test_pipeline.dag_id, 'my_pipeline')
 
     def test_default_start_task(self):
