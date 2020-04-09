@@ -28,6 +28,8 @@ from rainbow.runners.airflow.model.task import Task
 from rainbow.runners.airflow.tasks.defaults.job_end import JobEndTask
 from rainbow.runners.airflow.tasks.defaults.job_start import JobStartTask
 
+__DEPENDS_ON_PAST = 'depends_on_past'
+
 
 def register_dags(configs_path):
     """
@@ -47,11 +49,14 @@ def register_dags(configs_path):
             for pipeline in config['pipelines']:
                 pipeline_name = pipeline['pipeline']
 
-                default_args = {
-                    'owner': config['owner'],
+                default_args = {k: v for k, v in pipeline.items()}
+
+                override_args = {
                     'start_date': datetime.combine(pipeline['start_date'], datetime.min.time()),
-                    'depends_on_past': False,
+                    __DEPENDS_ON_PAST: default_args[__DEPENDS_ON_PAST] if __DEPENDS_ON_PAST in default_args else False,
                 }
+
+                default_args.update(override_args)
 
                 dag = DAG(
                     dag_id=pipeline_name,

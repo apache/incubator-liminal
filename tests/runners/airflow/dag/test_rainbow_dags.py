@@ -31,6 +31,15 @@ class Test(TestCase):
 
         self.assertIsInstance(task_dict['end'], JobEndOperator)
 
+    def test_default_args(self):
+        dag = self.get_register_dags()[0]
+        default_args = dag.default_args
+
+        keys = default_args.keys()
+        self.assertIn('default_arg_loaded', keys)
+        self.assertIn('default_array_loaded', keys)
+        self.assertIn('default_object_loaded', keys)
+
     @staticmethod
     def get_register_dags():
         base_path = os.path.join(os.path.dirname(__file__), '../rainbow')

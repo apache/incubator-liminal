@@ -17,12 +17,17 @@
 # under the License.
 ---
 name: MyPipeline
-owner: Bosco Albert Baracus
 pipelines:
   - pipeline: my_pipeline
+    owner: Bosco Albert Baracus
     start_date: 1970-01-01
     timeout_minutes: 45
     schedule: 0 * 1 * *
+    default_arg_loaded: check
+    default_array_loaded: [2, 3, 4]
+    default_object_loaded:
+      key1: val1
+      key2: val2
     metrics:
      namespace: TestNamespace
      backends: [ 'cloudwatch' ]
