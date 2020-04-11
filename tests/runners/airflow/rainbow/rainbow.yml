@@ -29,8 +29,8 @@ pipelines:
       key1: val1
       key2: val2
     metrics:
-     namespace: TestNamespace
-     backends: [ 'cloudwatch' ]
+      namespace: TestNamespace
+      backends: [ 'cloudwatch' ]
     tasks:
       - task: my_static_input_task
         type: python
@@ -42,7 +42,7 @@ pipelines:
           env2: "b"
         input_type: static
         input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        output_path: /output.json
+        output_path: /mnt/vol1/my_output.json
         cmd: python -u hello_world.py
       - task: my_parallelized_static_input_task
         type: python
@@ -55,7 +55,7 @@ pipelines:
         input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
         split_input: True
         executors: 2
-        cmd: python -u helloworld.py
+        cmd: python -u hello_world.py
       - task: my_task_output_input_task
         type: python
         description: task with input from other task's output

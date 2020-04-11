@@ -20,10 +20,11 @@ import os
 
 import yaml
 
-from rainbow.build.image.image_builder import ImageBuilder, ServiceImageBuilderMixin
+from rainbow.build.image_builder import ServiceImageBuilderMixin
+from rainbow.build.python import BasePythonImageBuilder
 
 
-class PythonServerImageBuilder(ImageBuilder, ServiceImageBuilderMixin):
+class PythonServerImageBuilder(BasePythonImageBuilder, ServiceImageBuilderMixin):
 
     def __init__(self, config, base_path, relative_source_path, tag):
         super().__init__(config, base_path, relative_source_path, tag)
@@ -40,4 +41,5 @@ class PythonServerImageBuilder(ImageBuilder, ServiceImageBuilderMixin):
         ]
 
     def _additional_files_from_filename_content_pairs(self):
-        return [('service.yml', yaml.safe_dump(self.config))]
+        return super()._additional_files_from_filename_content_pairs() + \
+               [('service.yml', yaml.safe_dump(self.config))]

@@ -18,9 +18,8 @@
 
 import os
 import shutil
+import subprocess
 import tempfile
-
-import docker
 
 
 class ImageBuilder:
@@ -28,14 +27,14 @@ class ImageBuilder:
     Builds an image from source code
     """
 
+    __NO_CACHE = 'no_cache'
+
     def __init__(self, config, base_path, relative_source_path, tag):
         """
-        TODO: pydoc
-
-        :param config:
-        :param base_path:
-        :param relative_source_path:
-        :param tag:
+        :param config: task/service config
+        :param base_path: directory containing rainbow yml
+        :param relative_source_path: source path relative to rainbow yml
+        :param tag: image tag
         """
         self.base_path = base_path
         self.relative_source_path = relative_source_path
@@ -51,27 +50,44 @@ class ImageBuilder:
         temp_dir = self.__temp_dir()
 
         self.__copy_source_code(temp_dir)
-        self.__write_additional_files(temp_dir)
+        self._write_additional_files(temp_dir)
 
-        # TODO: log docker output
-        docker_client = docker.from_env()
-        docker_client.images.build(path=temp_dir, tag=self.tag)
-        docker_client.close()
+        no_cache = ''
+        if self.__NO_CACHE in self.config and self.config[self.__NO_CACHE]:
+            no_cache = '--no-cache=true'
+
+        docker_build_command = f'docker build {no_cache} --progress=plain ' + \
+                               f'--tag {self.tag} {self._build_flags()} {temp_dir}'
+
+        if self._use_buildkit():
+            docker_build_command = f'DOCKER_BUILDKIT=1 {docker_build_command}'
+
+        print(docker_build_command)
+
+        docker_build_out = ''
+        try:
+            docker_build_out = subprocess.check_output(docker_build_command,
+                                                       shell=True, stderr=subprocess.STDOUT,
+                                                       timeout=240)
+        except subprocess.CalledProcessError as e:
+            docker_build_out = e.output
+            raise e
+        finally:
+            print('=' * 80)
+            for line in str(docker_build_out)[2:-3].split('\\n'):
+                print(line)
+            print('=' * 80)
 
         self.__remove_dir(temp_dir)
 
         print(f'[X] Building image: {self.tag} (Success).')
 
+        return docker_build_out
+
     def __copy_source_code(self, temp_dir):
         self.__copy_dir(os.path.join(self.base_path, self.relative_source_path), temp_dir)
 
-    def __write_additional_files(self, temp_dir):
-        # TODO: move requirements.txt related code to a parent class for python image builders.
-        requirements_file_path = os.path.join(temp_dir, 'requirements.txt')
-        if not os.path.exists(requirements_file_path):
-            with open(requirements_file_path, 'w'):
-                pass
-
+    def _write_additional_files(self, temp_dir):
         for file in [self._dockerfile_path()] + self._additional_files_from_paths():
             self.__copy_file(file, temp_dir)
 
@@ -116,6 +132,18 @@ class ImageBuilder:
         File name and content pairs to create files from
         """
         return []
+
+    def _build_flags(self):
+        """
+        Additional build flags to add to docker build command.
+        """
+        return ''
+
+    def _use_buildkit(self):
+        """
+        overwrite with True to use docker buildkit
+        """
+        return False
 
 
 class ServiceImageBuilderMixin(object):

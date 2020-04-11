@@ -20,13 +20,13 @@ import os
 
 import yaml
 
-from rainbow.build.image.image_builder import ImageBuilder, ServiceImageBuilderMixin
+from rainbow.build.image_builder import ImageBuilder, ServiceImageBuilderMixin
 from rainbow.core.util import files_util, class_util
 
 
 def build_rainbows(path):
     """
-    TODO: doc for build_rainbows
+    Build images for rainbows in path.
     """
     config_files = files_util.find_config_files(path)
 

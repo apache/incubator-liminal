@@ -67,7 +67,6 @@ class PrepareInputOperator(KubernetesPodOperator):
             else:
                 raise ValueError(f'Unknown config type: {self.input_type}')
 
-        # TODO: pass run_id as well as env var
         run_id = context['dag_run'].run_id
         print(f'run_id = {run_id}')
 
@@ -145,4 +144,8 @@ class KubernetesPodOperatorWithInputAndOutput(KubernetesPodOperator):
 
             self.log.info(f'Empty input for task {self.task_split}.')
 
+        run_id = context['dag_run'].run_id
+        print(f'run_id = {run_id}')
+
+        self.env_vars.update({'run_id': run_id})
         return super().execute(context)

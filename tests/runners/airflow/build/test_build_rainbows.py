@@ -42,7 +42,7 @@ class TestBuildRainbows(TestCase):
     def __remove_images(self):
         for image_name in self.__image_names:
             if len(self.docker_client.images.list(image_name)) > 0:
-                self.docker_client.images.remove(image=image_name)
+                self.docker_client.images.remove(image=image_name, force=True)
 
     def test_build_rainbow(self):
         build_rainbows.build_rainbows(os.path.join(os.path.dirname(__file__), '../rainbow'))

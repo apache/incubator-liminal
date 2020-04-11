@@ -16,12 +16,14 @@
 # specific language governing permissions and limitations
 # under the License.
 import json
+import os
 
-print('Hello world!')
-print()
+print('Hello world!\n')
 
 with open('/rainbow_input.json') as file:
-    print(json.loads(file.readline()))
+    print(f'rainbow_input.json contents = {json.loads(file.readline())}')
 
-with open('/output.json', 'w') as file:
+os.makedirs('/mnt/vol1/', exist_ok=True)
+
+with open('/mnt/vol1/my_output.json', 'w') as file:
     file.write(json.dumps({'a': 1, 'b': 2}))

@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import os
 import threading
 import time
@@ -41,23 +42,47 @@ class TestPythonServer(TestCase):
         self.docker_client.close()
 
     def test_build_python_server(self):
+        build_out = self.__test_build_python_server()
+
+        self.assertTrue('RUN pip install -r requirements.txt' in build_out, 'Incorrect pip command')
+
+    def test_build_python_server_with_pip_conf(self):
+        build_out = self.__test_build_python_server(use_pip_conf=True)
+
+        self.assertTrue(
+            'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip insta...' in build_out,
+            'Incorrect pip command')
+
+    def __test_build_python_server(self, use_pip_conf=False):
         base_path = os.path.join(os.path.dirname(__file__), '../../../rainbow')
-        builder = PythonServerImageBuilder(config=self.config,
+
+        config = self.__create_conf('my_task')
+
+        if use_pip_conf:
+            config['pip_conf'] = os.path.join(base_path, 'pip.conf')
+
+        builder = PythonServerImageBuilder(config=config,
                                            base_path=base_path,
                                            relative_source_path='myserver',
                                            tag=self.image_name)
 
-        builder.build()
+        build_out = str(builder.build())
 
         thread = threading.Thread(target=self.__run_container, args=[self.image_name])
         thread.daemon = True
         thread.start()
 
-        time.sleep(2)
+        time.sleep(5)
 
-        server_response = urllib.request.urlopen("http://localhost:9294/myendpoint1").read()
+        print('Sending request to server')
 
-        self.assertEqual("b'1'", str(server_response))
+        server_response = str(urllib.request.urlopen('http://localhost:9294/myendpoint1').read())
+
+        print(f'Response from server: {server_response}')
+
+        self.assertEqual("b'1'", server_response)
+
+        return build_out
 
     def __remove_containers(self):
         print(f'Stopping containers with image: {self.image_name}')
@@ -92,6 +117,7 @@ class TestPythonServer(TestCase):
             'input_type': 'my_input_type',
             'input_path': 'my_input',
             'output_path': '/my_output.json',
+            'no_cache': True,
             'endpoints': [
                 {
                     'endpoint': '/myendpoint1',
