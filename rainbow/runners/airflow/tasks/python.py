@@ -20,6 +20,7 @@ import json
 from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 
+from rainbow.runners.airflow.config.standalone_variable_backend import get_variable
 from rainbow.runners.airflow.model import task
 from rainbow.runners.airflow.operators.kubernetes_pod_operator_with_input_output import \
     KubernetesPodOperatorWithInputAndOutput, \
@@ -143,10 +144,10 @@ class PythonTask(task.Task):
 
     def __kubernetes_kwargs(self):
         kubernetes_kwargs = {
-            'namespace': Variable.get('kubernetes_namespace', default_var='default'),
+            'namespace': get_variable('kubernetes_namespace', default_val='default'),
             'name': self.task_name.replace('_', '-'),
-            'in_cluster': Variable.get('in_kubernetes_cluster', default_var=False),
-            'image_pull_policy': Variable.get('image_pull_policy', default_var='IfNotPresent'),
+            'in_cluster': get_variable('in_kubernetes_cluster', default_val=False),
+            'image_pull_policy': get_variable('image_pull_policy', default_val='IfNotPresent'),
             'get_logs': True,
             'env_vars': self.env_vars,
             'do_xcom_push': True,
@@ -162,9 +163,9 @@ class PythonTask(task.Task):
         env_vars = {}
         if 'env_vars' in self.config:
             env_vars = self.config['env_vars']
-        airflow_configuration_variable = Variable.get(
+        airflow_configuration_variable = get_variable(
             f'''{self.pipeline_name}_dag_configuration''',
-            default_var=None)
+            default_val=None)
         if airflow_configuration_variable:
             airflow_configs = json.loads(airflow_configuration_variable)
             environment_variables_key = f'''{self.pipeline_name}_environment_variables'''

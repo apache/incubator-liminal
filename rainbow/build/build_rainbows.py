@@ -74,33 +74,42 @@ def __build_image(base_path, builder_config, builder):
 
 
 def __get_task_build_class(task_type):
-    return task_build_classes[task_type] if task_type in task_build_classes else None
+    return task_build_types.get(task_type, None)
 
 
 def __get_service_build_class(service_type):
-    return service_build_classes[service_type] if service_type in service_build_classes else None
+    return service_build_types.get(service_type, None)
 
 
 print(f'Loading image builder implementations..')
 
 # TODO: add configuration for user image builders package
-image_builders_package = 'rainbow/build/image'
-user_image_builders_package = 'TODO: user_image_builders_package'
+image_builders_package = 'rainbow.build.image'
+# user_image_builders_package = 'TODO: user_image_builders_package'
 
 task_build_classes = class_util.find_subclasses_in_packages(
-    [image_builders_package, user_image_builders_package],
+    [image_builders_package],
     ImageBuilder)
+
+
+def get_types_dict(task_build_classes):
+    # take module name from class name
+    return {x.split(".")[-2]: c for x, c in task_build_classes.items()}
+
+
+task_build_types = get_types_dict(task_build_classes)
 
 print(f'Finished loading image builder implementations: {task_build_classes}')
 
 print(f'Loading service image builder implementations..')
 
 # TODO: add configuration for user service image builders package
-service_builders_package = 'rainbow/build/service'
-user_service_builders_package = 'TODO: user_service_builders_package'
+service_builders_package = 'rainbow.build.service'
+# user_service_builders_package = 'TODO: user_service_builders_package'
 
 service_build_classes = class_util.find_subclasses_in_packages(
-    [service_builders_package, user_service_builders_package],
+    [service_builders_package],
     ServiceImageBuilderMixin)
 
+service_build_types = get_types_dict(service_build_classes)
 print(f'Finished loading service image builder implementations: {service_build_classes}')

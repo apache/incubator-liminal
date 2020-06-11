@@ -15,16 +15,21 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
 import os
+from os import environ
+
+from airflow.models import Variable
+
+RAINBOW_STAND_ALONE_MODE_KEY = "RAINBOW_STAND_ALONE_MODE"
 
 
-def find_config_files(path):
-    files = []
-    print(path)
-    for r, d, f in os.walk(path):
-        for file in f:
-            if os.path.basename(file) in ['rainbow.yml', 'rainbow.yaml']:
-                print(os.path.join(r, file))
-                files.append(os.path.join(r, file))
-    return files
+def get_variable(key, default_val):
+    if rainbow_local_mode():
+        return os.environ.get(key, default_val)
+    else:
+        return Variable.get(key, default_var=default_val)
+
+
+def rainbow_local_mode():
+    stand_alone = environ.get(RAINBOW_STAND_ALONE_MODE_KEY, "False")
+    return stand_alone.strip().lower() == "true"

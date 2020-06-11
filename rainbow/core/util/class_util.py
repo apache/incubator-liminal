@@ -17,9 +17,7 @@
 # under the License.
 
 import importlib.util
-import inspect
-import os
-import sys
+import pkgutil
 
 
 def find_subclasses_in_packages(packages, parent_class):
@@ -27,28 +25,42 @@ def find_subclasses_in_packages(packages, parent_class):
     Finds all subclasses of given parent class within given packages
     :return: map of module ref -> class
     """
-    classes = {}
+    module_content = {}
+    for p in packages:
+        module_content.update(import_module(p))
 
-    for py_path in [a for a in sys.path]:
-        for root, directories, files in os.walk(py_path):
-            if any(package in root for package in packages):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    if file.endswith('.py') and '__pycache__' not in file_path:
-                        spec = importlib.util.spec_from_file_location(file[:-3], file_path)
-                        mod = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(mod)
-                        for name, obj in inspect.getmembers(mod):
-                            if inspect.isclass(obj) and not obj.__name__.endswith('Mixin'):
-                                module_name = mod.__name__
-                                class_name = obj.__name__
-                                parent_module = root[len(py_path) + 1:].replace('/', '.')
-                                module = parent_module.replace('airflow.dags.', '') + \
-                                         '.' + module_name
-                                clazz = __get_class(module, class_name)
-                                if issubclass(clazz, parent_class):
-                                    classes.update({module_name: clazz})
-    return classes
+    subclasses = set()
+    work = [parent_class]
+    while work:
+        parent = work.pop()
+        for child in parent.__subclasses__():
+            if child not in subclasses:
+                work.append(child)
+                # verify that the found class is in the relevant module
+                for p in packages:
+                    if p in child.__module__:
+                        subclasses.add(child)
+                        break
+
+    result = {sc.__module__ + "." + sc.__name__: sc for sc in subclasses}
+    return result
+
+
+def import_module(package, recrsive=True):
+    """ Import all submodules of a module, recursively, including subpackages
+    :param package: package (name or actual module)
+    :type package: str | module
+    :rtype: dict[str, types.ModuleType]
+    """
+    if isinstance(package, str):
+        package = importlib.import_module(package)
+    results = {}
+    for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
+        full_name = package.__name__ + '.' + name
+        results[full_name] = importlib.import_module(full_name)
+        if recrsive and is_pkg:
+            results.update(import_module(full_name))
+    return results
 
 
 def __get_class(the_module, the_class):

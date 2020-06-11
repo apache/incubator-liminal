@@ -18,13 +18,21 @@
 
 import os
 
+DEFAULT_DAGS_ZIP_NAME = 'rainbows.zip'
+DEFAULT_RAINBOW_HOME = os.path.expanduser('~/rainbow_home')
+DEFAULT_RAINBOWS_SUBDIR = "rainbows"
+RAINBOW_HOME_PARAM_NAME = "RAINBOW_HOME"
 
-def find_config_files(path):
-    files = []
-    print(path)
-    for r, d, f in os.walk(path):
-        for file in f:
-            if os.path.basename(file) in ['rainbow.yml', 'rainbow.yaml']:
-                print(os.path.join(r, file))
-                files.append(os.path.join(r, file))
-    return files
+
+def get_rainbow_home():
+    if not os.environ.get(RAINBOW_HOME_PARAM_NAME):
+        print("no environment parameter called RAINBOW_HOME detected")
+        print(f"registering {DEFAULT_RAINBOW_HOME} as the RAINBOW_HOME directory")
+        os.environ[RAINBOW_HOME_PARAM_NAME] = DEFAULT_RAINBOW_HOME
+    return os.environ.get(RAINBOW_HOME_PARAM_NAME, DEFAULT_RAINBOW_HOME)
+
+
+def get_dags_dir():
+    # if we are inside airflow, we will take it from the configured dags folder
+    base_dir = os.environ.get("AIRFLOW__CORE__DAGS_FOLDER", get_rainbow_home())
+    return os.path.join(base_dir, DEFAULT_RAINBOWS_SUBDIR)

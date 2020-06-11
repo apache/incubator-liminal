@@ -38,7 +38,7 @@ class JobStatusOperator(BaseOperator):
             *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.backends = backends
-        self.cloudwatch = CloudWatchHook()
+        self.cloudwatch = None
 
     def execute(self, context):
         for backend in self.backends:
@@ -52,11 +52,16 @@ class JobStatusOperator(BaseOperator):
         raise NotImplementedError
 
     def send_metric_to_cloudwatch(self, metric):
-        self.cloudwatch.put_metric_data(metric)
+        self.get_cloudwatch().put_metric_data(metric)
 
     report_functions = {
         'cloudwatch': send_metric_to_cloudwatch
     }
+
+    def get_cloudwatch(self):
+        if not self.cloudwatch:
+            self.cloudwatch = CloudWatchHook()
+        return self.cloudwatch
 
 
 class JobStartOperator(JobStatusOperator):

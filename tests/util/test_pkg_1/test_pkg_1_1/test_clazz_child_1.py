@@ -16,15 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import os
+
+from tests.util.test_pkg_1.test_clazz_base import A
 
 
-def find_config_files(path):
-    files = []
-    print(path)
-    for r, d, f in os.walk(path):
-        for file in f:
-            if os.path.basename(file) in ['rainbow.yml', 'rainbow.yaml']:
-                print(os.path.join(r, file))
-                files.append(os.path.join(r, file))
-    return files
+class B(A):
+    pass
+
+
+class M:
+    pass

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -17,24 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import os
-
-import click
-
-from rainbow.build import build_rainbows
-
-
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
-@click.option('--path', default=os.getcwd(), help='Build within this path.')
-def build(path):
-    click.echo(f'Building rainbows in {path}')
-    build_rainbows.build_rainbows(path)
-
-
-if __name__ == '__main__':
-    cli()

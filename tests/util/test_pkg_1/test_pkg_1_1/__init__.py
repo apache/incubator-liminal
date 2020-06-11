@@ -15,16 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-import os
-
-
-def find_config_files(path):
-    files = []
-    print(path)
-    for r, d, f in os.walk(path):
-        for file in f:
-            if os.path.basename(file) in ['rainbow.yml', 'rainbow.yaml']:
-                print(os.path.join(r, file))
-                files.append(os.path.join(r, file))
-    return files

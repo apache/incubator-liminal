@@ -76,12 +76,44 @@ services:
         function: myendpoint1func
 ```
 
-## Example repository structure
-
-[Example repository structure](
-https://github.com/Natural-Intelligence/rainbow/tree/master/tests/runners/airflow/rainbow]
-)
 
 # Installation
+1. Install this package
+```bash
+   pip install git+https://github.com/Natural-Intelligence/rainbow.git@rainbow_local_mode
+```
+2. Optional: set RAINBOW_HOME to path of your choice (if not set, will default to ~/rainbow_home)
+```bash
+echo 'export RAINBOW_HOME=</path/to/some/folder>' >> ~/.bash_profile && source ~/.bash_profile
+```
 
-TODO: installation.
+# Authoring pipelines
+
+This involves at minimum creating a single file called rainbow.yml as in the example above.
+
+If your pipeline requires custom python code to implement tasks, they should be organized 
+[like this](https://github.com/Natural-Intelligence/rainbow/tree/master/tests/runners/airflow/rainbow)
+
+If your pipeline  introduces imports of external packages which are not already a part 
+of the rainbow framework (i.e. you had to pip install them yourself), you need to also provide 
+a requirements.txt in the root of your project.
+
+# Testing the pipeline locally
+
+When your pipeline code is ready, you can test it by running it locally on your machine.
+
+1. Deploy the pipeline:
+```bash
+cd </path/to/your/rainbow/code> 
+rainbow deploy
+```
+2. Make sure you have docker running
+3. Start the Server
+```bash
+rainbow start
+```
+4. Navigate to [http://localhost:8080/admin]
+5. You should see your ![pipeline](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/images/airflow.png")
+
+### Running Tests (for contributors)
+When doing local development and running Rainbow unit-tests, make sure to set RAINBOW_STAND_ALONE_MODE=True

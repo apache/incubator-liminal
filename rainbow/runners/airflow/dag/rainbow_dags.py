@@ -17,11 +17,13 @@
 # under the License.
 
 from datetime import datetime, timedelta
+from os import environ
 
 import yaml
 from airflow import DAG
 from airflow.models import Variable
 
+from rainbow.core import environment
 from rainbow.core.util import class_util
 from rainbow.core.util import files_util
 from rainbow.runners.airflow.model.task import Task
@@ -33,13 +35,13 @@ __DEPENDS_ON_PAST = 'depends_on_past'
 
 def register_dags(configs_path):
     """
-    Registers pipelines in rainbow yml files found in given path (recursively) as airflow DAGs.
+    TODO: doc for register_dags
     """
-
+    print(f'Registering DAG from path: {configs_path}')
     config_files = files_util.find_config_files(configs_path)
 
     dags = []
-
+    print(f'found {len(config_files)} in path: {configs_path}')
     for config_file in config_files:
         print(f'Registering DAG for file: {config_file}')
 
@@ -83,28 +85,35 @@ def register_dags(configs_path):
                 job_end_task = JobEndTask(dag, pipeline_name, parent, pipeline, 'all_done')
                 job_end_task.apply_task_to_dag()
 
-                print(f'{pipeline_name}: {dag.tasks}')
+                print(f'registered DAG {dag.dag_id}: {dag.tasks}')
 
                 globals()[pipeline_name] = dag
-
                 dags.append(dag)
 
-            return dags
+    return dags
 
 
 print(f'Loading task implementations..')
 
 # TODO: add configuration for user tasks package
-task_package = 'rainbow/runners/airflow/tasks'
+impl_packages = 'rainbow.runners.airflow.tasks'
 user_task_package = 'TODO: user_tasks_package'
 
-task_classes = class_util.find_subclasses_in_packages([task_package, user_task_package], Task)
+task_classes = class_util.find_subclasses_in_packages([impl_packages], Task)
 
-print(f'Finished loading task implementations: {task_classes}')
+
+def tasks_by_rainbow_name(task_classes):
+    return {full_name.replace(impl_packages, '').replace(clzz.__name__, '')[1:-1]: clzz
+            for (full_name, clzz) in task_classes.items()}
+
+
+tasks_by_rainbow_name = tasks_by_rainbow_name(task_classes)
+
+print(f'Finished loading task implementations: {tasks_by_rainbow_name}')
 
 
 def get_task_class(task_type):
-    return task_classes[task_type]
+    return tasks_by_rainbow_name[task_type]
 
 
-register_dags(Variable.get('rainbows_dir'))
+register_dags(environment.get_dags_dir())

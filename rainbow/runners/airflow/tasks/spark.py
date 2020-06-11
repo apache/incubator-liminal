@@ -18,7 +18,6 @@
 
 from rainbow.runners.airflow.model import task
 
-
 class SparkTask(task.Task):
     """
     Executes a Spark application.
