@@ -42,20 +42,14 @@ rsync -a --exclude 'venv' $(PWD)/ $docker_build_dir/zip_content/
 # perform installation of external pacakges (framework-requirements and user-requirements)
 # this is done inside a docker to 1) avoid requiring the user to install stuff, and 2) to create a platform-compatible
 # package (install the native libraries in a flavour suitable for the docker in which airflow runs, and not user machine)
-docker stop rainbow_build
-docker rm rainbow_build
-docker run --name rainbow_build -v /private/"$docker_build_dir":/home/rainbow/tmp --entrypoint="" -u 0 \
-       puckel/docker-airflow:1.10.9 /bin/bash -c "apt-get update && apt-get install -y wget && apt-get install -y git &&
-       cd /home/rainbow/tmp/zip_content &&
-       wget https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/rainbow/runners/airflow/dag/rainbow_dags.py &&
-       wget https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/requirements-airflow.txt &&
-       wget https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/scripts/docker-compose.yml &&
-       pip install --no-deps --target=\"/home/rainbow/tmp/zip_content\" git+https://github.com/Natural-Intelligence/rainbow.git@rainbow_local_mode &&
+
+docker run --rm --name rainbow_build -v /private/"$docker_build_dir":/home/rainbow/tmp --entrypoint="" -u 0 \
+       puckel/docker-airflow:1.10.9 /bin/bash -c "cd /home/rainbow/tmp/zip_content &&
+       pip install --no-deps --target=\"/home/rainbow/tmp/zip_content\" liminal==0.0.2dev5 &&
+       rsync -avzh --ignore-errors /home/rainbow/tmp/zip_content/liminal-resources/* /home/rainbow/tmp/zip_content/
        pip install --target=\"/home/rainbow/tmp/zip_content\" -r /home/rainbow/tmp/zip_content/requirements-airflow.txt &&
        pip install --target=\"/home/rainbow/tmp/zip_content\" -r /home/rainbow/tmp/zip_content/requirements.txt"
 
-docker stop rainbow_build
-docker rm rainbow_build
 
 # zip the content per https://airflow.apache.org/docs/stable/concepts.html#packaged-dags
 cd $docker_build_dir/zip_content
@@ -64,6 +58,3 @@ rm __init__.py
 
 zip -r ../dags/rainbows.zip .
 cp ../dags/rainbows.zip $target_path
-
-
-

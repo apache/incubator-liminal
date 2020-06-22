@@ -30,7 +30,7 @@ pipelines:
       key2: val2
     metrics:
       namespace: TestNamespace
-      backends: [ 'cloudwatch' ]
+      backends: [ ]
     tasks:
       - task: my_static_input_task
         type: python

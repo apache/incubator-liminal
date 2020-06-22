@@ -35,7 +35,7 @@ __DEPENDS_ON_PAST = 'depends_on_past'
 
 def register_dags(configs_path):
     """
-    TODO: doc for register_dags
+    Registers pipelines in rainbow yml files found in given path (recursively) as airflow DAGs.
     """
     print(f'Registering DAG from path: {configs_path}')
     config_files = files_util.find_config_files(configs_path)

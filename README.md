@@ -1,3 +1,22 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required bgit y applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
 # Rainbow
 
 Rainbow is an end-to-end platform for data engineers & scientists, allowing them to build,
@@ -80,7 +99,7 @@ services:
 # Installation
 1. Install this package
 ```bash
-   pip install git+https://github.com/Natural-Intelligence/rainbow.git@rainbow_local_mode
+   pip install liminal
 ```
 2. Optional: set RAINBOW_HOME to path of your choice (if not set, will default to ~/rainbow_home)
 ```bash
@@ -102,18 +121,54 @@ a requirements.txt in the root of your project.
 
 When your pipeline code is ready, you can test it by running it locally on your machine.
 
-1. Deploy the pipeline:
+1. Ensure you have The Docker engine running locally, and enable a local Kubernetes cluster:
+![Kubernetes configured](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/images/k8s_running.png)
+
+If you want to execute your pipeline on a remote kubernetes cluster, make sure the cluster is configured
+using :
+```bash
+kubectl config set-context <your remote kubernetes cluster>
+``` 
+2. Build the docker images used by your pipeline.
+
+In the example pipeline above, you can see that tasks and services have an "image" field - such as 
+"my_static_input_task_image". This means that the task is executed inside a docker container, and the docker container 
+is created from a docker image where various code and libraries are installed.
+
+You can take a look at what the build process looks like, e.g. 
+[here](https://github.com/Natural-Intelligence/rainbow/tree/master/rainbow/build/image/python)
+
+In order for the images to be available for your pipeline, you'll need to build them locally:
+
+```bash
+cd </path/to/your/rainbow/code>
+rainbow build
+```
+
+You'll see that a number of outputs indicating various docker images built.
+
+3. Deploy the pipeline:
 ```bash
 cd </path/to/your/rainbow/code> 
 rainbow deploy
 ```
-2. Make sure you have docker running
-3. Start the Server
+
+4. Start the server
 ```bash
 rainbow start
 ```
-4. Navigate to [http://localhost:8080/admin]
-5. You should see your ![pipeline](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/images/airflow.png")
+
+5. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
+
+6. You should see your ![pipeline](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/master/images/airflow.png)
+The pipeline is scheduled to run according to the ```json schedule: 0 * 1 * *``` field in the .yml file you provided.
+
+7. To manually activate your pipeline:
+Click your pipeline and then click "trigger DAG"
+Click "Graph view"
+You should see the steps in your pipeline getting executed in "real time" by clicking "Refresh" periodically.
+
+![Pipeline activation](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/images/airflow_trigger.png)
 
 ### Running Tests (for contributors)
 When doing local development and running Rainbow unit-tests, make sure to set RAINBOW_STAND_ALONE_MODE=True

@@ -17,9 +17,9 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
 
 import setuptools
-from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -29,9 +29,9 @@ with open('requirements.txt') as f:
     print(requirements)
 
 setuptools.setup(
-    name="rainbow",
-    version="0.0.1",
-    author="Rainbow team",
+    name="liminal",
+    version=os.environ["LIMINAL_BUILD_VERSION"],
+    author="liminal team",
     description="A package for authoring and deploying machine learning workflows",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -39,10 +39,15 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: Apache 2.0",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
+    license='Apache License, Version 2.0',
     python_requires='>=3.6',
     install_requires=requirements,
-    scripts=['scripts/rainbow', 'scripts/package.sh']
+    scripts=['scripts/rainbow', 'scripts/package.sh'],
+    include_package_data=True,
+    data_files=[('liminal-resources', ['scripts/docker-compose.yml',
+                                       'requirements-airflow.txt',
+                                       'rainbow/runners/airflow/dag/rainbow_dags.py'])]
 )
