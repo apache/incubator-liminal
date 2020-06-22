@@ -32,6 +32,7 @@ WORKDIR /app
 COPY ./requirements.txt /app/
 
 # mount the secret in the correct location, then run pip install
+RUN pip install --upgrade pip
 RUN {{mount}} pip install -r requirements.txt
 
 # Copy the current directory contents into the container at /app

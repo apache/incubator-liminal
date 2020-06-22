@@ -29,6 +29,8 @@ WORKDIR /app
 # Be careful when changing this code.                                                            !
 
 # Install any needed packages specified in python_server_requirements.txt and requirements.txt
+RUN pip install --upgrade pip
+
 COPY ./python_server_requirements.txt /app/
 RUN pip install -r python_server_requirements.txt
 
