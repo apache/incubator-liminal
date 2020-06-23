@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from rainbow.core.util import class_util
+from liminal.core.util import class_util
 from tests.util.test_pkg_1.test_clazz_base import A, Z
 from tests.util.test_pkg_1.test_pkg_1_1.test_clazz_child_1 import B
 from tests.util.test_pkg_1.test_pkg_1_1.test_clazz_child_2 import C

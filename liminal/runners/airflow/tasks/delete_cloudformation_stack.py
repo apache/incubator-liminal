@@ -9,13 +9,23 @@
 #
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required bgit y applicable law or agreed to in writing,
+# Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
 
-include scripts/*
-include requirements-airflow.txt
-recursive-include liminal/build/ *
+from liminal.runners.airflow.model import task
+
+
+class DeleteCloudFormationStackTask(task.Task):
+    """
+    Deletes cloud_formation stack.
+    """
+
+    def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
+        super().__init__(dag, pipeline_name, parent, config, trigger_rule)
+
+    def apply_task_to_dag(self):
+        pass

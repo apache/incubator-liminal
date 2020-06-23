@@ -22,11 +22,11 @@ from unittest import TestCase
 
 import docker
 
-from rainbow.build.image.python.python import PythonImageBuilder
+from liminal.build.image.python.python import PythonImageBuilder
 
 
 class TestPythonImageBuilder(TestCase):
-    __IMAGE_NAME = 'rainbow_image'
+    __IMAGE_NAME = 'liminal_image'
     __OUTPUT_PATH = '/mnt/vol1/my_output.json'
 
     def setUp(self) -> None:
@@ -59,7 +59,7 @@ class TestPythonImageBuilder(TestCase):
     def __test_build(self, use_pip_conf=False):
         config = self.__create_conf('my_task')
 
-        base_path = os.path.join(os.path.dirname(__file__), '../../rainbow')
+        base_path = os.path.join(os.path.dirname(__file__), '../../liminal')
 
         if use_pip_conf:
             config['pip_conf'] = os.path.join(base_path, 'pip.conf')
@@ -77,7 +77,7 @@ class TestPythonImageBuilder(TestCase):
         docker_client = docker.from_env()
         docker_client.images.get(self.__IMAGE_NAME)
 
-        cmd = 'export RAINBOW_INPUT="{\\"x\\": 1}" && ' + \
+        cmd = 'export LIMINAL_INPUT="{\\"x\\": 1}" && ' + \
               'sh container-setup.sh && ' + \
               'python hello_world.py && ' + \
               f'sh container-teardown.sh {self.__OUTPUT_PATH}'
@@ -100,10 +100,10 @@ class TestPythonImageBuilder(TestCase):
         print(container_log)
 
         self.assertEqual(
-            "b\"Writing rainbow input..\\n" +
+            "b\"Writing liminal input..\\n" +
             "Hello world!\\n\\n" +
-            "rainbow_input.json contents = {'x': 1}\\n" +
-            "Writing rainbow output..\\n\"",
+            "liminal_input.json contents = {'x': 1}\\n" +
+            "Writing liminal output..\\n\"",
             str(container_log))
 
         with open(os.path.join(self.temp_airflow_dir, 'return.json')) as file:

@@ -19,9 +19,9 @@
 import unittest
 from unittest import TestCase
 
-from rainbow.runners.airflow.operators.kubernetes_pod_operator_with_input_output import \
+from liminal.runners.airflow.operators.kubernetes_pod_operator_with_input_output import \
     KubernetesPodOperatorWithInputAndOutput
-from rainbow.runners.airflow.tasks import python
+from liminal.runners.airflow.tasks import python
 from tests.util import dag_test_utils
 
 
@@ -49,7 +49,7 @@ class TestPythonTask(TestCase):
         return {
             'task': task_id,
             'cmd': 'foo bar',
-            'image': 'rainbow_image',
+            'image': 'liminal_image',
             'source': 'baz',
             'input_type': 'my_input_type',
             'input_path': 'my_input',

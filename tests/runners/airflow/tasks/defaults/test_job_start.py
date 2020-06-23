@@ -19,7 +19,7 @@
 import unittest
 from unittest import TestCase
 
-from rainbow.runners.airflow.tasks.defaults import job_end, job_start
+from liminal.runners.airflow.tasks.defaults import job_end, job_start
 from tests.util import dag_test_utils
 
 

@@ -29,7 +29,7 @@
                     max-size: 10m
                     max-file: "3"
             volumes:
-                - ${RAINBOW_HOME}:/usr/local/airflow/dags
+                - ${LIMINAL_HOME}:/usr/local/airflow/dags
                 - ${HOME}/.kube:/usr/local/airflow/.kube
             ports:
                 - "8080:8080"

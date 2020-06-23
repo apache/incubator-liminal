@@ -9,13 +9,27 @@
 #
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required bgit y applicable law or agreed to in writing,
+# Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
+from os import environ
 
-include scripts/*
-include requirements-airflow.txt
-recursive-include liminal/build/ *
+from airflow.models import Variable
+
+LIMINAL_STAND_ALONE_MODE_KEY = "LIMINAL_STAND_ALONE_MODE"
+
+
+def get_variable(key, default_val):
+    if liminal_local_mode():
+        return os.environ.get(key, default_val)
+    else:
+        return Variable.get(key, default_var=default_val)
+
+
+def liminal_local_mode():
+    stand_alone = environ.get(LIMINAL_STAND_ALONE_MODE_KEY, "False")
+    return stand_alone.strip().lower() == "true"

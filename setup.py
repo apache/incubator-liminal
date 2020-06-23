@@ -35,7 +35,7 @@ setuptools.setup(
     description="A package for authoring and deploying machine learning workflows",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Natural-Intelligence/rainbow",
+    url="https://github.com/apache/incubator-liminal",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -45,9 +45,9 @@ setuptools.setup(
     license='Apache License, Version 2.0',
     python_requires='>=3.6',
     install_requires=requirements,
-    scripts=['scripts/rainbow', 'scripts/package.sh'],
+    scripts=['scripts/liminal', 'scripts/package.sh'],
     include_package_data=True,
     data_files=[('liminal-resources', ['scripts/docker-compose.yml',
                                        'requirements-airflow.txt',
-                                       'rainbow/runners/airflow/dag/rainbow_dags.py'])]
+                                       'liminal/runners/airflow/dag/liminal_dags.py'])]
 )

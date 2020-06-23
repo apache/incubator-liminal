@@ -25,7 +25,7 @@ from unittest import TestCase
 
 import docker
 
-from rainbow.build.service.python_server.python_server import PythonServerImageBuilder
+from liminal.build.service.python_server.python_server import PythonServerImageBuilder
 
 
 class TestPythonServer(TestCase):
@@ -54,7 +54,7 @@ class TestPythonServer(TestCase):
             'Incorrect pip command')
 
     def __test_build_python_server(self, use_pip_conf=False):
-        base_path = os.path.join(os.path.dirname(__file__), '../../../rainbow')
+        base_path = os.path.join(os.path.dirname(__file__), '../../../liminal')
 
         config = self.__create_conf('my_task')
 
@@ -112,7 +112,7 @@ class TestPythonServer(TestCase):
         return {
             'task': task_id,
             'cmd': 'foo bar',
-            'image': 'rainbow_server_image',
+            'image': 'liminal_server_image',
             'source': 'baz',
             'input_type': 'my_input_type',
             'input_path': 'my_input',

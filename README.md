@@ -17,14 +17,14 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# Rainbow
+# Liminal
 
-Rainbow is an end-to-end platform for data engineers & scientists, allowing them to build,
+Liminal is an end-to-end platform for data engineers & scientists, allowing them to build,
 train and deploy machine learning models in a robust and agile way.
 
 The platform provides the abstractions and declarative capabilities for
 data extraction & feature engineering followed by model training and serving.
-Rainbow's goal is to operationalize the machine learning process, allowing data scientists to
+Liminal's goal is to operationalize the machine learning process, allowing data scientists to
 quickly transition from a successful experiment to an automated pipeline of model training,
 validation, deployment and inference in production, freeing them from engineering and
 non-functional tasks, and allowing them to focus on machine learning code and artifacts.
@@ -101,20 +101,20 @@ services:
 ```bash
    pip install liminal
 ```
-2. Optional: set RAINBOW_HOME to path of your choice (if not set, will default to ~/rainbow_home)
+2. Optional: set LIMINAL_HOME to path of your choice (if not set, will default to ~/liminal_home)
 ```bash
-echo 'export RAINBOW_HOME=</path/to/some/folder>' >> ~/.bash_profile && source ~/.bash_profile
+echo 'export LIMINAL_HOME=</path/to/some/folder>' >> ~/.bash_profile && source ~/.bash_profile
 ```
 
 # Authoring pipelines
 
-This involves at minimum creating a single file called rainbow.yml as in the example above.
+This involves at minimum creating a single file called liminal.yml as in the example above.
 
 If your pipeline requires custom python code to implement tasks, they should be organized 
-[like this](https://github.com/Natural-Intelligence/rainbow/tree/master/tests/runners/airflow/rainbow)
+[like this](https://github.com/apache/incubator-liminal/tree/master/tests/runners/airflow/liminal)
 
 If your pipeline  introduces imports of external packages which are not already a part 
-of the rainbow framework (i.e. you had to pip install them yourself), you need to also provide 
+of the liminal framework (i.e. you had to pip install them yourself), you need to also provide 
 a requirements.txt in the root of your project.
 
 # Testing the pipeline locally
@@ -122,7 +122,7 @@ a requirements.txt in the root of your project.
 When your pipeline code is ready, you can test it by running it locally on your machine.
 
 1. Ensure you have The Docker engine running locally, and enable a local Kubernetes cluster:
-![Kubernetes configured](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/images/k8s_running.png)
+![Kubernetes configured](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/k8s_running.png)
 
 If you want to execute your pipeline on a remote kubernetes cluster, make sure the cluster is configured
 using :
@@ -136,31 +136,31 @@ In the example pipeline above, you can see that tasks and services have an "imag
 is created from a docker image where various code and libraries are installed.
 
 You can take a look at what the build process looks like, e.g. 
-[here](https://github.com/Natural-Intelligence/rainbow/tree/master/rainbow/build/image/python)
+[here](https://github.com/apache/incubator-liminal/tree/master/liminal/build/image/python)
 
 In order for the images to be available for your pipeline, you'll need to build them locally:
 
 ```bash
-cd </path/to/your/rainbow/code>
-rainbow build
+cd </path/to/your/liminal/code>
+liminal build
 ```
 
 You'll see that a number of outputs indicating various docker images built.
 
 3. Deploy the pipeline:
 ```bash
-cd </path/to/your/rainbow/code> 
-rainbow deploy
+cd </path/to/your/liminal/code> 
+liminal deploy
 ```
 
 4. Start the server
 ```bash
-rainbow start
+liminal start
 ```
 
 5. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
 
-6. You should see your ![pipeline](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/master/images/airflow.png)
+6. You should see your ![pipeline](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow.png)
 The pipeline is scheduled to run according to the ```json schedule: 0 * 1 * *``` field in the .yml file you provided.
 
 7. To manually activate your pipeline:
@@ -168,7 +168,7 @@ Click your pipeline and then click "trigger DAG"
 Click "Graph view"
 You should see the steps in your pipeline getting executed in "real time" by clicking "Refresh" periodically.
 
-![Pipeline activation](https://raw.githubusercontent.com/Natural-Intelligence/rainbow/rainbow_local_mode/images/airflow_trigger.png)
+![Pipeline activation](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow_trigger.png)
 
 ### Running Tests (for contributors)
-When doing local development and running Rainbow unit-tests, make sure to set RAINBOW_STAND_ALONE_MODE=True
+When doing local development and running Liminal unit-tests, make sure to set LIMINAL_STAND_ALONE_MODE=True

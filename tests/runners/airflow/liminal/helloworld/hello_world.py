@@ -9,13 +9,21 @@
 #
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required bgit y applicable law or agreed to in writing,
+# Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import json
+import os
 
-include scripts/*
-include requirements-airflow.txt
-recursive-include liminal/build/ *
+print('Hello world!\n')
+
+with open('/liminal_input.json') as file:
+    print(f'liminal_input.json contents = {json.loads(file.readline())}')
+
+os.makedirs('/mnt/vol1/', exist_ok=True)
+
+with open('/mnt/vol1/my_output.json', 'w') as file:
+    file.write(json.dumps({'a': 1, 'b': 2}))

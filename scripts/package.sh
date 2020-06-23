@@ -21,12 +21,12 @@ echo $1
 target_path="$1"
 
 echo "running from " $(PWD)
-echo "target path for rainbow zip file is " $target_path
+echo "target path for liminal zip file is " $target_path
 
-echo "cleaning up the temp dirs $TMPDIR/rainbow_build"
-rm -rf $TMPDIR/rainbow_build-*/
+echo "cleaning up the temp dirs $TMPDIR/liminal_build"
+rm -rf $TMPDIR/liminal_build-*/
 
-tmp_dir=$(mktemp -d -t rainbow_build-)
+tmp_dir=$(mktemp -d -t liminal_build-)
 echo "creating temp directory $tmp_dir"
 
 docker_build_dir=$tmp_dir/docker_build
@@ -43,12 +43,12 @@ rsync -a --exclude 'venv' $(PWD)/ $docker_build_dir/zip_content/
 # this is done inside a docker to 1) avoid requiring the user to install stuff, and 2) to create a platform-compatible
 # package (install the native libraries in a flavour suitable for the docker in which airflow runs, and not user machine)
 
-docker run --rm --name rainbow_build -v /private/"$docker_build_dir":/home/rainbow/tmp --entrypoint="" -u 0 \
-       puckel/docker-airflow:1.10.9 /bin/bash -c "cd /home/rainbow/tmp/zip_content &&
-       pip install --no-deps --target=\"/home/rainbow/tmp/zip_content\" liminal==0.0.2dev5 &&
-       rsync -avzh --ignore-errors /home/rainbow/tmp/zip_content/liminal-resources/* /home/rainbow/tmp/zip_content/
-       pip install --target=\"/home/rainbow/tmp/zip_content\" -r /home/rainbow/tmp/zip_content/requirements-airflow.txt &&
-       pip install --target=\"/home/rainbow/tmp/zip_content\" -r /home/rainbow/tmp/zip_content/requirements.txt"
+docker run --rm --name liminal_build -v /private/"$docker_build_dir":/home/liminal/tmp --entrypoint="" -u 0 \
+       puckel/docker-airflow:1.10.9 /bin/bash -c "cd /home/liminal/tmp/zip_content &&
+       pip install --no-deps --target=\"/home/liminal/tmp/zip_content\" liminal==0.0.2dev5 &&
+       rsync -avzh --ignore-errors /home/liminal/tmp/zip_content/liminal-resources/* /home/liminal/tmp/zip_content/
+       pip install --target=\"/home/liminal/tmp/zip_content\" -r /home/liminal/tmp/zip_content/requirements-airflow.txt &&
+       pip install --target=\"/home/liminal/tmp/zip_content\" -r /home/liminal/tmp/zip_content/requirements.txt"
 
 
 # zip the content per https://airflow.apache.org/docs/stable/concepts.html#packaged-dags
@@ -56,5 +56,5 @@ cd $docker_build_dir/zip_content
 mv docker-compose.yml $target_path
 rm __init__.py
 
-zip -r ../dags/rainbows.zip .
-cp ../dags/rainbows.zip $target_path
+zip -r ../dags/liminal.zip .
+cp ../dags/liminal.zip $target_path
