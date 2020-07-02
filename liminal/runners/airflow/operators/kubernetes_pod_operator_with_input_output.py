@@ -3,16 +3,11 @@ import json
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 
 
-def split_list(seq, num):
-    avg = len(seq) / float(num)
-    out = []
-    last = 0.0
-
-    while last < len(seq):
-        out.append(seq[int(last):int(last + avg)])
-        last += avg
-
-    return out
+def _split_list(seq, num):
+    k, m = divmod(len(seq), num)
+    return list(
+        (seq[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(num))
+    )
 
 
 _IS_SPLIT_KEY = 'is_split'
@@ -27,13 +22,9 @@ class PrepareInputOperator(KubernetesPodOperator):
                  executors=1,
                  *args,
                  **kwargs):
-        namespace = kwargs['namespace']
-        image = kwargs['image']
-        name = kwargs['name']
-
-        del kwargs['namespace']
-        del kwargs['image']
-        del kwargs['name']
+        namespace = kwargs.pop('namespace')
+        image = kwargs.pop('image')
+        name = kwargs.pop('name')
 
         super().__init__(
             namespace=namespace,
@@ -74,7 +65,11 @@ class PrepareInputOperator(KubernetesPodOperator):
             self.log.info(f'Generated input: {input_dict}')
 
             if self.split_input:
-                input_splits = split_list(input_dict, self.executors)
+                input_splits = _split_list(input_dict, self.executors)
+                numbered_splits = list(
+                    zip(range(len(input_splits)), input_splits)
+                )
+                self.log.info(numbered_splits)
 
                 ti.xcom_push(key=_IS_SPLIT_KEY, value=True)
 
@@ -100,13 +95,9 @@ class KubernetesPodOperatorWithInputAndOutput(KubernetesPodOperator):
                  input_task_id=None,
                  *args,
                  **kwargs):
-        namespace = kwargs['namespace']
-        image = kwargs['image']
-        name = kwargs['name']
-
-        del kwargs['namespace']
-        del kwargs['image']
-        del kwargs['name']
+        namespace = kwargs.pop('namespace')
+        image = kwargs.pop('image')
+        name = kwargs.pop('name')
 
         super().__init__(
             namespace=namespace,
