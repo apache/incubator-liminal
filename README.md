@@ -17,9 +17,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# Liminal
+# Apache Liminal
 
-Liminal is an end-to-end platform for data engineers & scientists, allowing them to build,
+Apache Liminal is an end-to-end platform for data engineers & scientists, allowing them to build,
 train and deploy machine learning models in a robust and agile way.
 
 The platform provides the abstractions and declarative capabilities for
