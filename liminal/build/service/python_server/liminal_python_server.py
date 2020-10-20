@@ -27,7 +27,10 @@ def start_server(yml_path):
         __start_server(yaml.safe_load(stream))
 
 
+# noinspection PyUnresolvedReferences
 def __start_server(config):
+    globals()['request'] = __import__('flask').request
+
     endpoints = config['endpoints']
 
     for endpoint_config in endpoints:
@@ -41,7 +44,7 @@ def __start_server(config):
 
         app.add_url_rule(rule=endpoint,
                          endpoint=endpoint,
-                         view_func=function,
+                         view_func=lambda: function(request.data),
                          methods=['GET', 'POST'])
 
     print('Starting python server')

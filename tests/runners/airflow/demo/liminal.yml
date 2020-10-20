@@ -1,0 +1,37 @@
+---
+name: MyDataScienceApp
+owner: Bosco Albert Baracus
+services:
+  - service:
+    name: my_datascience_server
+    type: python_server
+    description: my ds server
+    image: myorg/mydatascienceapp
+    source: .
+    endpoints:
+      - endpoint: /predict
+        module: serving
+        function: predict
+pipelines:
+  - pipeline: my_datascience_pipeline
+    start_date: 1970-01-01
+    timeout_minutes: 45
+    schedule: 0 * 1 * *
+    metrics:
+      namespace: DataScience
+      backends: []
+    tasks:
+      - task: train
+        type: python
+        input_type: static
+        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
+        description: train model
+        image: myorg/mydatascienceapp
+        cmd: python -u training.py train
+      - task: validate
+        type: python
+        input_type: static
+        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
+        description: validate model and deploy
+        image: myorg/mydatascienceapp
+        cmd: python -u training.py validate
