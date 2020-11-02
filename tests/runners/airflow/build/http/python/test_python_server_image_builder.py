@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import json
 import os
 import threading
 import time
@@ -76,11 +77,18 @@ class TestPythonServer(TestCase):
 
         print('Sending request to server')
 
-        server_response = str(urllib.request.urlopen('http://localhost:9294/myendpoint1').read())
+        json_string = '{"key1": "val1", "key2": "val2"}'
+
+        encoding = 'ascii'
+
+        server_response = str(urllib.request.urlopen(
+            'http://localhost:9294/myendpoint1',
+            data=json_string.encode(encoding)
+        ).read().decode(encoding))
 
         print(f'Response from server: {server_response}')
 
-        self.assertEqual("b'1'", server_response)
+        self.assertEqual(f'Input was: {json.loads(json_string)}', server_response)
 
         return build_out
 

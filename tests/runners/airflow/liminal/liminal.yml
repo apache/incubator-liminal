@@ -71,5 +71,5 @@ services:
     source: myserver
     endpoints:
       - endpoint: /myendpoint1
-        module: myserver.my_server
+        module: my_server
         function: myendpoint1func

@@ -16,37 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import logging
+
 import yaml
-from flask import Flask
-
-app = Flask(__name__)
-
-
-def start_server(yml_path):
-    with open(yml_path) as stream:
-        __start_server(yaml.safe_load(stream))
-
-
-def __start_server(config):
-    endpoints = config['endpoints']
-
-    for endpoint_config in endpoints:
-        print(f'Registering endpoint: {endpoint_config}')
-        endpoint = endpoint_config['endpoint']
-
-        print(endpoint_config['module'])
-
-        module = __get_module(endpoint_config['module'])
-        function = module.__getattribute__(endpoint_config['function'])
-
-        app.add_url_rule(rule=endpoint,
-                         endpoint=endpoint,
-                         view_func=function,
-                         methods=['GET', 'POST'])
-
-    print('Starting python server')
-
-    app.run(host='0.0.0.0', threaded=False, port=80)
+from flask import Flask, request, Blueprint
 
 
 def __get_module(kls):
@@ -58,5 +31,35 @@ def __get_module(kls):
     return m
 
 
-if __name__ == "__main__":
-    start_server('service.yml')
+def __get_endpoint_function(endpoint_config):
+    module = __get_module(endpoint_config['module'])
+    return module.__getattribute__(endpoint_config['function'])
+
+
+LOG = logging.getLogger("liminal_python_server")
+
+with open('service.yml') as stream:
+    config = yaml.safe_load(stream)
+
+endpoints = dict([
+    (endpoint_config['endpoint'][1:], __get_endpoint_function(endpoint_config))
+    for endpoint_config in config['endpoints']
+])
+
+blueprint = Blueprint('simple_page', __name__)
+
+
+@blueprint.route('/', defaults={'endpoint': ''}, methods=('GET', 'POST'))
+@blueprint.route('/<endpoint>', methods=('GET', 'POST'))
+def show(endpoint):
+    if endpoint in endpoints:
+        return endpoints[endpoint](request.get_data())
+    else:
+        return 'Page not found.', 404
+
+
+app = Flask(__name__)
+app.register_blueprint(blueprint)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', threaded=False, port=80)
