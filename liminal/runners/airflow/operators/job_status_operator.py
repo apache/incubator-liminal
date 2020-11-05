@@ -105,33 +105,34 @@ class JobEndOperator(JobStatusOperator):
         super().execute(context)
         
     def metrics(self, context):
-        duration = round((pytz.utc.localize(datetime.utcnow()) - context[
-            'ti'].get_dagrun().start_date).total_seconds())
+        duration = round((pytz.utc.localize(datetime.utcnow()) - context['ti'].get_dagrun().start_date).total_seconds())
 
         self.log.info('Elapsed time: %s' % duration)
 
-        task_instances = context['dag_run'].get_task_instances()
-
-        task_states = [self.__log_and_get_state(task_instance)
-                       for task_instance in task_instances
-                       if task_instance.task_id != context['task_instance'].task_id]
-
-        if all((state == State.SUCCESS or state == State.SKIPPED) for state in task_states):
-            self.__job_result = 1
+        self.log.info(f'dag final job result: {self.__job_result}')
 
         return [
-            Metric(self.namespace, 'JobResult', self.__job_result,
-                   [Tag('ApplicationName', self.application_name)]),
-            Metric(self.namespace, 'JobDuration', duration,
-                   [Tag('ApplicationName', self.application_name)])
+            Metric(self.namespace, 'JobResult', self.__job_result, [Tag('ApplicationName', self.application_name)]),
+            Metric(self.namespace, 'JobDuration', duration, [Tag('ApplicationName', self.application_name)])
         ]
 
     def __log_and_get_state(self, task_instance):
         state = task_instance.state
 
-        self.log.info(f'{task_instance.task_id} finished with state: {state}')
+        self.log.info(f'Task {task_instance.task_id} finished with state = {state}')
 
         return state
+    
+    def __calculate_job_result(self, context):
+        self.log.info('scanning task instances states.. ')
+        task_instances = context['dag_run'].get_task_instances()
+        task_states = [self.__log_and_get_state(task_instance)
+                       for task_instance in task_instances
+                       if task_instance.task_id != context['task_instance'].task_id]
+
+        self.__job_result = 0
+        if all((state == State.SUCCESS or state == State.SKIPPED) for state in task_states):
+            self.__job_result = 1
 
     @apply_lineage
     @provide_session
