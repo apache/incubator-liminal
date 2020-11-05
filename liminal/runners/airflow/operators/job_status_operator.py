@@ -100,6 +100,10 @@ class JobEndOperator(JobStatusOperator):
         self.application_name = application_name
         self.__job_result = 0
 
+    def execute(self, context):
+        self.__calculate_job_result(context)
+        super().execute(context)
+        
     def metrics(self, context):
         duration = round((pytz.utc.localize(datetime.utcnow()) - context[
             'ti'].get_dagrun().start_date).total_seconds())
