@@ -38,20 +38,22 @@ def build_liminal_apps(path):
         with open(config_file) as stream:
             liminal_config = yaml.safe_load(stream)
 
-            for pipeline in liminal_config['pipelines']:
-                for task in pipeline['tasks']:
-                    task_name = task['task']
+            if 'pipelines' in liminal_config:
+                for pipeline in liminal_config['pipelines']:
+                    for task in pipeline['tasks']:
+                        task_name = task['task']
 
-                    if 'source' in task:
-                        task_type = task['type']
-                        builder_class = __get_task_build_class(task_type)
-                        if builder_class:
-                            __build_image(base_path, task, builder_class)
+                        if 'source' in task:
+                            task_type = task['type']
+                            builder_class = __get_task_build_class(task_type)
+                            if builder_class:
+                                __build_image(base_path, task, builder_class)
+                            else:
+                                raise ValueError(f'No such task type: {task_type}')
                         else:
-                            raise ValueError(f'No such task type: {task_type}')
-                    else:
-                        print(f'No source configured for task {task_name}, skipping build..')
+                            print(f'No source configured for task {task_name}, skipping build..')
 
+            if 'services' in liminal_config:
                 for service in liminal_config['services']:
                     service_type = service['type']
                     builder_class = __get_service_build_class(service_type)
