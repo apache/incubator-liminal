@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
     version: '3.7'
     services:
         postgres:
@@ -6,34 +22,85 @@
                 - POSTGRES_USER=airflow
                 - POSTGRES_PASSWORD=airflow
                 - POSTGRES_DB=
-
+            restart: always
             ports:
                 - "5432:5432"
+            volumes:
+                - ${LIMINAL_HOME}/db:/var/lib/postgresql/data
             logging:
                 options:
                     max-size: 10m
                     max-file: "3"
 
         webserver:
-            image: puckel/docker-airflow:1.10.9
-            restart: always
+            build:
+                context: .
+                dockerfile: scripts/Dockerfile-airflow
+                args:
+                    LIMINAL_VERSION: ${LIMINAL_VERSION}
+            image: liminal-airflow
             depends_on:
                 - postgres
             environment:
                 - LOAD_EX=n
                 - EXECUTOR=Local
-                - AIRFLOW__CORE__DAGS_FOLDER=/usr/local/airflow/dags
+                - KUBECONFIG=/home/airflow/kube/config
                 - AIRFLOW__WEBSERVER__WORKERS=1
+                - LIMINAL_HOME=/opt/airflow/dags
+                - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+                - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
+                - AIRFLOW_CONN_METADATA_DB=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
+                - AIRFLOW_VAR__METADATA_DB_SCHEMA=airflow
             logging:
                 options:
                     max-size: 10m
                     max-file: "3"
             volumes:
-                - ${LIMINAL_HOME}:/usr/local/airflow/dags
-                - ${HOME}/.kube:/usr/local/airflow/.kube
+                - ${LIMINAL_HOME}:/opt/airflow/dags
+                - ${LIMINAL_HOME}/logs:/opt/airflow/logs
+                - ${HOME}/.kube:/home/airflow/kube
             ports:
                 - "8080:8080"
-            command: webserver
+            command: "webserver"
+            healthcheck:
+                test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+                interval: 30s
+                timeout: 30s
+                retries: 3
+
+
+        scheduler:
+            build:
+                context: .
+                dockerfile: scripts/Dockerfile-airflow
+                args:
+                    LIMINAL_VERSION: ${LIMINAL_VERSION}
+            image: liminal-airflow
+            depends_on:
+                - postgres
+                - webserver
+            environment:
+                - LOAD_EX=n
+                - EXECUTOR=Local
+                - AIRFLOW__WEBSERVER__WORKERS=1
+                - KUBECONFIG=/home/airflow/kube/config
+                - LIMINAL_HOME=/opt/airflow/dags
+                - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+                - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
+                - AIRFLOW_CONN_METADATA_DB=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
+                - AIRFLOW_VAR__METADATA_DB_SCHEMA=airflow
+                - AIRFLOW__SCHEDULER__SCHEDULER_HEARTBEAT_SEC=10
+            logging:
+                options:
+                    max-size: 10m
+                    max-file: "3"
+            volumes:
+                - ${LIMINAL_HOME}:/opt/airflow/dags
+                - ${LIMINAL_HOME}/logs:/opt/airflow/logs
+                - ${HOME}/.kube:/home/airflow/kube
+            ports:
+                - "8793:8793"
+            command: "scheduler"
             healthcheck:
                 test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
                 interval: 30s

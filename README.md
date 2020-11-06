@@ -101,6 +101,7 @@ services:
 ```bash
    pip install liminal
 ```
+
 2. Optional: set LIMINAL_HOME to path of your choice (if not set, will default to ~/liminal_home)
 ```bash
 echo 'export LIMINAL_HOME=</path/to/some/folder>' >> ~/.bash_profile && source ~/.bash_profile
@@ -123,6 +124,8 @@ When your pipeline code is ready, you can test it by running it locally on your 
 
 1. Ensure you have The Docker engine running locally, and enable a local Kubernetes cluster:
 ![Kubernetes configured](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/k8s_running.png)
+
+And allocate it at least 3 CPUs (under "Resources" in the Docker preference UI).
 
 If you want to execute your pipeline on a remote kubernetes cluster, make sure the cluster is configured
 using :
@@ -152,6 +155,12 @@ You'll see that a number of outputs indicating various docker images built.
 cd </path/to/your/liminal/code> 
 liminal deploy
 ```
+Note: after upgrading liminal, it's recommended to issue the command 
+```bash
+liminal deploy --clean
+``` 
+
+This will rebuild the airlfow docker containers from scratch with a fresh version of liminal, ensuring consistency.
 
 4. Start the server
 ```bash
