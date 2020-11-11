@@ -23,7 +23,6 @@
                 - POSTGRES_USER=airflow
                 - POSTGRES_PASSWORD=airflow
                 - POSTGRES_DB=
-            restart: always
             ports:
                 - "5432:5432"
             volumes:
