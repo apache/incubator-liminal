@@ -75,11 +75,11 @@ def deploy_liminal_core_internal(clean):
         print(f'Liminal was installed locally, changing the LIMINAL_VERSION parameter to {full_path}')
         os.environ[environment.LIMINAL_VERSION_PARAM_NAME]= full_path
     if clean:
-        docker_compose_command('down', ['--rmi', 'local'])
+        docker_compose_command('down', ['--remove-orphans','--rmi', 'local'])
         docker_compose_command('build', ['--no-cache'])
         docker_compose_command('run', ['webserver', 'resetdb', '-y'])
         docker_compose_command('run', ['webserver','initdb'])
-        docker_compose_command('down', [])
+        docker_compose_command('down', ['--remove-orphans'])
 
 def docker_compose_command(command_name, args):
     docker_compose_path, project_dir = get_docker_compose_paths()
@@ -113,9 +113,7 @@ def start():
         # initialize liminal home by default
         environment.get_liminal_home()
         docker_compose_path, project_dir = get_docker_compose_paths()
-        result = subprocess.call(
-            [f'docker-compose -f "{docker_compose_path}" --project-directory {project_dir} up'],
-            env=os.environ, shell=True)
+        docker_compose_command('up', [])
 
 
 def get_docker_compose_paths():

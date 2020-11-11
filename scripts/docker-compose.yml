@@ -18,6 +18,7 @@
     services:
         postgres:
             image: postgres:9.6
+            container_name: liminal-postgress
             environment:
                 - POSTGRES_USER=airflow
                 - POSTGRES_PASSWORD=airflow
@@ -39,6 +40,7 @@
                 args:
                     LIMINAL_VERSION: ${LIMINAL_VERSION}
             image: liminal-airflow
+            container_name: liminal-webserver
             depends_on:
                 - postgres
             environment:
@@ -76,6 +78,7 @@
                 args:
                     LIMINAL_VERSION: ${LIMINAL_VERSION}
             image: liminal-airflow
+            container_name: liminal-scheduler
             depends_on:
                 - postgres
                 - webserver
