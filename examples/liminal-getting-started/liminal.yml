@@ -1,0 +1,80 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+name: MyPipeline
+pipelines:
+  - pipeline: example_pipeline
+    owner: Amihay Zer-Kavod
+    start_date: 1970-01-01
+    timeout_minutes: 1
+    schedule: 0 * * * *
+    default_arg_loaded: check
+    default_array_loaded: [2, 3, 4]
+    default_object_loaded:
+      key1: val1
+      key2: val2
+    metrics:
+      namespace: TestNamespace
+      backends: [ ]
+    tasks:
+      - task: hello_world_example
+        type: python
+        description: static input task
+        image: hello_world_example_image
+        source: helloworld
+        env_vars:
+          env1: "a"
+          env2: "b"
+        input_type: static
+        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
+        output_path: /mnt/vol1/my_output.json
+        cmd: python -u hello_world.py
+      - task: parallelized_hello_world_example_task
+        type: python
+        description: parallelized parallelized hello world example
+        image: parallelized_hello_world_example_image
+        env_vars:
+          env1: "a"
+          env2: "b"
+        input_type: static
+        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
+        split_input: True
+        executors: 2
+        cmd: python -u hello_world.py
+      - task: my_task_output_input_task
+        type: python
+        description: task with input from other task's output
+        image: my_task_output_input_task_image
+        source: helloworld
+        env_vars:
+          env1: "a"
+          env2: "b"
+        input_type: task
+        input_path: my_static_input_task
+        cmd: python -u hello_world.py
+services:
+  - service:
+    name: amihay_python_server
+    type: python_server
+    description: my python server
+    image: ami_server_image
+    source: myserver
+    endpoints:
+      - endpoint: /myendpoint1
+        module: myserver.my_server
+        function: myendpoint1func

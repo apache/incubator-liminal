@@ -6,3 +6,5 @@ venv
 .Python
 *.pyc
 pip-selfcheck.json
+docs/build
+.DS_Store
