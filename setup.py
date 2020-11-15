@@ -28,10 +28,12 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
     print(requirements)
 
+
 setuptools.setup(
-    name="liminal",
-    version=os.environ["LIMINAL_BUILD_VERSION"],
-    author="liminal team",
+    name="apache-liminal",
+    version=os.environ.get("LIMINAL_BUILD_VERSION", os.environ.get('LIMINAL_VERSION', None)),
+    author="dev@liminal.apache.org",
+    author_email='dev@liminal.apache.org',
     description="A package for authoring and deploying machine learning workflows",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -45,9 +47,5 @@ setuptools.setup(
     license='Apache License, Version 2.0',
     python_requires='>=3.6',
     install_requires=requirements,
-    scripts=['scripts/liminal', 'scripts/package.sh'],
-    include_package_data=True,
-    data_files=[('liminal-resources', ['scripts/docker-compose.yml',
-                                       'requirements-airflow.txt',
-                                       'liminal/runners/airflow/dag/liminal_dags.py'])]
-)
+    scripts=['scripts/liminal'],
+    include_package_data=True)

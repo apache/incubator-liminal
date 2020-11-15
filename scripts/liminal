@@ -18,6 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -27,6 +28,13 @@ import click
 from liminal.build import liminal_apps_builder
 from liminal.core import environment
 from liminal.core.util import files_util
+from liminal.runners.airflow import dag
+import scripts as s
+try:
+    import importlib.resources as pkg_resources
+except ImportError:
+    # Try backported to PY<37 `importlib_resources`.
+    import importlib_resources as pkg_resources
 
 
 @click.group()
@@ -51,20 +59,44 @@ def build(path):
         liminal_apps_builder.build_liminal_apps(path)
 
 
-def deploy_liminal_core_internal():
-    click.echo("WARN: refreshing liminal core package")
-    liminal_home = environment.get_liminal_home()
-    subprocess.call([f'package.sh {liminal_home}'], shell=True)
+def deploy_liminal_core_internal(clean):
+    with pkg_resources.path(dag, 'liminal_dags.py') as p:
+        dags_path=p
+    os.makedirs(environment.get_dags_dir(), exist_ok=True)
+    dag_target_file = os.path.join(environment.get_liminal_home(), 'liminal_dags.py')
+    shutil.copyfile(dags_path, dag_target_file)
+    #initialize the env. variable which indicates to the docke compose which liminal to install in airflow docker
+    liminal_version = environment.get_liminal_version()
+    # if liminal is installed from local file - teh developer needs to put it in the /scripts folder, in which case
+    # it will end up inside the container during build
+    if liminal_version.find("file://")>-1:
+        local_file_name = os.path.basename(liminal_version)
+        full_path = os.path.join('/opt/airflow/dags',local_file_name)
+        print(f'Liminal was installed locally, changing the LIMINAL_VERSION parameter to {full_path}')
+        os.environ[environment.LIMINAL_VERSION_PARAM_NAME]= full_path
+    if clean:
+        docker_compose_command('down', ['--remove-orphans','--rmi', 'local'])
+        docker_compose_command('build', ['--no-cache'])
+        docker_compose_command('run', ['webserver', 'resetdb', '-y'])
+        docker_compose_command('run', ['webserver','initdb'])
+        docker_compose_command('down', ['--remove-orphans'])
 
+def docker_compose_command(command_name, args):
+    docker_compose_path, project_dir = get_docker_compose_paths()
+    concated_args = ' '.join(args)
+    subprocess.call(
+        [f'docker-compose -f "{docker_compose_path}" -p liminal --project-directory {project_dir} {command_name} {concated_args}'],
+        env=os.environ, shell=True)
 
 @cli.command("deploy", short_help="deploys your liminal.yaml files to $LIMINAL_HOME folder")
 @click.option('--path', default=os.getcwd(), help="folder containing liminal.yaml files")
-def deploy_liminal_apps(path):
+@click.option('--clean', is_flag=True, default=False, help="re-deploy liminal airflow components from scratch")
+def deploy_liminal_apps(path, clean):
     click.echo("deploying liminal yaml files")
     liminal_home = environment.get_liminal_home()
     os.makedirs(liminal_home, exist_ok=True)
     os.makedirs(environment.get_dags_dir(), exist_ok=True)
-    deploy_liminal_core_internal()
+    deploy_liminal_core_internal(clean)
     config_files = files_util.find_config_files(path)
     for config_file in config_files:
         click.echo(f"deploying liminal file: {config_file}")
@@ -80,9 +112,16 @@ def start():
     if docker_is_running():
         # initialize liminal home by default
         environment.get_liminal_home()
-        result = subprocess.call(
-            [f'docker-compose -f "{environment.get_liminal_home()}/docker-compose.yml" up'],
-            env=os.environ, shell=True)
+        docker_compose_path, project_dir = get_docker_compose_paths()
+        docker_compose_command('up', [])
+
+
+def get_docker_compose_paths():
+    with pkg_resources.path(s, 'docker-compose.yml') as p:
+        docker_compose_path = p
+    project_dir = pathlib.Path(docker_compose_path).parent.parent.absolute()
+    print(f"starting docker compose from path {project_dir}")
+    return docker_compose_path, project_dir
 
 
 if __name__ == '__main__':

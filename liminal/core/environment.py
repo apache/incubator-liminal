@@ -17,11 +17,14 @@
 # under the License.
 
 import os
+import subprocess
+from pathlib import Path
 
 DEFAULT_DAGS_ZIP_NAME = 'liminal.zip'
 DEFAULT_LIMINAL_HOME = os.path.expanduser('~/liminal_home')
 DEFAULT_PIPELINES_SUBDIR = "pipelines"
 LIMINAL_HOME_PARAM_NAME = "LIMINAL_HOME"
+LIMINAL_VERSION_PARAM_NAME = 'LIMINAL_VERSION'
 
 
 def get_liminal_home():
@@ -36,3 +39,20 @@ def get_dags_dir():
     # if we are inside airflow, we will take it from the configured dags folder
     base_dir = os.environ.get("AIRFLOW__CORE__DAGS_FOLDER", get_liminal_home())
     return os.path.join(base_dir, DEFAULT_PIPELINES_SUBDIR)
+
+
+def get_liminal_version():
+    result = os.environ.get(LIMINAL_VERSION_PARAM_NAME, None)
+    if not result:
+        output = subprocess.run(['pip freeze | grep \'apache-liminal\''], capture_output=True, env=os.environ, shell=True)
+        pip_res = output.stdout.decode('UTF-8').strip()
+        value = None
+        if not pip_res:
+            value = 'apache-liminal'
+        if ' @ ' in pip_res:
+            value = pip_res[pip_res.index(' @ ')+3:]
+        else:
+            value= pip_res
+        print(f'LIMINAL_VERSION not set. Setting it to currently installed version: {value}')
+        os.environ[LIMINAL_VERSION_PARAM_NAME] = value
+    return os.environ.get(LIMINAL_VERSION_PARAM_NAME, 'apache-liminal')

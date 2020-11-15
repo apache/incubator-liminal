@@ -1,4 +1,4 @@
-#
+#!/usr/bin/env bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -9,12 +9,22 @@
 #
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required bgit y applicable law or agreed to in writing,
+# Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+set -euo pipefail
 
-include scripts/*
-recursive-include liminal/build/ *
+# Use this to sign the tar balls generated from
+# python setup.py sdist --formats=gztar
+# ie. sign.sh <my_tar_ball>
+# you will still be required to type in your signing key password
+# or it needs to be available in your keychain
+
+for name in "${@}"
+do
+    gpg --armor --output "${name}.asc" --detach-sig "${name}"
+    gpg --print-md SHA512 "${name}" > "${name}.sha512"
+done
