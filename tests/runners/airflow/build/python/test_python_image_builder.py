@@ -56,13 +56,28 @@ class TestPythonImageBuilder(TestCase):
 
         self.__test_image()
 
-    def __test_build(self, use_pip_conf=False):
+    def test_build_with_python_version(self):
+        build_out = self.__test_build(python_version=3.6)
+
+        self.assertTrue('RUN pip install -r requirements.txt' in build_out,
+                        'Incorrect pip command')
+
+        self.__test_image()
+
+    def test_test_with_unsupported_python_version(self):
+        with self.assertRaises(ValueError):
+            self.__test_build(python_version='3.5.2')
+
+    def __test_build(self, use_pip_conf=False, python_version=None):
         config = self.__create_conf('my_task')
 
         base_path = os.path.join(os.path.dirname(__file__), '../../liminal')
 
         if use_pip_conf:
             config['pip_conf'] = os.path.join(base_path, 'pip.conf')
+
+        if python_version:
+            config['python_version'] = python_version
 
         builder = PythonImageBuilder(config=config,
                                      base_path=base_path,

@@ -17,7 +17,7 @@
 # under the License.
 
 # Use an official Python runtime as a parent image
-FROM python:3.7-slim
+FROM {{python}}
 
 # Install aptitude build-essential
 #RUN apt-get install -y --reinstall build-essential

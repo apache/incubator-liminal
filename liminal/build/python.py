@@ -21,15 +21,39 @@ import os
 from liminal.build.image_builder import ImageBuilder
 
 
+class PythonBaseImageVersions:
+    @property
+    def default_version(self):
+        return '3.7'
+
+    @property
+    def supported_versions(self):
+        return '3.6', '3.7', '3.8', '3.9'
+
+    def get_version(self, version):
+        if not version:
+            version = self.default_version
+        else:
+            version = str(version)
+        if version[:3] not in self.supported_versions:
+            raise ValueError(f'liminal supports the following python versions: '
+                             f'{self.supported_versions} but {version} were '
+                             f'passed')
+        return f'python:{version}-slim'
+
+
 class BasePythonImageBuilder(ImageBuilder):
     """
     Base class for building python images.
     """
 
     __PIP_CONF = 'pip_conf'
+    __PYTHON_VERSION = 'python_version'
 
-    def __init__(self, config, base_path, relative_source_path, tag):
+    def __init__(self, config, base_path, relative_source_path, tag,
+                 base_image=PythonBaseImageVersions()):
         super().__init__(config, base_path, relative_source_path, tag)
+        self._base_image = base_image
 
     @staticmethod
     def _dockerfile_path():
@@ -48,6 +72,7 @@ class BasePythonImageBuilder(ImageBuilder):
             data = original.read()
 
         data = self.__mount_pip_conf(data)
+        data = self.__add_python_base_version(data)
 
         return [('Dockerfile', data)]
 
@@ -62,6 +87,11 @@ class BasePythonImageBuilder(ImageBuilder):
             new_data = new_data.replace('{{mount}} ', '')
 
         return new_data
+
+    def __add_python_base_version(self, data):
+        python_version = self.config.get(self.__PYTHON_VERSION)
+        base_image = self._base_image.get_version(python_version)
+        return data.replace('{{python}}', base_image)
 
     def _build_flags(self):
         if self.__PIP_CONF in self.config:
