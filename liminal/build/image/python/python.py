@@ -29,9 +29,3 @@ class PythonImageBuilder(BasePythonImageBuilder):
     @staticmethod
     def _dockerfile_path():
         return os.path.join(os.path.dirname(__file__), 'Dockerfile')
-
-    def _additional_files_from_paths(self):
-        return [
-            os.path.join(os.path.dirname(__file__), 'container-setup.sh'),
-            os.path.join(os.path.dirname(__file__), 'container-teardown.sh'),
-        ]

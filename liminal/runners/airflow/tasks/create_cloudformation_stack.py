@@ -24,8 +24,8 @@ class CreateCloudFormationStackTask(task.Task):
     Creates cloud_formation stack.
     """
 
-    def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
-        super().__init__(dag, pipeline_name, parent, config, trigger_rule)
+    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
+        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
 
     def apply_task_to_dag(self):
         pass

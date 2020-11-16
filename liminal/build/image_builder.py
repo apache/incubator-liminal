@@ -56,8 +56,13 @@ class ImageBuilder:
         if self.__NO_CACHE in self.config and self.config[self.__NO_CACHE]:
             no_cache = '--no-cache=true'
 
-        docker_build_command = f'docker build {no_cache} --progress=plain ' + \
-                               f'--tag {self.tag} {self._build_flags()} {temp_dir}'
+        docker = 'docker' if shutil.which('docker') is not None else '/usr/local/bin/docker'
+        docker_build_command = f'{docker} build {no_cache} ' + \
+                               f'--tag {self.tag} '
+
+        docker_build_command += f'--progress=plain {self._build_flags()} '
+
+        docker_build_command += f'{temp_dir}'
 
         if self._use_buildkit():
             docker_build_command = f'DOCKER_BUILDKIT=1 {docker_build_command}'

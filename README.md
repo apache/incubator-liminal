@@ -36,52 +36,48 @@ perform), application servers,  and more.
 
 ## Example YAML config file
 ```yaml
-name: MyPipeline
+---
+name: MyLiminalStack
 owner: Bosco Albert Baracus
+volumes:
+  - volume: myvol1
+    local:
+      path: /Users/me/myvol1
 pipelines:
   - pipeline: my_pipeline
     start_date: 1970-01-01
     timeout_minutes: 45
     schedule: 0 * 1 * *
     metrics:
-     namespace: TestNamespace
-     backends: [ 'cloudwatch' ]
+      namespace: TestNamespace
+      backends: [ 'cloudwatch' ]
     tasks:
-      - task: my_static_input_task
+      - task: my_python_task
         type: python
         description: static input task
-        image: my_static_input_task_image
-        source: helloworld
+        image: my_python_task_img
+        source: write_inputs
         env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        output_path: /output.json
-        cmd: python -u hello_world.py
-      - task: my_parallelized_static_input_task
+          NUM_FILES: 10
+          NUM_SPLITS: 3
+        mounts:
+          - mount: mymount
+            volume: myvol1
+            path: /mnt/vol1
+        cmd: python -u write_inputs.py
+      - task: my_parallelized_python_task
         type: python
-        description: parallelized static input task
-        image: my_static_input_task_image
+        description: parallelized python task
+        image: my_parallelized_python_task_img
+        source: write_outputs
         env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        split_input: True
-        executors: 2
-        cmd: python -u helloworld.py
-      - task: my_task_output_input_task
-        type: python
-        description: task with input from other task's output
-        image: my_task_output_input_task_image
-        source: helloworld
-        env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: task
-        input_path: my_static_input_task
-        cmd: python -u hello_world.py
+          FOO: BAR
+        executors: 3
+        mounts:
+          - mount: mymount
+            volume: myvol1
+            path: /mnt/vol1
+        cmd: python -u write_inputs.py
 services:
   - service:
     name: my_python_server
@@ -91,7 +87,7 @@ services:
     source: myserver
     endpoints:
       - endpoint: /myendpoint1
-        module: myserver.my_server
+        module: my_server
         function: myendpoint1func
 ```
 
@@ -101,7 +97,6 @@ services:
 ```bash
    pip install liminal
 ```
-
 2. Optional: set LIMINAL_HOME to path of your choice (if not set, will default to ~/liminal_home)
 ```bash
 echo 'export LIMINAL_HOME=</path/to/some/folder>' >> ~/.bash_profile && source ~/.bash_profile

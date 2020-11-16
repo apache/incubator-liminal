@@ -16,16 +16,23 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from liminal.runners.airflow.model import task
+import json
+import os
 
+inputs_dir = '/mnt/vol1/inputs/'
 
-class DeleteCloudFormationStackTask(task.Task):
-    """
-    Deletes cloud_formation stack.
-    """
+num_files = int(os.environ['NUM_FILES'])
+num_splits = int(os.environ['NUM_SPLITS'])
 
-    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
-        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+# create input files - split by round robin
+for i in range(0, num_files):
+    split_id = i % num_splits
+    split_dir = os.path.join(inputs_dir, str(split_id))
 
-    def apply_task_to_dag(self):
-        pass
+    if not os.path.exists(split_dir):
+        os.makedirs(split_dir)
+
+    filename = os.path.join(split_dir, f'input{i}.json')
+    with open(filename, 'w') as f:
+        print(f'Writing input file {filename}')
+        f.write(json.dumps({'mykey': f'myval{i}'}))
