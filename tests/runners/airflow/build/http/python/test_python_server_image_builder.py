@@ -26,7 +26,7 @@ from unittest import TestCase
 import docker
 
 from liminal.build.service.python_server.python_server import PythonServerImageBuilder
-from liminal.build.python import PythonBaseImageVersions
+from liminal.build.python import PythonImageVersions
 
 class TestPythonServer(TestCase):
 
@@ -42,7 +42,7 @@ class TestPythonServer(TestCase):
         self.docker_client.close()
 
     def test_build_python_server(self):
-        versions = [None] + list(PythonBaseImageVersions().supported_versions)
+        versions = [None] + list(PythonImageVersions().supported_versions)
         for version in versions:
             build_out = self.__test_build_python_server(python_version=version)
             self.assertTrue('RUN pip install -r requirements.txt' in build_out,
