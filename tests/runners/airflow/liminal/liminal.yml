@@ -17,6 +17,10 @@
 # under the License.
 ---
 name: MyPipeline
+volumes:
+  - volume: myvol1
+    local:
+      path: /tmp/liminal_tests
 pipelines:
   - pipeline: my_pipeline
     owner: Bosco Albert Baracus
@@ -32,41 +36,32 @@ pipelines:
       namespace: TestNamespace
       backends: [ ]
     tasks:
-      - task: my_static_input_task
+      - task: my_python_task
         type: python
         description: static input task
-        image: my_static_input_task_image
-        source: helloworld
+        image: my_python_task_img
+        source: write_inputs
         env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        output_path: /mnt/vol1/my_output.json
-        cmd: python -u hello_world.py
-      - task: my_parallelized_static_input_task
+          NUM_FILES: 10
+          NUM_SPLITS: 3
+        mounts:
+          - mount: mymount
+            volume: myvol1
+            path: /mnt/vol1
+        cmd: python -u write_inputs.py
+      - task: my_parallelized_python_task
         type: python
-        description: parallelized static input task
-        image: my_static_input_task_image
+        description: parallelized python task
+        image: my_parallelized_python_task_img
+        source: write_outputs
         env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        split_input: True
-        executors: 2
-        cmd: python -u hello_world.py
-      - task: my_task_output_input_task
-        type: python
-        description: task with input from other task's output
-        image: my_task_output_input_task_image
-        source: helloworld
-        env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: task
-        input_path: my_static_input_task
-        cmd: python -u hello_world.py
+          FOO: BAR
+        executors: 3
+        mounts:
+          - mount: mymount
+            volume: myvol1
+            path: /mnt/vol1
+        cmd: python -u write_inputs.py
 services:
   - service:
     name: my_python_server

@@ -17,11 +17,9 @@
 # under the License.
 
 from datetime import datetime, timedelta
-from os import environ
 
 import yaml
 from airflow import DAG
-from airflow.models import Variable
 
 from liminal.core import environment
 from liminal.core.util import class_util
@@ -55,7 +53,8 @@ def register_dags(configs_path):
 
                 override_args = {
                     'start_date': datetime.combine(pipeline['start_date'], datetime.min.time()),
-                    __DEPENDS_ON_PAST: default_args[__DEPENDS_ON_PAST] if __DEPENDS_ON_PAST in default_args else False,
+                    __DEPENDS_ON_PAST: default_args[
+                        __DEPENDS_ON_PAST] if __DEPENDS_ON_PAST in default_args else False,
                 }
 
                 default_args.update(override_args)
@@ -67,7 +66,7 @@ def register_dags(configs_path):
                     catchup=False
                 )
 
-                job_start_task = JobStartTask(dag, pipeline_name, None, pipeline, 'all_success')
+                job_start_task = JobStartTask(dag, config, pipeline, {}, None, 'all_success')
                 parent = job_start_task.apply_task_to_dag()
 
                 trigger_rule = 'all_success'
@@ -77,12 +76,12 @@ def register_dags(configs_path):
                 for task in pipeline['tasks']:
                     task_type = task['type']
                     task_instance = get_task_class(task_type)(
-                        dag, pipeline['pipeline'], parent if parent else None, task, trigger_rule
+                        dag, config, pipeline, task, parent if parent else None, trigger_rule
                     )
 
                     parent = task_instance.apply_task_to_dag()
 
-                job_end_task = JobEndTask(dag, pipeline_name, parent, pipeline, 'all_done')
+                job_end_task = JobEndTask(dag, config, pipeline, {}, parent, 'all_done')
                 job_end_task.apply_task_to_dag()
 
                 print(f'registered DAG {dag.dag_id}: {dag.tasks}')
@@ -99,15 +98,15 @@ print(f'Loading task implementations..')
 impl_packages = 'liminal.runners.airflow.tasks'
 user_task_package = 'TODO: user_tasks_package'
 
-task_classes = class_util.find_subclasses_in_packages([impl_packages], Task)
-
 
 def tasks_by_liminal_name(task_classes):
     return {full_name.replace(impl_packages, '').replace(clzz.__name__, '')[1:-1]: clzz
             for (full_name, clzz) in task_classes.items()}
 
 
-tasks_by_liminal_name = tasks_by_liminal_name(task_classes)
+tasks_by_liminal_name = tasks_by_liminal_name(
+    class_util.find_subclasses_in_packages([impl_packages], Task)
+)
 
 print(f'Finished loading task implementations: {tasks_by_liminal_name}')
 

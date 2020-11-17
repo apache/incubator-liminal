@@ -26,8 +26,7 @@ from liminal.build.image.python.python import PythonImageBuilder
 
 
 class TestPythonImageBuilder(TestCase):
-    __IMAGE_NAME = 'liminal_image'
-    __OUTPUT_PATH = '/mnt/vol1/my_output.json'
+    __IMAGE_NAME = 'my_python_task_img'
 
     def setUp(self) -> None:
         super().setUp()
@@ -51,7 +50,7 @@ class TestPythonImageBuilder(TestCase):
         build_out = self.__test_build(use_pip_conf=True)
 
         self.assertTrue(
-            'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip insta...' in build_out,
+            'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
             'Incorrect pip command')
 
         self.__test_image()
@@ -66,7 +65,7 @@ class TestPythonImageBuilder(TestCase):
 
         builder = PythonImageBuilder(config=config,
                                      base_path=base_path,
-                                     relative_source_path='helloworld',
+                                     relative_source_path='write_inputs',
                                      tag=self.__IMAGE_NAME)
 
         build_out = str(builder.build())
@@ -77,11 +76,7 @@ class TestPythonImageBuilder(TestCase):
         docker_client = docker.from_env()
         docker_client.images.get(self.__IMAGE_NAME)
 
-        cmd = 'export LIMINAL_INPUT="{\\"x\\": 1}" && ' + \
-              'sh container-setup.sh && ' + \
-              'python hello_world.py && ' + \
-              f'sh container-teardown.sh {self.__OUTPUT_PATH}'
-        cmds = ['/bin/bash', '-c', cmd]
+        cmds = ['/bin/bash', '-c', 'python write_inputs.py']
 
         container_log = docker_client.containers.run(self.__IMAGE_NAME,
                                                      cmds,
@@ -89,10 +84,11 @@ class TestPythonImageBuilder(TestCase):
                                                          self.temp_dir: {
                                                              'bind': '/mnt/vol1',
                                                              'mode': 'rw'
-                                                         },
-                                                         self.temp_airflow_dir: {
-                                                             'bind': '/airflow/xcom',
-                                                             'mode': 'rw'},
+                                                         }
+                                                     },
+                                                     environment={
+                                                         'NUM_FILES': 10,
+                                                         'NUM_SPLITS': 3
                                                      })
 
         docker_client.close()
@@ -100,14 +96,19 @@ class TestPythonImageBuilder(TestCase):
         print(container_log)
 
         self.assertEqual(
-            "b\"Writing liminal input..\\n" +
-            "Hello world!\\n\\n" +
-            "liminal_input.json contents = {'x': 1}\\n" +
-            "Writing liminal output..\\n\"",
+            "b'"
+            "Writing input file /mnt/vol1/inputs/0/input0.json\\n"
+            "Writing input file /mnt/vol1/inputs/1/input1.json\\n"
+            "Writing input file /mnt/vol1/inputs/2/input2.json\\n"
+            "Writing input file /mnt/vol1/inputs/0/input3.json\\n"
+            "Writing input file /mnt/vol1/inputs/1/input4.json\\n"
+            "Writing input file /mnt/vol1/inputs/2/input5.json\\n"
+            "Writing input file /mnt/vol1/inputs/0/input6.json\\n"
+            "Writing input file /mnt/vol1/inputs/1/input7.json\\n"
+            "Writing input file /mnt/vol1/inputs/2/input8.json\\n"
+            "Writing input file /mnt/vol1/inputs/0/input9.json\\n"
+            "'",
             str(container_log))
-
-        with open(os.path.join(self.temp_airflow_dir, 'return.json')) as file:
-            self.assertEqual(file.read(), '{"a": 1, "b": 2}')
 
     def __create_conf(self, task_id):
         return {
@@ -115,10 +116,7 @@ class TestPythonImageBuilder(TestCase):
             'cmd': 'foo bar',
             'image': self.__IMAGE_NAME,
             'source': 'baz',
-            'input_type': 'my_input_type',
-            'input_path': 'my_input',
             'no_cache': True,
-            'output_path': self.__OUTPUT_PATH,
         }
 
     @staticmethod

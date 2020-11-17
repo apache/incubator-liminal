@@ -26,9 +26,8 @@ from liminal.build import liminal_apps_builder
 
 class TestLiminalAppsBuilder(TestCase):
     __image_names = [
-        'my_static_input_task_image',
-        'my_task_output_input_task_image',
-        'my_server_image'
+        'my_python_task_img',
+        'my_parallelized_python_task_img'
     ]
 
     def setUp(self) -> None:

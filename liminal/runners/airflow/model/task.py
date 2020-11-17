@@ -25,11 +25,12 @@ class Task:
     Task.
     """
 
-    def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
+    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
         self.dag = dag
-        self.pipeline_name = pipeline_name
+        self.liminal_config = liminal_config
+        self.pipeline_config = pipeline_config
+        self.task_config = task_config
         self.parent = parent
-        self.config = config
         self.trigger_rule = trigger_rule
 
     def apply_task_to_dag(self):

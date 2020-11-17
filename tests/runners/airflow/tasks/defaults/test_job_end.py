@@ -23,17 +23,21 @@ from liminal.runners.airflow.tasks.defaults import job_end
 from tests.util import dag_test_utils
 
 
+# noinspection DuplicatedCode
 class TestJobEndTask(TestCase):
 
     def test_apply_task_to_dag(self):
-        conf = {
-            'pipeline': 'my_pipeline',
-            'metrics': {'namespace': 'EndJobNameSpace', 'backends': ['cloudwatch']},
-        }
 
         dag = dag_test_utils.create_dag()
 
-        task0 = job_end.JobEndTask(dag, 'my_end_pipeline', None, conf, 'all_done')
+        task0 = job_end.JobEndTask(
+            dag,
+            {'metrics': {'namespace': 'EndJobNameSpace', 'backends': ['cloudwatch']}},
+            {'pipeline': 'my_end_pipeline'},
+            {},
+            None,
+            'all_done'
+        )
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)
@@ -48,7 +52,7 @@ class TestJobEndTask(TestCase):
         conf = {'pipeline': 'my_pipeline'}
         dag = dag_test_utils.create_dag()
 
-        task0 = job_end.JobEndTask(dag, 'my_end_pipeline', None, conf, 'all_done')
+        task0 = job_end.JobEndTask(dag, {}, {'pipeline': 'my_end_pipeline'}, conf, None, 'all_done')
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)
@@ -59,10 +63,14 @@ class TestJobEndTask(TestCase):
         self.assertEqual(dag_task0.trigger_rule, 'all_done')
 
     def test_apply_task_to_dag_with_partial_configuration(self):
-        conf = {'pipeline': 'my_pipeline', 'metrics': {'namespace': 'EndJobNameSpace'}}
         dag = dag_test_utils.create_dag()
 
-        task0 = job_end.JobEndTask(dag, 'my_end_pipeline', None, conf, 'all_done')
+        task0 = job_end.JobEndTask(dag,
+                                   {'metrics': {'namespace': 'EndJobNameSpace'}},
+                                   {'pipeline': 'my_end_pipeline'},
+                                   {},
+                                   None,
+                                   'all_done')
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)

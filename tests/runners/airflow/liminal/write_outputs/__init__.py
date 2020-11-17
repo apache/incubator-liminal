@@ -15,15 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import json
-import os
-
-print('Hello world!\n')
-
-with open('/liminal_input.json') as file:
-    print(f'liminal_input.json contents = {json.loads(file.readline())}')
-
-os.makedirs('/mnt/vol1/', exist_ok=True)
-
-with open('/mnt/vol1/my_output.json', 'w') as file:
-    file.write(json.dumps({'a': 1, 'b': 2}))

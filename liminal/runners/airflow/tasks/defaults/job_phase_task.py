@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,16 +15,25 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-set -euo pipefail
+"""
+Default base task.
+"""
+from abc import abstractmethod
 
-# Use this to sign the tar balls generated from
-# python setup.py sdist --formats=gztar
-# ie. sign.sh <my_tar_ball>
-# you will still be required to type in your signing key password
-# or it needs to be available in your keychain
+from liminal.runners.airflow.model.task import Task
 
-for name in "${@}"
-do
-    gpg --armor --output "${name}.asc" --detach-sig "${name}"
-    gpg --print-md SHA512 "${name}" > "${name}.sha512"
-done
+
+class JobPhaseTask(Task):
+    """
+    Job phase task. A task that runs automatically at a specific phase in the pipeline.
+    """
+
+    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
+        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+        metrics = self.liminal_config.get('metrics', {})
+        self.metrics_namespace = metrics.get('namespace', '')
+        self.metrics_backends = metrics.get('backends', [])
+
+    @abstractmethod
+    def apply_task_to_dag(self):
+        pass
