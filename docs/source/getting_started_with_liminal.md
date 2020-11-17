@@ -1,4 +1,21 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required bgit y applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
 # Getting Started with Apache Liminal
 
@@ -6,14 +23,9 @@ Liminal is a data systems orchestration platform. Liminal enables data scientist
 From feature engineering to production monitoring - and the framework takes care of the infra behind the scenes and seamlessly integrates with the infrastructure behind the scenes.
 
 
-
 ## Quick Start
 
-So, you’ve heard about liminal and decided you want to give it a try.
-
 This guide will allow you to set up your first apache Liminal environment and allow you to create some simple ML pipelines. These will be very similar to the ones you are going to build for real production scenarios. This is actually the magic behind Liminal.
-
-
 
 ## Prerequisites
 
@@ -21,7 +33,7 @@ Python 3 (3.6 and up)
 
 [Docker Desktop](https://www.docker.com/products/docker-desktop)
 
-*Note: make sure your kubernetes cluster is running*
+*Note: Make sure kubernetes cluster is running in docker desktop (or custom kubernetes installation on your machine).*
 
 ### Apache Liminal Hello World
 
@@ -41,25 +53,20 @@ git clone https://github.com/apache/incubator-liminal
 
 Create a python virtualenv to isolate your runs, like this:
 
-
 ```
 cd incubator-liminal/examples/liminal-getting-started
 python3 -m venv env
 ```
 
-
 And activate your virtual environment:
 
-
 ```
-source ../env/bin/activate
+source env/bin/activate
 ```
 
 Now we are ready to install liminal:
 
-
 ```
-pip uninstall apache-liminal 
 pip install apache-liminal
 rm -rf ~/liminal_home
 ```
@@ -67,28 +74,29 @@ Let's build the images you need for the example:
 ```
 liminal build
 ```
-The build will create docker images based on the Liminal.yml file, eash task and service will have its docker image created.
-
+The build will create docker images based on the Liminal.yml file, each task and service will have its docker image created.
 
 ```
-liminal deploy --clean  # the --clean is for removing old containers from the previous install
+liminal deploy --clean  
 ```
-The deploy will create missing containers from the images created above as well as basic Airflow containers needed to run the piplines, and deploy them to your local kubernetes cluster
+The deploy will create missing containers from the images created above as well as basic Apache AirFlow containers needed to run the pipelines, and deploy them to your local docker (docker-compose)
 
 *Note: Liminal creates a bunch of assets, some are going to be located under: the directory in your LIMINAL_HOME env variable. But default LIMINAL_HOME is set to ~/liminal_home directory.*
+
+*Note: the --clean flag is for removing old containers from the previous installs, it will not remove old images.*
 
 Now lets runs it:
 ```
 liminal start
 ```
-Liminal now spins up the AirFlow containers it will run the dag created based on the Liminal.yml file.
+Liminal now spins up the Apache AirFlow containers it will run the dag created based on the Liminal.yml file.
 It includes these three containers: 
 * liminal-postgress
 * liminal-webserver
 * liminal-scheduler
 
 Once it finished loading the, 
-Go to the airflow admin in the browser:
+Go to the Apache AirFlow admin in the browser:
 
 
 ```
@@ -97,26 +105,47 @@ http://localhost:8080/admin
 You can just click: [http://localhost:8080/admin](http://localhost:8080/admin)
 
 
-![drawing](nstatic/airflow_main.png)
+![](nstatic/Apache AirFlow_main.png)
 
 ***Important:** Click on the “On” button to activate the dag, nothing will happen otherwise!*
 
 You can go to tree view to see all the tasks configured in the liminal.yml file: \
-[http://localhost:8080/admin/airflow/tree?dag_id=example_pipeline](http://localhost:8080/admin/airflow/tree?dag_id=example_pipeline)
+[http://localhost:8080/admin/Apache AirFlow/tree?dag_id=example_pipeline](http://localhost:8080/admin/Apache AirFlow/tree?dag_id=example_pipeline)
 
 Now lets see what actually happened to our task:
 
-![drawing](nstatic/airflow_view_dag.png)
+![](nstatic/Apache AirFlow_view_dag.png)
 
 Click on “hello_world_example” and you will get this popup: \
 
-![drawing](nstatic/airflow_view_log.png) \
+![](nstatic/Apache AirFlow_view_log.png) \
 Click on “view log” button and you can see the log of the current task run: \
 
 
-![drawing](nstatic/airflow_task_log.png)
+![](nstatic/Apache AirFlow_task_log.png)
 
-And That's it!
+### mounted volumes
+All Tasks use a mounted volume as defined in the pipeline YAML:
+```YAML
+name: GettingStartedPipeline
+volumes:
+  - volume: gettingstartedvol
+    local:
+      path: ./
+```
+In our case the mounted volume will point to the liminal hello world example.
+The hello world task will read the **hello_world.json** file from the mounted volume and will write the **hello_world_output.json** to it.
+
+*Note:* Each task will internally mount the volume defined above to an internal representation, described under the task section in the yml:
+
+```YAML
+  task:
+  ...
+  mounts:
+     - mount: taskmount
+       volume: gettingstartedvol
+       path: /mnt/vol1
+```
 
 ### Here are the entire list of commands, if you want to start from scratch:
 
@@ -135,19 +164,15 @@ liminal start
 
 ### Closing up
 
-Killing (cmd-c) the cmd you are running in would partially stop the containers in Docker desktop.
+Killing (control-c) the cmd you are running in would partially stop the containers in Docker desktop.
 But, for making sure the dockers have closed:
 
 
 ```
-docker container stop liminal-postgress
-docker container stop liminal-webserver
-docker container stop liminal-scheduler
+docker container stop liminal-postgress  liminal-webserver liminal-scheduler```
 ```
 
-
-And don't forget to stop the python virtualenv, just write:
-
+And don't forget to deactivate the python virtualenv, just write:
 
 ```
 deactivate
