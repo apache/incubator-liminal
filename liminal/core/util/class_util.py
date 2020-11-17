@@ -62,10 +62,9 @@ def import_module(package, recursive=True):
     results = {}
     for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
         full_name = package.__name__ + '.' + name
-        if not name == 'liminal_python_server':
-            results[full_name] = importlib.import_module(full_name)
-            if recursive and is_pkg:
-                results.update(import_module(full_name))
+        results[full_name] = importlib.import_module(full_name)
+        if recursive and is_pkg:
+            results.update(import_module(full_name))
     return results
 
 

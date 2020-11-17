@@ -16,8 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import logging
-
 import yaml
 from flask import Flask, request, Blueprint
 
@@ -36,30 +34,28 @@ def __get_endpoint_function(endpoint_config):
     return module.__getattribute__(endpoint_config['function'])
 
 
-LOG = logging.getLogger("liminal_python_server")
-
-with open('service.yml') as stream:
-    config = yaml.safe_load(stream)
-
-endpoints = dict([
-    (endpoint_config['endpoint'][1:], __get_endpoint_function(endpoint_config))
-    for endpoint_config in config['endpoints']
-])
-
-blueprint = Blueprint('simple_page', __name__)
-
-
-@blueprint.route('/', defaults={'endpoint': ''}, methods=('GET', 'POST'))
-@blueprint.route('/<endpoint>', methods=('GET', 'POST'))
-def show(endpoint):
-    if endpoint in endpoints:
-        return endpoints[endpoint](request.get_data())
-    else:
-        return 'Page not found.', 404
-
-
-app = Flask(__name__)
-app.register_blueprint(blueprint)
-
 if __name__ == '__main__':
+    with open('service.yml') as stream:
+        config = yaml.safe_load(stream)
+
+    endpoints = dict([
+        (endpoint_config['endpoint'][1:], __get_endpoint_function(endpoint_config))
+        for endpoint_config in config['endpoints']
+    ])
+
+    blueprint = Blueprint('liminal_python_server_blueprint', __name__)
+
+
+    @blueprint.route('/', defaults={'endpoint': ''}, methods=('GET', 'POST'))
+    @blueprint.route('/<endpoint>', methods=('GET', 'POST'))
+    def show(endpoint):
+        if endpoint in endpoints:
+            return endpoints[endpoint](request.get_data())
+        else:
+            return 'Page not found.', 404
+
+
+    app = Flask(__name__)
+    app.register_blueprint(blueprint)
+
     app.run(host='0.0.0.0', threaded=False, port=80)
