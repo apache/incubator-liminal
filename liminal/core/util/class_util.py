@@ -46,11 +46,16 @@ def find_subclasses_in_packages(packages, parent_class):
     return result
 
 
-def import_module(package, recrsive=True):
-    """ Import all submodules of a module, recursively, including subpackages
+def import_module(package, recursive=True):
+    """
+    Import all submodules of a module
+
     :param package: package (name or actual module)
     :type package: str | module
     :rtype: dict[str, types.ModuleType]
+
+    :param recursive: search recursively (default: True)
+    :type recursive: bool
     """
     if isinstance(package, str):
         package = importlib.import_module(package)
@@ -58,7 +63,7 @@ def import_module(package, recrsive=True):
     for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
         full_name = package.__name__ + '.' + name
         results[full_name] = importlib.import_module(full_name)
-        if recrsive and is_pkg:
+        if recursive and is_pkg:
             results.update(import_module(full_name))
     return results
 
