@@ -2,7 +2,8 @@
 
 # Getting Started with Apache Liminal
 
-Liminal is a MachineLearning orchestration platform, or in other words: Liminal enables data scientists and data engineers to define their entire ML system and flow using configuration. From feature engineering to production monitoring - and the framework takes care of the infra behind the scenes and seamlessly integrates with the infrastructure behind the scenes.
+Liminal is a data systems orchestration platform. Liminal enables data scientists and data engineers to define their data systems and flow using configuration.
+From feature engineering to production monitoring - and the framework takes care of the infra behind the scenes and seamlessly integrates with the infrastructure behind the scenes.
 
 
 
