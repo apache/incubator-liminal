@@ -84,9 +84,12 @@ def deploy_liminal_core_internal(clean):
 def docker_compose_command(command_name, args):
     docker_compose_path, project_dir = get_docker_compose_paths()
     concated_args = ' '.join(args)
-    subprocess.call(
-        [f'docker-compose -f "{docker_compose_path}" -p liminal --project-directory {project_dir} {command_name} {concated_args}'],
-        env=os.environ, shell=True)
+    run_command = [f'docker-compose -f "{docker_compose_path}" -p liminal --project-directory {project_dir} {command_name} {concated_args}']
+    if 'follow' in str(args):
+        subprocess.call(run_command, env=os.environ, shell=True)
+    else:
+        output = subprocess.run(run_command,env=os.environ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    return output.stdout, output.stderr
 
 @cli.command("deploy", short_help="deploys your liminal.yaml files to $LIMINAL_HOME folder")
 @click.option('--path', default=os.getcwd(), help="folder containing liminal.yaml files")
@@ -104,6 +107,29 @@ def deploy_liminal_apps(path, clean):
         target_yml_name = os.path.join(environment.get_dags_dir(), yml_name)
         shutil.copyfile(config_file, target_yml_name)
 
+def liminal_is_running():
+        stdout, stderr = docker_compose_command('ps', [])
+        return "liminal" in stdout
+
+@cli.command("stop", short_help="stops the docker compose")
+def stop():
+    if docker_is_running() and liminal_is_running():
+        # initialize liminal home by default
+        environment.get_liminal_home()
+        docker_compose_command('down', [])
+
+@cli.command("logs", short_help="display the docker compose logs")
+@click.option('--follow', '-f', is_flag=True, default=False, help="Follow log output.")
+@click.option('--tail', '-t', default=0, type=int, help="Number of lines to show from the end of the log")
+def logs(follow, tail):
+    if docker_is_running() and liminal_is_running():
+        # initialize liminal home by default
+        environment.get_liminal_home()
+        if (follow):
+                docker_compose_command('logs', ['--follow'])
+        if (tail>0):
+                stdout, stderr = docker_compose_command('logs', [f'--tail={tail}'])
+                print(stdout)
 
 @cli.command("start",
              short_help="starts a local airflow in docker compose. should be run after deploy. " +
@@ -113,7 +139,7 @@ def start():
         # initialize liminal home by default
         environment.get_liminal_home()
         docker_compose_path, project_dir = get_docker_compose_paths()
-        docker_compose_command('up', [])
+        docker_compose_command('up', ['-d'])
 
 
 def get_docker_compose_paths():
