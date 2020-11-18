@@ -141,11 +141,7 @@ class PythonTask(task.Task):
             'image_pull_secrets': 'regcred',
             'resources': self.resources,
             'dag': self.dag,
-            'volumes': [
-                Volume(volume['volume'], volume)
-                for volume
-                in self.volumes_config
-            ],
+            'volumes': self.__airflow_volumes(),
             # TODO: aviem - mount with run_id as subpath
             'volume_mounts': [
                 VolumeMount(mount['volume'],
@@ -157,6 +153,15 @@ class PythonTask(task.Task):
             ]
         }
         return kubernetes_kwargs
+
+    def __airflow_volumes(self):
+        volumes = []
+        for volume in self.volumes_config:
+            name = volume['volume']
+            vol_config = volume.copy()
+            vol_config.pop('volume', None)
+            volumes.append(Volume(name, vol_config))
+        return volumes
 
     def __env_vars(self):
         return dict([(k, str(v)) for k, v in self.task_config.get('env_vars', {}).items()])
