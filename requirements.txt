@@ -7,4 +7,5 @@ pyyaml
 boto3==1.12.10
 botocore==1.15.21
 kubernetes
+wheel
 
