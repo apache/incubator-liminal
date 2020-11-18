@@ -48,4 +48,11 @@ Now open a browser on
 http://localhost:8000/
 Your docs will automatically update
 
+## Rebuilding the pythondoc liminal code documentation
+```
+cd docs
+sphinx-apidoc -o source/ ../liminal
+```
+
+
 

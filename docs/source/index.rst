@@ -33,7 +33,6 @@ Welcome to Apchae Liminal's documentation!
    liminal_yaml_guide
    howto_contrib_to_liminal_docs
 
-
 Indices and tables
 ==================
 
