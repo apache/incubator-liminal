@@ -12,15 +12,15 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
 project = u'Apchae Liminal'
-copyright = u'2020, Amihay Zer-Kavod'
+copyright = u'Apache Liminal'
 author = u'Amihay Zer-Kavod'
 
 # The short X.Y version
@@ -40,6 +40,7 @@ release = u'0.0.1'
 # ones.
 extensions = [
     'recommonmark',
+    'sphinx.ext.autodoc',
 ]
 
 html_logo = 'nstatic/liminal_logo.png'
