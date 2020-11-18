@@ -17,22 +17,22 @@
 # under the License.
 
 from liminal.runners.airflow.operators.job_status_operator import JobEndOperator
-from liminal.runners.airflow.tasks.defaults.default_task import DefaultTask
+from liminal.runners.airflow.tasks.defaults.job_phase_task import JobPhaseTask
 
 
-class JobEndTask(DefaultTask):
+class JobEndTask(JobPhaseTask):
     """
       Job end task. Reports job end metrics.
     """
 
-    def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
-        super().__init__(dag, pipeline_name, parent, config, trigger_rule)
+    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
+        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
 
     def apply_task_to_dag(self):
         job_end_task = JobEndOperator(
             task_id='end',
             namespace=self.metrics_namespace,
-            application_name=self.pipeline_name,
+            application_name=self.pipeline_config['pipeline'],
             backends=self.metrics_backends,
             dag=self.dag,
             trigger_rule=self.trigger_rule

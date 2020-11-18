@@ -17,5 +17,4 @@
 # under the License.
 
 include scripts/*
-include requirements-airflow.txt
 recursive-include liminal/build/ *

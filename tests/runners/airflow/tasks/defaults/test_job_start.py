@@ -19,21 +19,24 @@
 import unittest
 from unittest import TestCase
 
-from liminal.runners.airflow.tasks.defaults import job_end, job_start
+from liminal.runners.airflow.tasks.defaults import job_start
 from tests.util import dag_test_utils
 
 
+# noinspection DuplicatedCode
 class TestJobStartTask(TestCase):
 
     def test_apply_task_to_dag(self):
-        conf = {
-            'pipeline': 'my_pipeline',
-            'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']},
-        }
-
         dag = dag_test_utils.create_dag()
 
-        task0 = job_start.JobStartTask(dag, 'my_start_pipeline', None, conf, 'all_success')
+        task0 = job_start.JobStartTask(
+            dag,
+            {'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']}},
+            {'pipeline': 'my_start_pipeline'},
+            {},
+            None,
+            'all_success'
+        )
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)
@@ -49,7 +52,12 @@ class TestJobStartTask(TestCase):
 
         dag = dag_test_utils.create_dag()
 
-        task0 = job_start.JobStartTask(dag, 'my_end_pipeline', None, conf, 'all_success')
+        task0 = job_start.JobStartTask(dag,
+                                       {},
+                                       {'pipeline': 'my_end_pipeline'},
+                                       conf,
+                                       None,
+                                       'all_success')
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)
@@ -60,10 +68,14 @@ class TestJobStartTask(TestCase):
         self.assertEqual(dag_task0.trigger_rule, 'all_success')
 
     def test_apply_task_to_dag_with_partial_configuration(self):
-        conf = {'pipeline': 'my_pipeline', 'metrics': {'namespace': 'StartJobNameSpace'}}
         dag = dag_test_utils.create_dag()
 
-        task0 = job_start.JobStartTask(dag, 'my_start_pipeline', None, conf, 'all_success')
+        task0 = job_start.JobStartTask(dag,
+                                       {'metrics': {'namespace': 'StartJobNameSpace'}},
+                                       {'pipeline': 'my_start_pipeline'},
+                                       {},
+                                       None,
+                                       'all_success')
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)

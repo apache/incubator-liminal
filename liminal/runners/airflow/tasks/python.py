@@ -15,16 +15,16 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import json
+from typing import Optional
 
-from airflow.models import Variable
+from airflow.contrib.kubernetes.volume import Volume
+from airflow.contrib.kubernetes.volume_mount import VolumeMount
+from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.operators.dummy_operator import DummyOperator
 
+from liminal.kubernetes import volume_util
 from liminal.runners.airflow.config.standalone_variable_backend import get_variable
 from liminal.runners.airflow.model import task
-from liminal.runners.airflow.operators.kubernetes_pod_operator_with_input_output import \
-    KubernetesPodOperatorWithInputAndOutput, \
-    PrepareInputOperator
 
 
 class PythonTask(task.Task):
@@ -32,38 +32,42 @@ class PythonTask(task.Task):
     Python task.
     """
 
-    def __init__(self, dag, pipeline_name, parent, config, trigger_rule):
-        super().__init__(dag, pipeline_name, parent, config, trigger_rule)
-
-        self.input_type = self.config['input_type']
-        self.input_path = self.config['input_path']
-        self.task_name = self.config['task']
-        self.image = self.config['image']
+    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
+        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+        self.task_name = self.task_config['task']
+        self.image = self.task_config['image']
+        self.volumes_config = self._volumes_config()
+        self.mounts = self.task_config.get('mounts', [])
+        self._create_local_volumes()
         self.resources = self.__kubernetes_resources()
         self.env_vars = self.__env_vars()
         self.kubernetes_kwargs = self.__kubernetes_kwargs()
         self.cmds, self.arguments = self.__kubernetes_cmds_and_arguments()
-        self.input_task_id = self.task_name + '_input'
         self.executors = self.__executors()
 
     def apply_task_to_dag(self):
-        input_task = None
-
-        if self.input_type in ['static', 'task']:
-            input_task = self.__input_task()
-
         if self.executors == 1:
-            return self.__apply_task_to_dag_single_executor(input_task)
+            return self.__apply_task_to_dag_single_executor()
         else:
-            return self.__apply_task_to_dag_multiple_executors(input_task)
+            return self.__apply_task_to_dag_multiple_executors()
 
-    def __apply_task_to_dag_multiple_executors(self, input_task):
-        if not input_task:
-            input_task = DummyOperator(
-                task_id=self.input_task_id,
-                trigger_rule=self.trigger_rule,
-                dag=self.dag
-            )
+    def _volumes_config(self):
+        volumes_config = self.liminal_config.get('volumes', [])
+
+        for volume in volumes_config:
+            if 'local' in volume:
+                volume['persistentVolumeClaim'] = {
+                    'claimName': f"{volume['volume']}-pvc"
+                }
+
+        return volumes_config
+
+    def __apply_task_to_dag_multiple_executors(self):
+        start_task = DummyOperator(
+            task_id=f'{self.task_name}_parallelize',
+            trigger_rule=self.trigger_rule,
+            dag=self.dag
+        )
 
         end_task = DummyOperator(
             task_id=self.task_name,
@@ -71,75 +75,58 @@ class PythonTask(task.Task):
         )
 
         if self.parent:
-            self.parent.set_downstream(input_task)
+            self.parent.set_downstream(start_task)
 
             for i in range(self.executors):
                 split_task = self.__create_pod_operator(
-                    task_id=f'''{self.task_name}_{i}''',
-                    task_split=i,
-                    image=self.image
+                    image=self.image,
+                    task_id=i
                 )
 
-                input_task.set_downstream(split_task)
+                start_task.set_downstream(split_task)
 
                 split_task.set_downstream(end_task)
 
         return end_task
 
-    def __create_pod_operator(self, task_id, task_split, image):
-        return KubernetesPodOperatorWithInputAndOutput(
-            task_id=task_id,
-            input_task_id=self.input_task_id,
-            task_split=task_split if task_split else 0,
+    def __create_pod_operator(self, image: str, task_id: Optional[int] = None):
+        env_vars = self.env_vars
+
+        if task_id is not None:
+            env_vars = self.env_vars.copy()
+            env_vars['LIMINAL_SPLIT_ID'] = str(task_id)
+            env_vars['LIMINAL_NUM_SPLITS'] = str(self.executors)
+
+        return KubernetesPodOperator(
+            task_id=f'{self.task_name}_{task_id}' if task_id is not None else self.task_name,
             image=image,
             cmds=self.cmds,
             arguments=self.arguments,
+            env_vars=env_vars,
             **self.kubernetes_kwargs
         )
 
-    def __apply_task_to_dag_single_executor(self, input_task):
-        pod_task = self.__create_pod_operator(
-            task_id=f'{self.task_name}',
-            task_split=None,
-            image=f'''{self.image}'''
-        )
+    def __apply_task_to_dag_single_executor(self):
+        pod_task = self.__create_pod_operator(image=f'''{self.image}''')
 
         first_task = pod_task
 
-        if input_task:
-            first_task = input_task
-            first_task.set_downstream(pod_task)
         if self.parent:
             self.parent.set_downstream(first_task)
 
         return pod_task
 
-    def __input_task(self):
-        return PrepareInputOperator(
-            task_id=self.input_task_id,
-            image=self.image,
-            input_type=self.input_type,
-            input_path=self.input_path,
-            split_input=True if 'split_input' in self.config and
-                                self.config['split_input'] else False,
-            executors=self.executors,
-            **self.kubernetes_kwargs
-        )
-
-    def __executors(self):
+    def __executors(self) -> int:
         executors = 1
-        if 'executors' in self.config:
-            executors = self.config['executors']
+
+        if 'executors' in self.task_config:
+            executors = self.task_config['executors']
+
         return executors
 
     def __kubernetes_cmds_and_arguments(self):
         cmds = ['/bin/bash', '-c']
-        output_path = self.config['output_path'] if 'output_path' in self.config else ''
-        arguments = [
-            f"sh container-setup.sh && " +
-            f"{self.config['cmd']} && " +
-            f"sh container-teardown.sh {output_path}"
-        ]
+        arguments = [self.task_config['cmd']]
         return cmds, arguments
 
     def __kubernetes_kwargs(self):
@@ -149,40 +136,45 @@ class PythonTask(task.Task):
             'in_cluster': get_variable('in_kubernetes_cluster', default_val=False),
             'image_pull_policy': get_variable('image_pull_policy', default_val='IfNotPresent'),
             'get_logs': True,
-            'env_vars': self.env_vars,
-            'do_xcom_push': True,
             'is_delete_operator_pod': True,
             'startup_timeout_seconds': 300,
             'image_pull_secrets': 'regcred',
             'resources': self.resources,
-            'dag': self.dag
+            'dag': self.dag,
+            'volumes': [
+                Volume(volume['volume'], volume)
+                for volume
+                in self.volumes_config
+            ],
+            # TODO: aviem - mount with run_id as subpath
+            'volume_mounts': [
+                VolumeMount(mount['volume'],
+                            mount['path'],
+                            mount.get('sub_path'),
+                            mount.get('read_only', False))
+                for mount
+                in self.mounts
+            ]
         }
         return kubernetes_kwargs
 
     def __env_vars(self):
-        env_vars = {}
-        if 'env_vars' in self.config:
-            env_vars = self.config['env_vars']
-        airflow_configuration_variable = get_variable(
-            f'''{self.pipeline_name}_dag_configuration''',
-            default_val=None)
-        if airflow_configuration_variable:
-            airflow_configs = json.loads(airflow_configuration_variable)
-            environment_variables_key = f'''{self.pipeline_name}_environment_variables'''
-            if environment_variables_key in airflow_configs:
-                env_vars = airflow_configs[environment_variables_key]
-        return env_vars
+        return dict([(k, str(v)) for k, v in self.task_config.get('env_vars', {}).items()])
 
     def __kubernetes_resources(self):
         resources = {}
 
-        if 'request_cpu' in self.config:
-            resources['request_cpu'] = self.config['request_cpu']
-        if 'request_memory' in self.config:
-            resources['request_memory'] = self.config['request_memory']
-        if 'limit_cpu' in self.config:
-            resources['limit_cpu'] = self.config['limit_cpu']
-        if 'limit_memory' in self.config:
-            resources['limit_memory'] = self.config['limit_memory']
+        if 'request_cpu' in self.task_config:
+            resources['request_cpu'] = self.task_config['request_cpu']
+        if 'request_memory' in self.task_config:
+            resources['request_memory'] = self.task_config['request_memory']
+        if 'limit_cpu' in self.task_config:
+            resources['limit_cpu'] = self.task_config['limit_cpu']
+        if 'limit_memory' in self.task_config:
+            resources['limit_memory'] = self.task_config['limit_memory']
 
         return resources
+
+    def _create_local_volumes(self):
+        for volume in [volume for volume in self.volumes_config if 'local' in volume]:
+            volume_util.create_local_volume(volume)

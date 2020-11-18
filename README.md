@@ -36,52 +36,48 @@ perform), application servers,  and more.
 
 ## Example YAML config file
 ```yaml
-name: MyPipeline
+---
+name: MyLiminalStack
 owner: Bosco Albert Baracus
+volumes:
+  - volume: myvol1
+    local:
+      path: /Users/me/myvol1
 pipelines:
   - pipeline: my_pipeline
     start_date: 1970-01-01
     timeout_minutes: 45
     schedule: 0 * 1 * *
     metrics:
-     namespace: TestNamespace
-     backends: [ 'cloudwatch' ]
+      namespace: TestNamespace
+      backends: [ 'cloudwatch' ]
     tasks:
-      - task: my_static_input_task
+      - task: my_python_task
         type: python
         description: static input task
-        image: my_static_input_task_image
-        source: helloworld
+        image: my_python_task_img
+        source: write_inputs
         env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        output_path: /output.json
-        cmd: python -u hello_world.py
-      - task: my_parallelized_static_input_task
+          NUM_FILES: 10
+          NUM_SPLITS: 3
+        mounts:
+          - mount: mymount
+            volume: myvol1
+            path: /mnt/vol1
+        cmd: python -u write_inputs.py
+      - task: my_parallelized_python_task
         type: python
-        description: parallelized static input task
-        image: my_static_input_task_image
+        description: parallelized python task
+        image: my_parallelized_python_task_img
+        source: write_outputs
         env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        split_input: True
-        executors: 2
-        cmd: python -u helloworld.py
-      - task: my_task_output_input_task
-        type: python
-        description: task with input from other task's output
-        image: my_task_output_input_task_image
-        source: helloworld
-        env_vars:
-          env1: "a"
-          env2: "b"
-        input_type: task
-        input_path: my_static_input_task
-        cmd: python -u hello_world.py
+          FOO: BAR
+        executors: 3
+        mounts:
+          - mount: mymount
+            volume: myvol1
+            path: /mnt/vol1
+        cmd: python -u write_inputs.py
 services:
   - service:
     name: my_python_server
@@ -91,7 +87,7 @@ services:
     source: myserver
     endpoints:
       - endpoint: /myendpoint1
-        module: myserver.my_server
+        module: my_server
         function: myendpoint1func
 ```
 
@@ -124,6 +120,8 @@ When your pipeline code is ready, you can test it by running it locally on your 
 1. Ensure you have The Docker engine running locally, and enable a local Kubernetes cluster:
 ![Kubernetes configured](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/k8s_running.png)
 
+And allocate it at least 3 CPUs (under "Resources" in the Docker preference UI).
+
 If you want to execute your pipeline on a remote kubernetes cluster, make sure the cluster is configured
 using :
 ```bash
@@ -152,18 +150,40 @@ You'll see that a number of outputs indicating various docker images built.
 cd </path/to/your/liminal/code> 
 liminal deploy
 ```
+Note: after upgrading liminal, it's recommended to issue the command 
+```bash
+liminal deploy --clean
+``` 
+
+This will rebuild the airlfow docker containers from scratch with a fresh version of liminal, ensuring consistency.
 
 4. Start the server
 ```bash
 liminal start
 ```
 
-5. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
+5. Stop the server
+```bash
+liminal stop
+```
 
-6. You should see your ![pipeline](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow.png)
+6. Display the server logs
+```bash
+liminal logs --follow/--tail
+
+Number of lines to show from the end of the log:
+liminal logs --tail=10
+
+Follow log output:
+liminal logs --follow
+```
+
+6. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
+
+7. You should see your ![pipeline](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow.png)
 The pipeline is scheduled to run according to the ```json schedule: 0 * 1 * *``` field in the .yml file you provided.
 
-7. To manually activate your pipeline:
+8. To manually activate your pipeline:
 Click your pipeline and then click "trigger DAG"
 Click "Graph view"
 You should see the steps in your pipeline getting executed in "real time" by clicking "Refresh" periodically.
