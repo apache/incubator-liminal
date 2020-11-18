@@ -162,12 +162,28 @@ This will rebuild the airlfow docker containers from scratch with a fresh versio
 liminal start
 ```
 
-5. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
+5. Stop the server
+```bash
+liminal stop
+```
 
-6. You should see your ![pipeline](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow.png)
+6. Display the server logs
+```bash
+liminal logs --follow/--tail
+
+Number of lines to show from the end of the log:
+liminal logs --tail=10
+
+Follow log output:
+liminal logs --follow
+```
+
+6. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
+
+7. You should see your ![pipeline](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow.png)
 The pipeline is scheduled to run according to the ```json schedule: 0 * 1 * *``` field in the .yml file you provided.
 
-7. To manually activate your pipeline:
+8. To manually activate your pipeline:
 Click your pipeline and then click "trigger DAG"
 Click "Graph view"
 You should see the steps in your pipeline getting executed in "real time" by clicking "Refresh" periodically.
