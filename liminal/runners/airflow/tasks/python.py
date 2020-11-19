@@ -18,12 +18,11 @@
 import logging
 from typing import Optional
 
-from airflow.contrib.kubernetes.volume import Volume
-from airflow.contrib.kubernetes.volume_mount import VolumeMount
+from airflow.kubernetes.volume import Volume
+from airflow.kubernetes.volume_mount import VolumeMount
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.operators.dummy_operator import DummyOperator
 
-from liminal.kubernetes import volume_util
 from liminal.runners.airflow.config.standalone_variable_backend import get_variable
 from liminal.runners.airflow.model import task
 
@@ -55,31 +54,18 @@ class PythonTask(task.Task):
 
     def _volumes(self):
         volumes_config = self.liminal_config.get('volumes', [])
-
         volumes = []
         for volume_config in volumes_config:
             name = volume_config['volume']
-
-            if 'local' in volume_config:
-                self.__create_local_volume(volume_config)
-                volume = Volume(
-                    name=name,
-                    configs={
-                        'persistentVolumeClaim': {
-                            'claimName': f"{name}-pvc"
-                        }
+            volume = Volume(
+                name=name,
+                configs={
+                    'persistentVolumeClaim': {
+                        'claimName': f"{name}-pvc"
                     }
-                )
-            else:
-                volume_config_copy = volume_config.copy()
-                volume_config_copy.pop('volume', None)
-                volume = Volume(
-                    name=name,
-                    configs=volume_config_copy
-                )
-
+                }
+            )
             volumes.append(volume)
-
         return volumes
 
     def __apply_task_to_dag_multiple_executors(self):
@@ -189,7 +175,3 @@ class PythonTask(task.Task):
             resources['limit_memory'] = self.task_config['limit_memory']
 
         return resources
-
-    @staticmethod
-    def __create_local_volume(volume):
-        volume_util.create_local_volume(volume)
