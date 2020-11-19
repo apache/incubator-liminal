@@ -20,12 +20,10 @@ import os
 
 print('Hello world!\n')
 
-# with open('/liminal_input.json') as file:
-#     print(f'liminal_input.json contents = {json.loads(file.readline())}')
-print("*******  hello again *******")
-#
-os.makedirs('/mnt/vol1/', exist_ok=True)
-#
-with open('/mnt/vol1/my_output.json', 'w') as file:
-    file.write(json.dumps({'a': 1, 'b': 2}))
+with open('/mnt/gettingstartedvol/hello_world.json') as file:
+    print(f'hello_world.json contents = {json.loads(file.readline())}')
 
+os.makedirs('/mnt/vol1/', exist_ok=True)
+
+with open('/mnt/gettingstartedvol/hello_world_output.json', 'w') as file:
+    file.write(json.dumps({'hello': 1, 'world': 2}))

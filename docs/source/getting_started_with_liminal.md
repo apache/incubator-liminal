@@ -150,8 +150,8 @@ The hello world task will read the **hello_world.json** file from the mounted vo
 ### Here are the entire list of commands, if you want to start from scratch:
 
 ```
-git clone https://github.com/amihayz/liminal-examples
-cd liminal-examples
+git clone https://github.com/apache/incubator-liminal
+cd examples
 python3 -m venv env
 source env/bin/activate
 pip uninstall apache-liminal

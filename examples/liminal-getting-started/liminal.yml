@@ -16,13 +16,17 @@
 # specific language governing permissions and limitations
 # under the License.
 ---
-name: MyPipeline
+name: GettingStartedPipeline
+volumes:
+  - volume: gettingstartedvol
+    local:
+      path: ./
 pipelines:
-  - pipeline: example_pipeline
+  - pipeline: getting_started_pipeline
     owner: Amihay Zer-Kavod
     start_date: 1970-01-01
-    timeout_minutes: 1
-    schedule: 0 * * * *
+    timeout_minutes: 10
+    schedule: 0 * 1 * *
     default_arg_loaded: check
     default_array_loaded: [2, 3, 4]
     default_object_loaded:
@@ -32,17 +36,19 @@ pipelines:
       namespace: TestNamespace
       backends: [ ]
     tasks:
-      - task: hello_world_example
+      - task: python_hello_world_example
         type: python
         description: static input task
-        image: hello_world_example_image
+        image: python_hello_world_example_image
         source: helloworld
         env_vars:
           env1: "a"
           env2: "b"
         input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
-        output_path: /mnt/vol1/my_output.json
+        mounts:
+          - mount: mymount
+            volume: gettingstartedvol
+            path: /mnt/gettingstartedvol
         cmd: python -u hello_world.py
       - task: parallelized_hello_world_example_task
         type: python
@@ -52,7 +58,6 @@ pipelines:
           env1: "a"
           env2: "b"
         input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
         split_input: True
         executors: 2
         cmd: python -u hello_world.py
@@ -65,14 +70,13 @@ pipelines:
           env1: "a"
           env2: "b"
         input_type: task
-        input_path: my_static_input_task
         cmd: python -u hello_world.py
 services:
   - service:
-    name: amihay_python_server
+    name: liminal_getting_started_python_server
     type: python_server
     description: my python server
-    image: ami_server_image
+    image: liminal_getting_started_server_image
     source: myserver
     endpoints:
       - endpoint: /myendpoint1
