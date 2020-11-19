@@ -19,11 +19,21 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+if ! command -v liminal &> /dev/null
+then
+  liminal stop
+fi
+
+yes | pip uninstall apache-liminal
+
 cd "$DIR" || exit
+
+rm -rf "$DIR/../build"
+rm -rf "$DIR/../dist"
 
 python "$DIR/setup.py" sdist bdist_wheel
 
-cp "$DIR/dist/apache_liminal-0.0.1.MYVER-py3-none-any.whl" "$DIR/scripts"
-pip install "$DIR/scripts/apache_liminal-0.0.1.MYVER-py3-none-any.whl"
+cp "$DIR/dist/apache_liminal-0.0.0-py3-none-any.whl" "$DIR/scripts"
+pip install "$DIR/scripts/apache_liminal-0.0.0-py3-none-any.whl"
 
 cd - || exit

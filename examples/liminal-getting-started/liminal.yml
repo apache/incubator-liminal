@@ -20,10 +20,10 @@ name: GettingStartedPipeline
 volumes:
   - volume: gettingstartedvol
     local:
-      path: /tmp/liminal_gettingstarted
+      path: .
 pipelines:
   - pipeline: getting_started_pipeline
-    owner: Amihay Zer-Kavod
+    owner: Bosco Albert Baracus
     start_date: 1970-01-01
     timeout_minutes: 10
     schedule: 0 * 1 * *
@@ -44,7 +44,6 @@ pipelines:
         env_vars:
           env1: "a"
           env2: "b"
-        input_type: static
         mounts:
           - mount: mymount
             volume: gettingstartedvol
@@ -53,23 +52,20 @@ pipelines:
       - task: parallelized_hello_world_example_task
         type: python
         description: parallelized parallelized hello world example
-        image: parallelized_hello_world_example_image
+        image: python_hello_world_example_image
         env_vars:
           env1: "a"
           env2: "b"
-        input_type: static
         split_input: True
         executors: 2
         cmd: python -u hello_world.py
-      - task: my_task_output_input_task
+      - task: python_hello_world_output_task
         type: python
         description: task with input from other task's output
-        image: my_task_output_input_task_image
-        source: helloworld
+        image: python_hello_world_example_image
         env_vars:
           env1: "a"
           env2: "b"
-        input_type: task
         cmd: python -u hello_world.py
 services:
   - service:
@@ -80,5 +76,5 @@ services:
     source: myserver
     endpoints:
       - endpoint: /myendpoint1
-        module: myserver.my_server
+        module: my_server
         function: myendpoint1func

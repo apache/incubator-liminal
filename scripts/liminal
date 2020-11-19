@@ -17,6 +17,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import os
 import pathlib
 import shutil
@@ -24,12 +25,15 @@ import subprocess
 import sys
 
 import click
+import yaml
 
+import scripts as s
 from liminal.build import liminal_apps_builder
 from liminal.core import environment
 from liminal.core.util import files_util
+from liminal.kubernetes import volume_util
 from liminal.runners.airflow import dag
-import scripts as s
+
 try:
     import importlib.resources as pkg_resources
 except ImportError:
@@ -45,7 +49,7 @@ def cli():
 def docker_is_running():
     try:
         return not subprocess.check_output("docker info >/dev/null 2>&1", shell=True)
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         msg = "Docker is not running. Please start docker service on your machine\n"
         sys.stderr.write(f"ERROR: {msg}")
         raise RuntimeError(msg)
@@ -61,39 +65,52 @@ def build(path):
 
 def deploy_liminal_core_internal(clean):
     with pkg_resources.path(dag, 'liminal_dags.py') as p:
-        dags_path=p
+        dags_path = p
     os.makedirs(environment.get_dags_dir(), exist_ok=True)
     dag_target_file = os.path.join(environment.get_liminal_home(), 'liminal_dags.py')
     shutil.copyfile(dags_path, dag_target_file)
-    #initialize the env. variable which indicates to the docke compose which liminal to install in airflow docker
+    # initialize the env. variable which indicates to the docke compose which
+    # liminal to install in airflow docker
     liminal_version = environment.get_liminal_version()
-    # if liminal is installed from local file - teh developer needs to put it in the /scripts folder, in which case
-    # it will end up inside the container during build
-    if liminal_version.find("file://")>-1:
+    # if liminal is installed from local file - teh developer needs to put it in the /scripts folder
+    # in which case it will end up inside the container during build
+    if liminal_version.find("file://") > -1:
         local_file_name = os.path.basename(liminal_version)
-        full_path = os.path.join('/opt/airflow/dags',local_file_name)
-        print(f'Liminal was installed locally, changing the LIMINAL_VERSION parameter to {full_path}')
-        os.environ[environment.LIMINAL_VERSION_PARAM_NAME]= full_path
+        full_path = os.path.join('/opt/airflow/dags', local_file_name)
+        print(
+            f'Liminal was installed locally, changing the LIMINAL_VERSION parameter to {full_path}')
+        os.environ[environment.LIMINAL_VERSION_PARAM_NAME] = full_path
     if clean:
-        docker_compose_command('down', ['--remove-orphans','--rmi', 'local'])
+        docker_compose_command('down', ['--remove-orphans', '--rmi', 'local'])
         docker_compose_command('build', ['--no-cache'])
         docker_compose_command('run', ['webserver', 'resetdb', '-y'])
-        docker_compose_command('run', ['webserver','initdb'])
+        docker_compose_command('run', ['webserver', 'initdb'])
         docker_compose_command('down', ['--remove-orphans'])
+
 
 def docker_compose_command(command_name, args):
     docker_compose_path, project_dir = get_docker_compose_paths()
     concated_args = ' '.join(args)
-    run_command = [f'docker-compose -f "{docker_compose_path}" -p liminal --project-directory {project_dir} {command_name} {concated_args}']
+    run_command = [
+        'docker-compose '
+        f'-f "{docker_compose_path}" '
+        '-p liminal --project-directory '
+        f'{project_dir} {command_name} {concated_args}'
+    ]
+    print(run_command[0])
     if 'follow' in str(args):
         subprocess.call(run_command, env=os.environ, shell=True)
+        return '', ''
     else:
-        output = subprocess.run(run_command,env=os.environ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-    return output.stdout, output.stderr
+        output = subprocess.run(run_command, env=os.environ, shell=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, universal_newlines=True)
+        return output.stdout, output.stderr
+
 
 @cli.command("deploy", short_help="deploys your liminal.yaml files to $LIMINAL_HOME folder")
 @click.option('--path', default=os.getcwd(), help="folder containing liminal.yaml files")
-@click.option('--clean', is_flag=True, default=False, help="re-deploy liminal airflow components from scratch")
+@click.option('--clean', is_flag=True, default=False,
+              help="re-deploy liminal airflow components from scratch")
 def deploy_liminal_apps(path, clean):
     click.echo("deploying liminal yaml files")
     liminal_home = environment.get_liminal_home()
@@ -106,10 +123,15 @@ def deploy_liminal_apps(path, clean):
         yml_name = os.path.basename(config_file)
         target_yml_name = os.path.join(environment.get_dags_dir(), yml_name)
         shutil.copyfile(config_file, target_yml_name)
+        with open(config_file) as stream:
+            config = yaml.safe_load(stream)
+            volume_util.create_local_volumes(config, os.path.dirname(config_file))
+
 
 def liminal_is_running():
-        stdout, stderr = docker_compose_command('ps', [])
-        return "liminal" in stdout
+    stdout, stderr = docker_compose_command('ps', [])
+    return "liminal" in stdout
+
 
 @cli.command("stop", short_help="stops the docker compose")
 def stop():
@@ -118,18 +140,21 @@ def stop():
         environment.get_liminal_home()
         docker_compose_command('down', [])
 
+
 @cli.command("logs", short_help="display the docker compose logs")
 @click.option('--follow', '-f', is_flag=True, default=False, help="Follow log output.")
-@click.option('--tail', '-t', default=0, type=int, help="Number of lines to show from the end of the log")
+@click.option('--tail', '-t', default=0, type=int,
+              help="Number of lines to show from the end of the log")
 def logs(follow, tail):
     if docker_is_running() and liminal_is_running():
         # initialize liminal home by default
         environment.get_liminal_home()
-        if (follow):
-                docker_compose_command('logs', ['--follow'])
-        if (tail>0):
-                stdout, stderr = docker_compose_command('logs', [f'--tail={tail}'])
-                print(stdout)
+        if follow:
+            docker_compose_command('logs', ['--follow'])
+        if tail > 0:
+            stdout, stderr = docker_compose_command('logs', [f'--tail={tail}'])
+            print(stdout)
+
 
 @cli.command("start",
              short_help="starts a local airflow in docker compose. should be run after deploy. " +
@@ -138,7 +163,6 @@ def start():
     if docker_is_running():
         # initialize liminal home by default
         environment.get_liminal_home()
-        docker_compose_path, project_dir = get_docker_compose_paths()
         docker_compose_command('up', ['-d'])
 
 
@@ -146,7 +170,6 @@ def get_docker_compose_paths():
     with pkg_resources.path(s, 'docker-compose.yml') as p:
         docker_compose_path = p
     project_dir = pathlib.Path(docker_compose_path).parent.parent.absolute()
-    print(f"starting docker compose from path {project_dir}")
     return docker_compose_path, project_dir
 
 
