@@ -20,7 +20,7 @@ name: GettingStartedPipeline
 volumes:
   - volume: gettingstartedvol
     local:
-      path: ./
+      path: /tmp/liminal_gettingstarted
 pipelines:
   - pipeline: getting_started_pipeline
     owner: Amihay Zer-Kavod
