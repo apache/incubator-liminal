@@ -105,7 +105,7 @@ http://localhost:8080/admin
 You can just click: [http://localhost:8080/admin](http://localhost:8080/admin)
 
 
-![](nstatic/Apache AirFlow_main.png)
+![](nstatic/airflow_main.png)
 
 ***Important:** Click on the “On” button to activate the dag, nothing will happen otherwise!*
 
@@ -114,15 +114,15 @@ You can go to tree view to see all the tasks configured in the liminal.yml file:
 
 Now lets see what actually happened to our task:
 
-![](nstatic/Apache AirFlow_view_dag.png)
+![](nstatic/airflow_view_dag.png)
 
 Click on “hello_world_example” and you will get this popup: \
 
-![](nstatic/Apache AirFlow_view_log.png) \
+![](nstatic/airflow_view_log.png) \
 Click on “view log” button and you can see the log of the current task run: \
 
 
-![](nstatic/Apache AirFlow_task_log.png)
+![](nstatic/airflow_task_log.png)
 
 ### mounted volumes
 All Tasks use a mounted volume as defined in the pipeline YAML:
@@ -164,10 +164,13 @@ liminal start
 
 ### Closing up
 
-Killing (control-c) the cmd you are running in would partially stop the containers in Docker desktop.
-But, for making sure the dockers have closed:
+Making sure the airflow containers are closed, just click:
 
+```
+liminal stop
+```
 
+Or you can do it manually, stop the running containers:
 ```
 docker container stop liminal-postgress  liminal-webserver liminal-scheduler```
 ```
