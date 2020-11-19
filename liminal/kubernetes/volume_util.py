@@ -72,7 +72,8 @@ def delete_local_volume(name, namespace='default'):
         _LOG.info(f'Deleting persistent volume claim {pvc_name}')
         _kubernetes.delete_namespaced_persistent_volume_claim(pvc_name, namespace)
 
-    _LOCAL_VOLUMES.remove(name)
+    if name in _LOCAL_VOLUMES:
+        _LOCAL_VOLUMES.remove(name)
 
 
 def _create_persistent_volume_claim(pvc_name, volume_name, namespace):
