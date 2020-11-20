@@ -34,6 +34,9 @@ non-functional tasks, and allowing them to focus on machine learning code and ar
 Using simple YAML configuration, create your own schedule data pipelines (a sequence of tasks to
 perform), application servers,  and more.
 
+## Getting Started Documentation
+A simple getting stated guide for Liminal can be found [here]('docs/source/getting_started_with_liminal.md')
+
 ## Example YAML config file
 ```yaml
 ---
