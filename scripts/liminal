@@ -72,7 +72,8 @@ def deploy_liminal_core_internal(clean):
     # initialize the env. variable which indicates to the docke compose which
     # liminal to install in airflow docker
     liminal_version = environment.get_liminal_version()
-    # if liminal is installed from local file - teh developer needs to put it in the /scripts folder
+    print(f'Deploying liminal version: {liminal_version}')
+    # if liminal is installed from local file - the developer needs to put it in the /scripts folder
     # in which case it will end up inside the container during build
     if liminal_version.find("file://") > -1:
         local_file_name = os.path.basename(liminal_version)
@@ -160,6 +161,8 @@ def logs(follow, tail):
              short_help="starts a local airflow in docker compose. should be run after deploy. " +
                         "Make sure docker is running on your machine")
 def start():
+    liminal_version = environment.get_liminal_version()
+    print(f'starting liminal version: {liminal_version}')
     if docker_is_running():
         # initialize liminal home by default
         environment.get_liminal_home()

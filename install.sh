@@ -28,12 +28,18 @@ yes | pip uninstall apache-liminal
 
 cd "$DIR" || exit
 
-rm -rf "$DIR/../build"
-rm -rf "$DIR/../dist"
+rm -rf build
+rm -rf dist
 
-python "$DIR/setup.py" sdist bdist_wheel
+python setup.py sdist bdist_wheel
 
-cp "$DIR/dist/apache_liminal-0.0.0-py3-none-any.whl" "$DIR/scripts"
-pip install "$DIR/scripts/apache_liminal-0.0.0-py3-none-any.whl"
+rm scripts/*.whl
+
+cp dist/*.whl scripts
+
+ver=$(ls scripts/*.whl)
+export LIMINAL_VERSION="apache-liminal @ file://$ver"
+
+pip install scripts/*.whl
 
 cd - || exit
