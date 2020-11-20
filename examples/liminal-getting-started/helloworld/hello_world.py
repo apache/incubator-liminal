@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -10,15 +9,21 @@
 #
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required bgit y applicable law or agreed to in writing,
+# Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import json
+import os
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+print('Hello world!\n')
 
-export AIRFLOW__CORE__DAGS_FOLDER="$DIR/tests/runners/airflow/liminal/"
+# with open('/mnt/gettingstartedvol/hello_world.json') as file:
+#     print(f'hello_world.json contents = {json.loads(file.readline())}')
+#
+# os.makedirs('/mnt/vol1/', exist_ok=True)
 
-python -m unittest
+with open('/mnt/gettingstartedvol/hello_world_output.json', 'w') as file:
+    file.write(json.dumps({'hello': 1, 'world': 2}))

@@ -15,16 +15,18 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 from typing import Optional
 
-from airflow.contrib.kubernetes.volume import Volume
-from airflow.contrib.kubernetes.volume_mount import VolumeMount
+from airflow.kubernetes.volume import Volume
+from airflow.kubernetes.volume_mount import VolumeMount
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.operators.dummy_operator import DummyOperator
 
-from liminal.kubernetes import volume_util
 from liminal.runners.airflow.config.standalone_variable_backend import get_variable
 from liminal.runners.airflow.model import task
+
+_LOG = logging.getLogger(__name__)
 
 
 class PythonTask(task.Task):
@@ -36,9 +38,8 @@ class PythonTask(task.Task):
         super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
         self.task_name = self.task_config['task']
         self.image = self.task_config['image']
-        self.volumes_config = self._volumes_config()
+        self.volumes = self._volumes()
         self.mounts = self.task_config.get('mounts', [])
-        self._create_local_volumes()
         self.resources = self.__kubernetes_resources()
         self.env_vars = self.__env_vars()
         self.kubernetes_kwargs = self.__kubernetes_kwargs()
@@ -51,16 +52,21 @@ class PythonTask(task.Task):
         else:
             return self.__apply_task_to_dag_multiple_executors()
 
-    def _volumes_config(self):
+    def _volumes(self):
         volumes_config = self.liminal_config.get('volumes', [])
-
-        for volume in volumes_config:
-            if 'local' in volume:
-                volume['persistentVolumeClaim'] = {
-                    'claimName': f"{volume['volume']}-pvc"
+        volumes = []
+        for volume_config in volumes_config:
+            name = volume_config['volume']
+            volume = Volume(
+                name=name,
+                configs={
+                    'persistentVolumeClaim': {
+                        'claimName': f"{name}-pvc"
+                    }
                 }
-
-        return volumes_config
+            )
+            volumes.append(volume)
+        return volumes
 
     def __apply_task_to_dag_multiple_executors(self):
         start_task = DummyOperator(
@@ -141,12 +147,7 @@ class PythonTask(task.Task):
             'image_pull_secrets': 'regcred',
             'resources': self.resources,
             'dag': self.dag,
-            'volumes': [
-                Volume(volume['volume'], volume)
-                for volume
-                in self.volumes_config
-            ],
-            # TODO: aviem - mount with run_id as subpath
+            'volumes': self.volumes,
             'volume_mounts': [
                 VolumeMount(mount['volume'],
                             mount['path'],
@@ -174,7 +175,3 @@ class PythonTask(task.Task):
             resources['limit_memory'] = self.task_config['limit_memory']
 
         return resources
-
-    def _create_local_volumes(self):
-        for volume in [volume for volume in self.volumes_config if 'local' in volume]:
-            volume_util.create_local_volume(volume)

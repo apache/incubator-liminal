@@ -19,6 +19,27 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-export AIRFLOW__CORE__DAGS_FOLDER="$DIR/tests/runners/airflow/liminal/"
+if ! command -v liminal &> /dev/null
+then
+  liminal stop
+fi
 
-python -m unittest
+yes | pip uninstall apache-liminal
+
+cd "$DIR" || exit
+
+rm -rf build
+rm -rf dist
+
+python setup.py sdist bdist_wheel
+
+rm scripts/*.whl
+
+cp dist/*.whl scripts
+
+ver=$(ls scripts/*.whl)
+export LIMINAL_VERSION="apache-liminal @ file://$ver"
+
+pip install scripts/*.whl
+
+cd - || exit

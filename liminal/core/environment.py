@@ -44,15 +44,20 @@ def get_dags_dir():
 def get_liminal_version():
     result = os.environ.get(LIMINAL_VERSION_PARAM_NAME, None)
     if not result:
-        output = subprocess.run(['pip freeze | grep \'apache-liminal\''], capture_output=True, env=os.environ, shell=True)
+        output = subprocess.run(['pip freeze | grep \'apache-liminal\''], capture_output=True,
+                                env=os.environ, shell=True)
         pip_res = output.stdout.decode('UTF-8').strip()
-        value = None
-        if not pip_res:
-            value = 'apache-liminal'
-        if ' @ ' in pip_res:
-            value = pip_res[pip_res.index(' @ ')+3:]
+        scripts_dir = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'scripts'
+        )
+        whl_files = [file for file in os.listdir(scripts_dir) if file.endswith(".whl")]
+        if whl_files:
+            value = 'file://' + os.path.join(scripts_dir, whl_files[0])
+        elif ' @ ' in pip_res:
+            value = pip_res[pip_res.index(' @ ') + 3:]
         else:
-            value= pip_res
+            value = pip_res
         print(f'LIMINAL_VERSION not set. Setting it to currently installed version: {value}')
         os.environ[LIMINAL_VERSION_PARAM_NAME] = value
     return os.environ.get(LIMINAL_VERSION_PARAM_NAME, 'apache-liminal')

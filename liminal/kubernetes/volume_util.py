@@ -17,6 +17,7 @@
 # under the License.
 
 import logging
+import os
 
 from kubernetes import client, config
 from kubernetes.client import V1PersistentVolume, V1PersistentVolumeClaim
@@ -26,6 +27,21 @@ config.load_kube_config()
 _LOG = logging.getLogger('volume_util')
 _LOCAL_VOLUMES = set([])
 _kubernetes = client.CoreV1Api()
+
+
+def create_local_volumes(liminal_config, base_dir):
+    volumes_config = liminal_config.get('volumes', [])
+
+    for volume_config in volumes_config:
+        if 'local' in volume_config:
+            print(f'Creating local kubernetes volume if needed: {volume_config}')
+            path = volume_config['local']['path']
+            if path.startswith(".."):
+                path = os.path.join(base_dir, path)
+            if path.startswith("."):
+                path = os.path.join(base_dir, path[1:])
+            volume_config['local']['path'] = path
+            create_local_volume(volume_config)
 
 
 def create_local_volume(conf, namespace='default') -> None:
@@ -72,7 +88,8 @@ def delete_local_volume(name, namespace='default'):
         _LOG.info(f'Deleting persistent volume claim {pvc_name}')
         _kubernetes.delete_namespaced_persistent_volume_claim(pvc_name, namespace)
 
-    _LOCAL_VOLUMES.remove(name)
+    if name in _LOCAL_VOLUMES:
+        _LOCAL_VOLUMES.remove(name)
 
 
 def _create_persistent_volume_claim(pvc_name, volume_name, namespace):

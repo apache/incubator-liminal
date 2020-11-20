@@ -6,3 +6,9 @@ venv
 .Python
 *.pyc
 pip-selfcheck.json
+.DS_Store
+build
+apache_liminal.egg-info
+scripts/*.tar.gz
+scripts/*.whl
+dist
