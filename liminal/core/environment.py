@@ -18,7 +18,7 @@
 
 import os
 import subprocess
-from pathlib import Path
+import logging
 
 DEFAULT_DAGS_ZIP_NAME = 'liminal.zip'
 DEFAULT_LIMINAL_HOME = os.path.expanduser('~/liminal_home')
@@ -29,8 +29,8 @@ LIMINAL_VERSION_PARAM_NAME = 'LIMINAL_VERSION'
 
 def get_liminal_home():
     if not os.environ.get(LIMINAL_HOME_PARAM_NAME):
-        print("no environment parameter called LIMINAL_HOME detected")
-        print(f"registering {DEFAULT_LIMINAL_HOME} as the LIMINAL_HOME directory")
+        logging.info("no environment parameter called LIMINAL_HOME detected")
+        logging.info(f"registering {DEFAULT_LIMINAL_HOME} as the LIMINAL_HOME directory")
         os.environ[LIMINAL_HOME_PARAM_NAME] = DEFAULT_LIMINAL_HOME
     return os.environ.get(LIMINAL_HOME_PARAM_NAME, DEFAULT_LIMINAL_HOME)
 
@@ -58,6 +58,6 @@ def get_liminal_version():
             value = pip_res[pip_res.index(' @ ') + 3:]
         else:
             value = pip_res
-        print(f'LIMINAL_VERSION not set. Setting it to currently installed version: {value}')
+        logging.info(f'LIMINAL_VERSION not set. Setting it to currently installed version: {value}')
         os.environ[LIMINAL_VERSION_PARAM_NAME] = value
     return os.environ.get(LIMINAL_VERSION_PARAM_NAME, 'apache-liminal')

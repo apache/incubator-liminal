@@ -21,6 +21,7 @@ import os
 
 from kubernetes import client, config
 from kubernetes.client import V1PersistentVolume, V1PersistentVolumeClaim
+import logging
 
 config.load_kube_config()
 
@@ -34,7 +35,7 @@ def create_local_volumes(liminal_config, base_dir):
 
     for volume_config in volumes_config:
         if 'local' in volume_config:
-            print(f'Creating local kubernetes volume if needed: {volume_config}')
+            logging.info(f'Creating local kubernetes volume if needed: {volume_config}')
             path = volume_config['local']['path']
             if path.startswith(".."):
                 path = os.path.join(base_dir, path)

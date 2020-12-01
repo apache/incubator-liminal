@@ -5,7 +5,6 @@ from unittest import TestCase
 from liminal.runners.airflow.dag import liminal_dags
 from liminal.runners.airflow.operators.job_status_operator import JobEndOperator, JobStartOperator
 
-
 class Test(TestCase):
     def test_register_dags(self):
         dags = self.get_register_dags()

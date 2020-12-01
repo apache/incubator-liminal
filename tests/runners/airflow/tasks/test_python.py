@@ -24,7 +24,7 @@ from liminal.build import liminal_apps_builder
 from liminal.kubernetes import volume_util
 from liminal.runners.airflow.tasks import python
 from tests.util import dag_test_utils
-
+import logging
 
 class TestPythonTask(TestCase):
     _VOLUME_NAME = 'myvol1'
@@ -58,7 +58,7 @@ class TestPythonTask(TestCase):
         task1.apply_task_to_dag()
 
         for task in dag.tasks:
-            print(f'Executing task {task.task_id}')
+            logging.info(f'Executing task {task.task_id}')
             task.execute({})
 
         inputs_dir = os.path.join(self.temp_dir, 'inputs')
