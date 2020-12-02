@@ -22,8 +22,6 @@ import docker
 from unittest import TestCase
 from liminal.build.image.python.python import PythonImageBuilder
 import logging
-from liminal.logging.logging_setup import logging_initialization
-logging_initialization()
 
 class TestPythonImageBuilder(TestCase):
     __IMAGE_NAME = 'my_python_task_img'
