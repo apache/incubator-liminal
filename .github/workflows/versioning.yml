@@ -1,0 +1,31 @@
+name: Versioning RC
+
+on:
+  workflow_run:
+    workflows: ["Running unittest"]
+    branches: [master]
+    types: 
+      - completed
+
+jobs:
+  versioning-auto-commit:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Publish package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+      - name: Install dependencies for setup
+        run: |
+          python -m pip install --upgrade pip
+          pip install bump2version
+      - name: Project versioning
+        run: bumpversion build
+      - name: Commit report
+        run: |
+          git config --global user.name 'Liminal Bot'
+          git commit -am "Increment version"
+          git push

@@ -243,6 +243,12 @@ export LIMINAL_BUILD_VERSION=0.0.1rc1-incubating
 git clone https://github.com/apache/incubating-liminal.git 
 cd incubating-liminal
 ```
+
+- Mark the next version
+```bash
+# Set Version
+sed -i '/^current_version /s/=.*$/= '"$LIMINAL_BUILD_VERSION"'/' .bumpversion.cfg
+```
   
 - Tag your release
 
