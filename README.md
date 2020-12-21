@@ -96,9 +96,9 @@ services:
 
 
 # Installation
-1. Install this package
+1. Install this repository (HEAD)
 ```bash
-   pip install liminal
+   pip install git+https://github.com/apache/incubator-liminal.git
 ```
 2. Optional: set LIMINAL_HOME to path of your choice (if not set, will default to ~/liminal_home)
 ```bash
