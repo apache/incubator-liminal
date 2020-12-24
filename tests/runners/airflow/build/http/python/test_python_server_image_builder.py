@@ -27,7 +27,7 @@ from unittest import TestCase
 import docker
 
 from liminal.build.service.python_server.python_server import PythonServerImageBuilder
-
+from liminal.build.python import PythonImageVersions
 
 class TestPythonServer(TestCase):
 
@@ -43,9 +43,11 @@ class TestPythonServer(TestCase):
         self.docker_client.close()
 
     def test_build_python_server(self):
-        build_out = self.__test_build_python_server()
-
-        self.assertTrue('RUN pip install -r requirements.txt' in build_out, 'Incorrect pip command')
+        versions = [None] + list(PythonImageVersions().supported_versions)
+        for version in versions:
+            build_out = self.__test_build_python_server(python_version=version)
+            self.assertTrue('RUN pip install -r requirements.txt' in build_out,
+                            'Incorrect pip command')
 
     def test_build_python_server_with_pip_conf(self):
         build_out = self.__test_build_python_server(use_pip_conf=True)
@@ -54,13 +56,17 @@ class TestPythonServer(TestCase):
             'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
             'Incorrect pip command')
 
-    def __test_build_python_server(self, use_pip_conf=False):
+    def __test_build_python_server(self, use_pip_conf=False,
+                                   python_version=None):
         base_path = os.path.join(os.path.dirname(__file__), '../../../liminal')
 
         config = self.__create_conf('my_task')
 
         if use_pip_conf:
             config['pip_conf'] = os.path.join(base_path, 'pip.conf')
+
+        if python_version:
+            config['python_version'] = python_version
 
         builder = PythonServerImageBuilder(config=config,
                                            base_path=base_path,

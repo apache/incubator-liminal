@@ -23,6 +23,7 @@ from unittest import TestCase
 import docker
 
 from liminal.build.image.python.python import PythonImageBuilder
+from liminal.build.python import PythonImageVersions
 
 
 class TestPythonImageBuilder(TestCase):
@@ -40,9 +41,11 @@ class TestPythonImageBuilder(TestCase):
         self.__remove_dir(self.temp_airflow_dir)
 
     def test_build(self):
-        build_out = self.__test_build()
-
-        self.assertTrue('RUN pip install -r requirements.txt' in build_out, 'Incorrect pip command')
+        for python_version in [None ,
+                               PythonImageVersions().supported_versions[0]]:
+            build_out = self.__test_build(python_version=python_version)
+        self.assertTrue('RUN pip install -r requirements.txt' in build_out,
+                        'Incorrect pip command')
 
         self.__test_image()
 
@@ -55,13 +58,20 @@ class TestPythonImageBuilder(TestCase):
 
         self.__test_image()
 
-    def __test_build(self, use_pip_conf=False):
+    def test_with_unsupported_python_version(self):
+        with self.assertRaises(ValueError):
+            self.__test_build(python_version='3.5.2')
+
+    def __test_build(self, use_pip_conf=False, python_version=None):
         config = self.__create_conf('my_task')
 
         base_path = os.path.join(os.path.dirname(__file__), '../../liminal')
 
         if use_pip_conf:
             config['pip_conf'] = os.path.join(base_path, 'pip.conf')
+
+        if python_version:
+            config['python_version'] = python_version
 
         builder = PythonImageBuilder(config=config,
                                      base_path=base_path,
