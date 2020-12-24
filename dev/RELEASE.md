@@ -92,7 +92,7 @@ Should follow https://www.python.org/dev/peps/pep-0440/
 - Build a local version of liminal:
 ```bash
 # Set Version
-export LIMINAL_BUILD_VERSION=0.0.1RC1
+export LIMINAL_BUILD_VERSION=0.0.1rc1
 python setup.py sdist bdist_wheel
 ```
 
@@ -228,7 +228,7 @@ The Release Candidate artifacts we vote upon should be the exact ones we vote ag
 
 ```bash
 # Set Version
-export LIMINAL_BUILD_VERSION=0.0.1RC1
+export LIMINAL_BUILD_VERSION=0.0.1rc1
 
 # Example after cloning
 git clone https://github.com/apache/incubating-liminal.git 
