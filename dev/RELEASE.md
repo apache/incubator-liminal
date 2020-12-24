@@ -251,7 +251,7 @@ git clean -fxd
 - Tarball the repo
 
 ```bash
-git archive --format=tar.gz ${LIMINAL_BUILD_VERSION} --prefix=apache-liminal-${LIMINAL_BUILD_VERSION}/ -o apache-liminal-${LIMINAL_BUILD_VERSION}-source.tar.gz`
+git archive --format=tar.gz ${LIMINAL_BUILD_VERSION} --prefix=apache-liminal-${LIMINAL_BUILD_VERSION}/ -o apache-liminal-${LIMINAL_BUILD_VERSION}-source.tar.gz
 ```
 
 
