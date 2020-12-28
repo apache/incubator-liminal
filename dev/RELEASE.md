@@ -544,6 +544,17 @@ release candidate number 1,2,3,....).
 pip install apache-liminal==<LIMINAL_BUID_VERSION>rc<X>
 ```
 
+### Seek approval from Incubator PMC
+
+[Post to the Incubator’s general list requesting approval from the Incubator PMC](https://lists.apache.org/thread.html/06655226ba08c16a8cb273f9b45e0b0a15ebaed0d06783fdd06a03f6@%3Cgeneral.incubator.apache.org%3E).
+Should the Incubator PMC vote to approve a release, the Podling MAY make that release available to the public under these conditions:
+
+* The release archive(s) MUST include the word "incubating" in the filename.
+* The release archive(s) MUST contain a disclaimer found in DISCLAIMER file.
+
+Releases for the Podling MUST be distributed through http://www.apache.org/dist/incubator/Podling
+https://lists.apache.org/thread.html/06655226ba08c16a8cb273f9b45e0b0a15ebaed0d06783fdd06a03f6@%3Cgeneral.incubator.apache.org%3E
+
 ## Publish the final Apache Liminal release
 
 ### Summarize the voting for the Apache Liminal release
