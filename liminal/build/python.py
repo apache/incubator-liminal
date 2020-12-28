@@ -21,15 +21,50 @@ import os
 from liminal.build.image_builder import ImageBuilder
 
 
+class PythonImageVersions:
+    """
+    Handles the python versions for python images.
+    """
+
+    @property
+    def default_version(self):
+        return '3.7'
+
+    @property
+    def supported_versions(self):
+        return '3.6', '3.7', '3.8', '3.9'
+
+    def get_image_name(self, python_version):
+        """
+        :param python_version: The python version that would be installed in
+            the docker image. For example '3.8', '3.8.1' etc.
+        :type python_version: str
+        :return: The name of the base (slim) python image
+        :rtype: str
+        """
+        if not python_version:
+            python_version = self.default_version
+        else:
+            python_version = str(python_version)
+        if python_version[:3] not in self.supported_versions:
+            raise ValueError(f'liminal supports the following python versions: '
+                             f'{self.supported_versions} but {python_version} '
+                             f'were passed')
+        return f'python:{python_version}-slim'
+
+
 class BasePythonImageBuilder(ImageBuilder):
     """
     Base class for building python images.
     """
 
     __PIP_CONF = 'pip_conf'
+    __PYTHON_VERSION = 'python_version'
 
-    def __init__(self, config, base_path, relative_source_path, tag):
+    def __init__(self, config, base_path, relative_source_path, tag,
+                 base_image=PythonImageVersions()):
         super().__init__(config, base_path, relative_source_path, tag)
+        self._base_image = base_image
 
     @staticmethod
     def _dockerfile_path():
@@ -48,6 +83,7 @@ class BasePythonImageBuilder(ImageBuilder):
             data = original.read()
 
         data = self.__mount_pip_conf(data)
+        data = self.__add_python_base_version(data)
 
         return [('Dockerfile', data)]
 
@@ -62,6 +98,11 @@ class BasePythonImageBuilder(ImageBuilder):
             new_data = new_data.replace('{{mount}} ', '')
 
         return new_data
+
+    def __add_python_base_version(self, data):
+        python_version = self.config.get(self.__PYTHON_VERSION)
+        base_image = self._base_image.get_image_name(python_version)
+        return data.replace('{{python}}', base_image)
 
     def _build_flags(self):
         if self.__PIP_CONF in self.config:

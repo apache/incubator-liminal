@@ -1,4 +1,4 @@
-#
+#!/usr/bin/env bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,25 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Use an official Python runtime as a parent image
-FROM {{python}}
+# Use this to sign the tar balls generated from
+# python setup.py sdist --formats=gztar
+# ie. sign.sh <my_tar_ball>
+# you will still be required to type in your signing key password
+# or it needs to be available in your keychain
 
-# Install aptitude build-essential
-#RUN apt-get install -y --reinstall build-essential
+NAME="${1}"
 
-# Set the working directory to /app
-WORKDIR /app
-
-# Order of operations is important here for docker's caching & incremental build performance.    !
-# Be careful when changing this code.                                                            !
-
-# Install any needed packages specified in requirements.txt
-COPY ./requirements.txt /app/
-
-# mount the secret in the correct location, then run pip install
-RUN pip install --upgrade pip
-RUN {{mount}} pip install -r requirements.txt
-
-# Copy the current directory contents into the container at /app
-RUN echo "Copying source code.."
-COPY . /app/
+gpg --armor --output "${NAME}.asc" --detach-sig "${NAME}"
+gpg --print-md SHA512 "${NAME}" > "${NAME}.sha512"
