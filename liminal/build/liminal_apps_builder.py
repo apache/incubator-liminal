@@ -103,7 +103,7 @@ def get_types_dict(task_build_classes):
 task_build_types = get_types_dict(task_build_classes)
 
 logging.info(f'Finished loading image builder implementations: {task_build_classes}')
-logging.info('dasdasdasdas')
+
 logging.info(f'Loading service image builder implementations..')
 
 # TODO: add configuration for user service image builders package
