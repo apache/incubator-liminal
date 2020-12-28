@@ -34,8 +34,8 @@ from liminal.core.util import files_util
 from liminal.kubernetes import volume_util
 from liminal.runners.airflow import dag
 from liminal.logging.logging_setup import logging_initialization
-logging_initialization()
 import logging
+logging_initialization()
 try:
     import importlib.resources as pkg_resources
 except ImportError:

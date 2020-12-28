@@ -21,14 +21,20 @@ from liminal.core import environment
 LIMINAL = 'liminal'
 LOGS_DIR = 'logs'
 
+
 def logging_initialization():
     # TBD - rotating file handler
     # TBD - log in JSON format
     root_logger = logging.getLogger()
-    log_formatter = logging.Formatter("%(asctime)s [%(threadName)s] [%(levelname)s]  %(message)s")
+
+    log_formatter = logging.Formatter('[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
+                                      '%m-%d %H:%M:%S')
+
     file_handler = logging.FileHandler("{0}/{1}/{2}.log".format(environment.get_liminal_home(), LOGS_DIR, LIMINAL))
-    file_handler.setFormatter(log_formatter)
     root_logger.addHandler(file_handler)
-    root_logger.setLevel(logging.DEBUG)
+    root_logger.setLevel(logging.INFO)
+
+    # set the same format for all handlers
+    [h.setFormatter(log_formatter) for h in root_logger.handlers]
 
     logging.info('Logging initialization completed')
