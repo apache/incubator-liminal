@@ -26,6 +26,7 @@ from unittest import TestCase
 
 import docker
 
+from liminal.build.service.python_server.python_server import PythonServerImageBuilder
 from liminal.build.python import PythonImageVersions
 import logging
 

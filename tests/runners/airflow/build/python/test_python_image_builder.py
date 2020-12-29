@@ -20,6 +20,7 @@ import shutil
 import tempfile
 import docker
 from unittest import TestCase
+from liminal.build.image.python.python import PythonImageBuilder
 from liminal.build.python import PythonImageVersions
 import logging
 
