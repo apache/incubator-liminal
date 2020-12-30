@@ -47,5 +47,5 @@ How to remove a version and rebuild:
 cd example_folder
 pip uninstall apache-liminal
 cd <liminal_path>
-rm ./dist 
+rm -r ./dist 
 ```
