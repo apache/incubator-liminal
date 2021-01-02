@@ -95,6 +95,7 @@ def deploy_liminal_core_internal(clean):
 
 
 def docker_compose_command(command_name, args):
+    detached_mode = False
     docker_compose_path, project_dir = get_docker_compose_paths()
     concated_args = ' '.join(args)
     run_command = [
@@ -104,14 +105,16 @@ def docker_compose_command(command_name, args):
         f'{project_dir} {command_name} {concated_args}'
     ]
     logging.info(run_command[0])
-    if 'follow' in str(args):
-        subprocess.call(run_command, env=os.environ, shell=True)
-        return '', ''
-    else:
+    if ('tail' in str(args) or '-d' in str(args) or command_name in ['ps', 'down']):
+        detached_mode = True
+
+    if detached_mode:
         output = subprocess.run(run_command, env=os.environ, shell=True, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, universal_newlines=True)
         return output.stdout, output.stderr
-
+    else:
+        subprocess.call(run_command, env=os.environ, shell=True)
+        return '', ''
 
 @cli.command("deploy", short_help="deploys your liminal.yaml files to $LIMINAL_HOME folder")
 @click.option('--path', default=os.getcwd(), help="folder containing liminal.yaml files")
@@ -165,13 +168,17 @@ def logs(follow, tail):
 @cli.command("start",
              short_help="starts a local airflow in docker compose. should be run after deploy. " +
                         "Make sure docker is running on your machine")
-def start():
+@click.option('--detached-mode', '-d', is_flag=True, default=False, help="Start liminal in detached mode.")
+def start(detached_mode):
     liminal_version = environment.get_liminal_version()
     logging.info(f'starting liminal version: {liminal_version}')
     if docker_is_running():
         # initialize liminal home by default
         environment.get_liminal_home()
-        docker_compose_command('up', ['-d'])
+        if detached_mode:
+            docker_compose_command('up', ['-d'])
+        else:
+            docker_compose_command('up', [])
 
 
 def get_docker_compose_paths():
