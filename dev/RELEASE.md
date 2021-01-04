@@ -134,6 +134,15 @@ This covers pip repositories, files and installtion from URL.
 The fallback in case no string is found, is simply 'apache-liminal' assuming your .pypirc contains an 
 index which has this package.
 
+
+## Testing a version from testpypi:
+
+Installing liminal locally: 
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple apache-liminal
+
+Tell liminal where to take the version to put inside the airflow docker:
+export LIMINAL_VERSION='--index-url https://test.pypi.org/simple/ apache-liminal==0.0.1rc1'
+
 ## Upload Public keys to id.apache.org
 
 Make sure your public key is on id.apache.org and in KEYS. You will need to sign the release artifacts
