@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 import os
 import shutil
 import tempfile
@@ -41,7 +42,7 @@ class TestPythonImageBuilder(TestCase):
         self.__remove_dir(self.temp_airflow_dir)
 
     def test_build(self):
-        for python_version in [None ,
+        for python_version in [None,
                                PythonImageVersions().supported_versions[0]]:
             build_out = self.__test_build(python_version=python_version)
         self.assertTrue('RUN pip install -r requirements.txt' in build_out,
@@ -103,7 +104,7 @@ class TestPythonImageBuilder(TestCase):
 
         docker_client.close()
 
-        print(container_log)
+        logging.info(container_log)
 
         self.assertEqual(
             "b'"

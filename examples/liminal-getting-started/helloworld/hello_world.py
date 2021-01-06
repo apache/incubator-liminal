@@ -16,14 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 import json
-import os
 
 print('Hello world!\n')
-
-# with open('/mnt/gettingstartedvol/hello_world.json') as file:
-#     print(f'hello_world.json contents = {json.loads(file.readline())}')
-#
-# os.makedirs('/mnt/vol1/', exist_ok=True)
 
 with open('/mnt/gettingstartedvol/hello_world_output.json', 'w') as file:
     file.write(json.dumps({'hello': 1, 'world': 2}))

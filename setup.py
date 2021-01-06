@@ -17,6 +17,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 import os
 
 import setuptools
@@ -26,8 +27,7 @@ with open("README.md", "r") as fh:
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
-    print(requirements)
-
+    logging.info(requirements)
 
 setuptools.setup(
     name="apache-liminal",

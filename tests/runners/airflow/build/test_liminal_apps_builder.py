@@ -23,7 +23,6 @@ import docker
 
 from liminal.build import liminal_apps_builder
 
-
 class TestLiminalAppsBuilder(TestCase):
     __image_names = [
         'my_python_task_img',

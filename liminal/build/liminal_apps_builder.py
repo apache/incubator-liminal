@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import logging
 import os
 
 import yaml
@@ -31,7 +32,7 @@ def build_liminal_apps(path):
     config_files = files_util.find_config_files(path)
 
     for config_file in config_files:
-        print(f'Building artifacts for file: {config_file}')
+        logging.info(f'Building artifacts for file: {config_file}')
 
         base_path = os.path.dirname(config_file)
 
@@ -51,7 +52,8 @@ def build_liminal_apps(path):
                             else:
                                 raise ValueError(f'No such task type: {task_type}')
                         else:
-                            print(f'No source configured for task {task_name}, skipping build..')
+                            logging.info(
+                                f'No source configured for task {task_name}, skipping build..')
 
             if 'services' in liminal_config:
                 for service in liminal_config['services']:
@@ -72,7 +74,7 @@ def __build_image(base_path, builder_config, builder):
             tag=builder_config['image'])
         builder_instance.build()
     else:
-        print(f"No source provided for {builder_config['name']}, skipping.")
+        logging.info(f"No source provided for {builder_config['name']}, skipping.")
 
 
 def __get_task_build_class(task_type):
@@ -83,13 +85,13 @@ def __get_service_build_class(service_type):
     return service_build_types.get(service_type, None)
 
 
-print(f'Loading image builder implementations..')
+logging.info(f'Loading image builder implementations..')
 
 # TODO: add configuration for user image builders package
 image_builders_package = 'liminal.build.image'
 # user_image_builders_package = 'TODO: user_image_builders_package'
 
-task_build_classes = class_util.find_subclasses_in_packages(
+TASK_BUILD_CLASSES = class_util.find_subclasses_in_packages(
     [image_builders_package],
     ImageBuilder)
 
@@ -99,11 +101,10 @@ def get_types_dict(task_build_classes):
     return {x.split(".")[-2]: c for x, c in task_build_classes.items()}
 
 
-task_build_types = get_types_dict(task_build_classes)
+task_build_types = get_types_dict(TASK_BUILD_CLASSES)
 
-print(f'Finished loading image builder implementations: {task_build_classes}')
-
-print(f'Loading service image builder implementations..')
+logging.info(f'Finished loading image builder implementations: {TASK_BUILD_CLASSES}')
+logging.info(f'Loading service image builder implementations..')
 
 # TODO: add configuration for user service image builders package
 service_builders_package = 'liminal.build.service'
@@ -114,4 +115,4 @@ service_build_classes = class_util.find_subclasses_in_packages(
     ServiceImageBuilderMixin)
 
 service_build_types = get_types_dict(service_build_classes)
-print(f'Finished loading service image builder implementations: {service_build_classes}')
+logging.info(f'Finished loading service image builder implementations: {service_build_classes}')
