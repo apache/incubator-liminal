@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 import os
 import tempfile
 import unittest
@@ -58,7 +59,7 @@ class TestPythonTask(TestCase):
         task1.apply_task_to_dag()
 
         for task in dag.tasks:
-            print(f'Executing task {task.task_id}')
+            logging.info(f'Executing task {task.task_id}')
             task.execute({})
 
         inputs_dir = os.path.join(self.temp_dir, 'inputs')

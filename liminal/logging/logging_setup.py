@@ -16,27 +16,32 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import json
 import logging
-import os
+from logging.handlers import RotatingFileHandler
 
-split_id = int(os.environ['LIMINAL_SPLIT_ID'])
-num_splits = int(os.environ['LIMINAL_NUM_SPLITS'])
+from liminal.core import environment
 
-inputs_dir = f'/mnt/vol1/inputs/{split_id}'
-outputs_dir = '/mnt/vol1/outputs/'
+LIMINAL = 'liminal'
+LOGS_DIR = 'logs'
+MAX_FILE_SIZE = 10485760  # 10 MB
 
-if not os.path.exists(outputs_dir):
-    os.makedirs(outputs_dir)
 
-logging.info(f'Running write_outputs for split id {split_id} [NUM_SPLITS = {num_splits}]')
+def logging_initialization():
+    root_logger = logging.getLogger()
 
-for filename in os.listdir(inputs_dir):
-    with open(os.path.join(inputs_dir, filename)) as infile, \
-            open(os.path.join(
-                outputs_dir,
-                filename.replace('input', 'output').replace('.json', '.txt')
-            ), 'w') as outfile:
-        logging.info(f'Writing output file: {outfile.name}')
-        data = json.loads(infile.read())
-        outfile.write(data['mykey'])
+    log_formatter = logging.Formatter(
+        '[%(asctime)s] [%(filename)s:%(lineno)d] %(levelname)s - %(message)s',
+        '%m-%d %H:%M:%S'
+    )
+
+    file_handler = RotatingFileHandler(
+        f'{environment.get_liminal_home()}/{LOGS_DIR}/{LIMINAL}.log',
+        maxBytes=MAX_FILE_SIZE,
+        backupCount=3
+    )
+    root_logger.addHandler(file_handler)
+    root_logger.setLevel(logging.INFO)
+
+    [h.setFormatter(log_formatter) for h in root_logger.handlers]
+
+    logging.info('Logging initialization completed')

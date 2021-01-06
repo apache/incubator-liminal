@@ -18,6 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import logging
 import os
 import pathlib
 import shutil
@@ -27,12 +28,15 @@ import sys
 import click
 import yaml
 
-import scripts as s
+import scripts
 from liminal.build import liminal_apps_builder
 from liminal.core import environment
 from liminal.core.util import files_util
 from liminal.kubernetes import volume_util
+from liminal.logging.logging_setup import logging_initialization
 from liminal.runners.airflow import dag
+
+logging_initialization()
 
 try:
     import importlib.resources as pkg_resources
@@ -64,6 +68,7 @@ def build(path):
 
 
 def deploy_liminal_core_internal(clean):
+    # noinspection PyTypeChecker
     with pkg_resources.path(dag, 'liminal_dags.py') as p:
         dags_path = p
     os.makedirs(environment.get_dags_dir(), exist_ok=True)
@@ -72,13 +77,13 @@ def deploy_liminal_core_internal(clean):
     # initialize the env. variable which indicates to the docke compose which
     # liminal to install in airflow docker
     liminal_version = environment.get_liminal_version()
-    print(f'Deploying liminal version: {liminal_version}')
+    logging.info(f'Deploying liminal version: {liminal_version}')
     # if liminal is installed from local file - the developer needs to put it in the /scripts folder
     # in which case it will end up inside the container during build
     if liminal_version.find("file://") > -1:
         local_file_name = os.path.basename(liminal_version)
         full_path = os.path.join('/opt/airflow/dags', local_file_name)
-        print(
+        logging.info(
             f'Liminal was installed locally, changing the LIMINAL_VERSION parameter to {full_path}')
         os.environ[environment.LIMINAL_VERSION_PARAM_NAME] = full_path
     if clean:
@@ -98,7 +103,7 @@ def docker_compose_command(command_name, args):
         '-p liminal --project-directory '
         f'{project_dir} {command_name} {concated_args}'
     ]
-    print(run_command[0])
+    logging.info(run_command[0])
     if 'follow' in str(args):
         subprocess.call(run_command, env=os.environ, shell=True)
         return '', ''
@@ -154,7 +159,7 @@ def logs(follow, tail):
             docker_compose_command('logs', ['--follow'])
         if tail > 0:
             stdout, stderr = docker_compose_command('logs', [f'--tail={tail}'])
-            print(stdout)
+            logging.info(stdout)
 
 
 @cli.command("start",
@@ -162,7 +167,7 @@ def logs(follow, tail):
                         "Make sure docker is running on your machine")
 def start():
     liminal_version = environment.get_liminal_version()
-    print(f'starting liminal version: {liminal_version}')
+    logging.info(f'starting liminal version: {liminal_version}')
     if docker_is_running():
         # initialize liminal home by default
         environment.get_liminal_home()
@@ -170,7 +175,8 @@ def start():
 
 
 def get_docker_compose_paths():
-    with pkg_resources.path(s, 'docker-compose.yml') as p:
+    # noinspection PyTypeChecker
+    with pkg_resources.path(scripts, 'docker-compose.yml') as p:
         docker_compose_path = p
     project_dir = pathlib.Path(docker_compose_path).parent.parent.absolute()
     return docker_compose_path, project_dir

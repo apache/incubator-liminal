@@ -17,14 +17,15 @@
 # under the License.
 
 import os
+import logging
 
 
 def find_config_files(path):
     files = []
-    print(path)
+    logging.info(path)
     for r, d, f in os.walk(path):
         for file in f:
             if os.path.basename(file) in ['liminal.yml', 'liminal.yaml']:
-                print(os.path.join(r, file))
+                logging.info(os.path.join(r, file))
                 files.append(os.path.join(r, file))
     return files

@@ -17,6 +17,7 @@
 # under the License.
 
 import json
+import logging
 import os
 import threading
 import time
@@ -26,8 +27,9 @@ from unittest import TestCase
 
 import docker
 
-from liminal.build.service.python_server.python_server import PythonServerImageBuilder
 from liminal.build.python import PythonImageVersions
+from liminal.build.service.python_server.python_server import PythonServerImageBuilder
+
 
 class TestPythonServer(TestCase):
 
@@ -81,7 +83,7 @@ class TestPythonServer(TestCase):
 
         time.sleep(5)
 
-        print('Sending request to server')
+        logging.info('Sending request to server')
 
         json_string = '{"key1": "val1", "key2": "val2"}'
 
@@ -92,33 +94,33 @@ class TestPythonServer(TestCase):
             data=json_string.encode(encoding)
         ).read().decode(encoding))
 
-        print(f'Response from server: {server_response}')
+        logging.info(f'Response from server: {server_response}')
 
         self.assertEqual(f'Input was: {json.loads(json_string)}', server_response)
 
         return build_out
 
     def __remove_containers(self):
-        print(f'Stopping containers with image: {self.image_name}')
+        logging.info(f'Stopping containers with image: {self.image_name}')
 
         all_containers = self.docker_client.containers
         matching_containers = all_containers.list(filters={'ancestor': self.image_name})
 
         for container in matching_containers:
             container_id = container.id
-            print(f'Stopping container {container_id}')
+            logging.info(f'Stopping container {container_id}')
             self.docker_client.api.stop(container_id)
-            print(f'Removing container {container_id}')
+            logging.info(f'Removing container {container_id}')
             self.docker_client.api.remove_container(container_id)
 
         self.docker_client.containers.prune()
 
     def __run_container(self, image_name):
         try:
-            print(f'Running container for image: {image_name}')
+            logging.info(f'Running container for image: {image_name}')
             self.docker_client.containers.run(image_name, ports={'80/tcp': 9294})
         except Exception as err:
-            print(err)
+            logging.exception(err)
             pass
 
     @staticmethod
