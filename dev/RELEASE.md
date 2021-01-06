@@ -92,7 +92,7 @@ Should follow https://www.python.org/dev/peps/pep-0440/
 - Build a local version of liminal:
 ```bash
 # Set Version
-export LIMINAL_BUILD_VERSION=0.0.1rc1
+export LIMINAL_BUILD_VERSION=0.0.1rc1-incubating
 python setup.py sdist bdist_wheel
 ```
 
@@ -141,7 +141,7 @@ Installing liminal locally:
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple apache-liminal
 
 Tell liminal where to take the version to put inside the airflow docker:
-export LIMINAL_VERSION='--index-url https://test.pypi.org/simple/ apache-liminal==0.0.1rc1'
+export LIMINAL_VERSION='--index-url https://test.pypi.org/simple/ apache-liminal==0.0.1rc1-incubating'
 
 ## Upload Public keys to id.apache.org
 
@@ -237,7 +237,7 @@ The Release Candidate artifacts we vote upon should be the exact ones we vote ag
 
 ```bash
 # Set Version
-export LIMINAL_BUILD_VERSION=0.0.1rc1
+export LIMINAL_BUILD_VERSION=0.0.1rc1-incubating
 
 # Example after cloning
 git clone https://github.com/apache/incubating-liminal.git 
