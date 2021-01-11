@@ -17,12 +17,13 @@
 # under the License.
 
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 
 from liminal.core import environment
 
-LIMINAL = 'liminal'
 LOGS_DIR = 'logs'
+LOG_FILENAME = 'liminal.log'
 MAX_FILE_SIZE = 10485760  # 10 MB
 
 
@@ -34,11 +35,15 @@ def logging_initialization():
         '%m-%d %H:%M:%S'
     )
 
+    logs_dir = os.path.join(environment.get_liminal_home(), LOGS_DIR)
+    os.makedirs(logs_dir, exist_ok=True)
+
     file_handler = RotatingFileHandler(
-        f'{environment.get_liminal_home()}/{LOGS_DIR}/{LIMINAL}.log',
+        os.path.join(logs_dir, LOG_FILENAME),
         maxBytes=MAX_FILE_SIZE,
         backupCount=3
     )
+
     root_logger.addHandler(file_handler)
     root_logger.setLevel(logging.INFO)
 
