@@ -6,35 +6,3 @@ I. Included Software
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 Licensed under the Apache License 2.0.
-
-II. Used Software
-
-This product uses software developed at
-Docker Inc. (https://www.docker.com/).
-Licensed under the Apache License 2.0.
-
-This product uses software developed at
-Pallets Projects (https://palletsprojects.com/).
-Licensed under the BSD-3-Clause License.
-
-This product uses software developed at
-PyYAML (https://pyyaml.org/).
-Licensed under the MIT License.
-
-This product uses software developed at
-Amazon Web Services, Inc. (https://aws.amazon.com/).
-Licensed under the Apache License 2.0.
-
-This product uses software developed at
-The Linux Foundation ® (https://www.linuxfoundation.org/).
-Licensed under the Apache License 2.0.
-
-This product uses software developed by
-Daniel Holth (https://wheel.readthedocs.io/).
-Licensed under the MIT License.
-
-III. License Summary
-
-- Apache License 2.0
-- BSD-3-Clause License
-- MIT License

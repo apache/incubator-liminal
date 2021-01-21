@@ -1,21 +1,15 @@
-# -*- coding: utf-8 -*-
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from datetime import datetime
 from typing import Any
 
@@ -103,17 +97,20 @@ class JobEndOperator(JobStatusOperator):
     def execute(self, context):
         self.__calculate_job_result(context)
         super().execute(context)
-        
+
     def metrics(self, context):
-        duration = round((pytz.utc.localize(datetime.utcnow()) - context['ti'].get_dagrun().start_date).total_seconds())
+        duration = round((pytz.utc.localize(datetime.utcnow()) - context[
+            'ti'].get_dagrun().start_date).total_seconds())
 
         self.log.info('Elapsed time: %s' % duration)
 
         self.log.info(f'dag final job result: {self.__job_result}')
 
         return [
-            Metric(self.namespace, 'JobResult', self.__job_result, [Tag('ApplicationName', self.application_name)]),
-            Metric(self.namespace, 'JobDuration', duration, [Tag('ApplicationName', self.application_name)])
+            Metric(self.namespace, 'JobResult', self.__job_result,
+                   [Tag('ApplicationName', self.application_name)]),
+            Metric(self.namespace, 'JobDuration', duration,
+                   [Tag('ApplicationName', self.application_name)])
         ]
 
     def __log_and_get_state(self, task_instance):
@@ -122,7 +119,7 @@ class JobEndOperator(JobStatusOperator):
         self.log.info(f'Task {task_instance.task_id} finished with state = {state}')
 
         return state
-    
+
     def __calculate_job_result(self, context):
         self.log.info('scanning task instances states.. ')
         task_instances = context['dag_run'].get_task_instances()
