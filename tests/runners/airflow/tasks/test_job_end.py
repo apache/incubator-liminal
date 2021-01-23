@@ -13,7 +13,7 @@
 import unittest
 from unittest import TestCase
 
-from liminal.runners.airflow.tasks.defaults import job_end
+from liminal.runners.airflow.tasks import job_end
 from tests.util import dag_test_utils
 
 
