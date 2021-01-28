@@ -43,5 +43,8 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=requirements,
     scripts=['scripts/liminal'],
-    include_package_data=True
+    include_package_data=True,
+    package_data={
+        'liminal': ['../DISCLAIMER', '../LICENSE', '../NOTICE', '../README.md']
+    }
 )
