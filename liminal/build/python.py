@@ -1,14 +1,20 @@
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 import os
 
@@ -83,12 +89,14 @@ class BasePythonImageBuilder(ImageBuilder):
 
     def __mount_pip_conf(self, data):
         new_data = data
+
         if self.__PIP_CONF in self.config:
             new_data = '# syntax = docker/dockerfile:1.0-experimental\n' + data
             new_data = new_data.replace('{{mount}}',
                                         '--mount=type=secret,id=pip_config,dst=/etc/pip.conf \\\n')
         else:
             new_data = new_data.replace('{{mount}} ', '')
+
         return new_data
 
     def __add_python_base_version(self, data):
