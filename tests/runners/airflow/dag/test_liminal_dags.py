@@ -54,7 +54,7 @@ class Test(TestCase):
 
     @staticmethod
     def get_register_dags():
-        base_path = os.path.join(os.path.dirname(__file__), '../liminal')
+        base_path = os.path.join(os.path.dirname(__file__), '../../apps/test_app')
         return liminal_dags.register_dags(base_path)
 
 

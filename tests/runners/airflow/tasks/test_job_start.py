@@ -13,7 +13,7 @@
 import unittest
 from unittest import TestCase
 
-from liminal.runners.airflow.tasks.defaults import job_start
+from liminal.runners.airflow.tasks import job_start
 from tests.util import dag_test_utils
 
 
@@ -24,12 +24,13 @@ class TestJobStartTask(TestCase):
         dag = dag_test_utils.create_dag()
 
         task0 = job_start.JobStartTask(
-            dag,
-            {'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']}},
-            {'pipeline': 'my_start_pipeline'},
-            {},
-            None,
-            'all_success'
+            task_id="start_task",
+            dag=dag,
+            liminal_config={'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']}},
+            pipeline_config={'pipeline': 'my_start_pipeline'},
+            task_config={},
+            parent=None,
+            trigger_rule='all_success'
         )
         task0.apply_task_to_dag()
 
@@ -46,12 +47,14 @@ class TestJobStartTask(TestCase):
 
         dag = dag_test_utils.create_dag()
 
-        task0 = job_start.JobStartTask(dag,
-                                       {},
-                                       {'pipeline': 'my_end_pipeline'},
-                                       conf,
-                                       None,
-                                       'all_success')
+        task0 = job_start.JobStartTask(
+            task_id="start_task",
+            dag=dag,
+            liminal_config=conf,
+            task_config={},
+            pipeline_config={'pipeline': 'my_end_pipeline'},
+            parent=None,
+            trigger_rule='all_success')
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)
@@ -64,12 +67,13 @@ class TestJobStartTask(TestCase):
     def test_apply_task_to_dag_with_partial_configuration(self):
         dag = dag_test_utils.create_dag()
 
-        task0 = job_start.JobStartTask(dag,
-                                       {'metrics': {'namespace': 'StartJobNameSpace'}},
-                                       {'pipeline': 'my_start_pipeline'},
-                                       {},
-                                       None,
-                                       'all_success')
+        task0 = job_start.JobStartTask(task_id="start_task",
+                                       dag=dag,
+                                       liminal_config={'metrics': {'namespace': 'StartJobNameSpace'}},
+                                       pipeline_config={'pipeline': 'my_start_pipeline'},
+                                       task_config={},
+                                       parent=None,
+                                       trigger_rule='all_success', )
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)

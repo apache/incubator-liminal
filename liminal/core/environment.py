@@ -55,3 +55,9 @@ def get_liminal_version():
         logging.info(f'LIMINAL_VERSION not set. Setting it to currently installed version: {value}')
         os.environ[LIMINAL_VERSION_PARAM_NAME] = value
     return os.environ.get(LIMINAL_VERSION_PARAM_NAME, 'apache-liminal')
+
+
+def get_airflow_home_dir():
+    # if we are inside airflow, we will take it from the configured dags folder
+    base_dir = os.environ.get("AIRFLOW__CORE__DAGS_FOLDER", get_liminal_home())
+    return os.path.join(base_dir)

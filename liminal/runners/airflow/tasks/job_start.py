@@ -9,22 +9,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from liminal.runners.airflow.model import task
+from liminal.runners.airflow.operators.job_status_operator import JobStartOperator
 
-from liminal.runners.airflow.operators.job_status_operator import JobEndOperator
-from liminal.runners.airflow.tasks.defaults.job_phase_task import JobPhaseTask
 
-
-class JobEndTask(JobPhaseTask):
+class JobStartTask(task.Task):
     """
-      Job end task. Reports job end metrics.
+    Job start task. Reports job start metrics.
     """
 
-    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
-        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                 task_config):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                         task_config)
+        metrics = self.liminal_config.get('metrics', {})
+        self.metrics_namespace = metrics.get('namespace', '')
+        self.metrics_backends = metrics.get('backends', [])
 
     def apply_task_to_dag(self):
-        job_end_task = JobEndOperator(
-            task_id='end',
+        job_start_task = JobStartOperator(
+            task_id='start',
             namespace=self.metrics_namespace,
             application_name=self.pipeline_config['pipeline'],
             backends=self.metrics_backends,
@@ -33,6 +37,6 @@ class JobEndTask(JobPhaseTask):
         )
 
         if self.parent:
-            self.parent.set_downstream(job_end_task)
+            self.parent.set_downstream(job_start_task)
 
-        return job_end_task
+        return job_start_task

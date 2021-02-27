@@ -15,3 +15,14 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+---
+name: default_liminal
+type: super
+service_defaults:
+  one: two
+task_defaults:
+  env_vars:
+    env1: a
+pipeline_defaults:
+  one: one
+  two: two

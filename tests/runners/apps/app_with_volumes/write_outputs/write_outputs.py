@@ -15,3 +15,28 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+import json
+import os
+
+num_splits = int(os.environ['NUM_SPLITS'])
+
+outputs_dir = '/mnt/vol1/outputs/'
+
+for i in range(0, num_splits):
+    inputs_dir = f'/mnt/vol1/inputs/{i}'
+
+    for filename in os.listdir(inputs_dir):
+        if not os.path.exists(outputs_dir):
+            os.makedirs(outputs_dir)
+
+        print(f'Running write_outputs for split id {i} [NUM_SPLITS = {num_splits}]')
+
+        with open(os.path.join(inputs_dir, filename)) as infile, \
+                open(os.path.join(
+                    outputs_dir,
+                    filename.replace('input', 'output').replace('.json', '.txt')
+                ), 'w') as outfile:
+            print(f'Writing output file: {outfile.name}')
+            data = json.loads(infile.read())
+            outfile.write(data['mykey'])

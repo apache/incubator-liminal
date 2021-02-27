@@ -1,17 +1,22 @@
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 import json
-import logging
 import os
 import threading
 import time
@@ -21,8 +26,9 @@ from unittest import TestCase
 
 import docker
 
-from liminal.build.python import PythonImageVersions
-from liminal.build.service.python_server.python_server import PythonServerImageBuilder
+from liminal.build.image.python_server.python_server import PythonServerImageBuilder
+
+
 
 
 class TestPythonServer(TestCase):
@@ -39,82 +45,74 @@ class TestPythonServer(TestCase):
         self.docker_client.close()
 
     def test_build_python_server(self):
-        versions = [None] + list(PythonImageVersions().supported_versions)
-        for version in versions:
-            build_out = self.__test_build_python_server(python_version=version)
-            self.assertTrue('RUN pip install -r requirements.txt' in build_out,
-                            'Incorrect pip command')
+        self.__test_build_python_server()
 
     def test_build_python_server_with_pip_conf(self):
-        build_out = self.__test_build_python_server(use_pip_conf=True)
+        self.__test_build_python_server(use_pip_conf=True)
+        # TODO: add assert with local pip server
 
-        self.assertTrue(
-            'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
-            'Incorrect pip command')
-
-    def __test_build_python_server(self, use_pip_conf=False,
-                                   python_version=None):
-        base_path = os.path.join(os.path.dirname(__file__), '../../../liminal')
+    def __test_build_python_server(self, use_pip_conf=False):
+        base_path = os.path.join(os.path.dirname(__file__), '../../../../apps/test_app')
 
         config = self.__create_conf('my_task')
 
         if use_pip_conf:
             config['pip_conf'] = os.path.join(base_path, 'pip.conf')
 
-        if python_version:
-            config['python_version'] = python_version
-
         builder = PythonServerImageBuilder(config=config,
                                            base_path=base_path,
                                            relative_source_path='myserver',
                                            tag=self.image_name)
 
-        build_out = str(builder.build())
+        builder.build()
 
-        thread = threading.Thread(target=self.__run_container, args=[self.image_name])
-        thread.daemon = True
-        thread.start()
+        if 'JENKINS_URL' not in os.environ:
+            thread = threading.Thread(target=self.__run_container, args=[self.image_name])
+            thread.daemon = True
+            thread.start()
 
-        time.sleep(5)
+            time.sleep(5)
 
-        logging.info('Sending request to server')
+            print('Sending request to server')
 
-        json_string = '{"key1": "val1", "key2": "val2"}'
+            json_string = '{"key1": "val1", "key2": "val2"}'
 
-        encoding = 'ascii'
+            encoding = 'ascii'
 
-        server_response = str(urllib.request.urlopen(
-            'http://localhost:9294/myendpoint1',
-            data=json_string.encode(encoding)
-        ).read().decode(encoding))
+            server_response = str(urllib.request.urlopen(
+                'http://localhost:9294/myendpoint1',
+                data=json_string.encode(encoding)
+            ).read().decode(encoding))
 
-        logging.info(f'Response from server: {server_response}')
+            print(f'Response from server: {server_response}')
 
-        self.assertEqual(f'Input was: {json.loads(json_string)}', server_response)
-
-        return build_out
+            self.assertEqual(f'Input was: {json.loads(json_string)}', server_response)
 
     def __remove_containers(self):
-        logging.info(f'Stopping containers with image: {self.image_name}')
+        print(f'Stopping containers with image: {self.image_name}')
 
         all_containers = self.docker_client.containers
         matching_containers = all_containers.list(filters={'ancestor': self.image_name})
 
         for container in matching_containers:
             container_id = container.id
-            logging.info(f'Stopping container {container_id}')
+            print(f'Stopping container {container_id}')
             self.docker_client.api.stop(container_id)
-            logging.info(f'Removing container {container_id}')
+            print(f'Removing container {container_id}')
             self.docker_client.api.remove_container(container_id)
 
         self.docker_client.containers.prune()
 
     def __run_container(self, image_name):
         try:
-            logging.info(f'Running container for image: {image_name}')
-            self.docker_client.containers.run(image_name, ports={'80/tcp': 9294})
+            print(f'Running container for image: {image_name}')
+            self.docker_client.containers.run(
+                image_name,
+                ports={'80/tcp': 9294},
+                environment={'USE_LAMBDA_IN_SERVING': False}
+            )
         except Exception as err:
-            logging.exception(err)
+            print(err)
             pass
 
     @staticmethod
@@ -123,7 +121,7 @@ class TestPythonServer(TestCase):
             'task': task_id,
             'cmd': 'foo bar',
             'image': 'liminal_server_image',
-            'source': 'baz',
+            'source': '.',
             'input_type': 'my_input_type',
             'input_path': 'my_input',
             'output_path': '/my_output.json',

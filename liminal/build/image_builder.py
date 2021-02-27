@@ -1,16 +1,21 @@
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
-import logging
 import os
 import shutil
 import subprocess
@@ -23,6 +28,7 @@ class ImageBuilder:
     """
 
     __NO_CACHE = 'no_cache'
+    USE_LEGACY_DOCKER_VERSION = 'use_legacy_docker_version'
 
     def __init__(self, config, base_path, relative_source_path, tag):
         """
@@ -35,18 +41,22 @@ class ImageBuilder:
         self.relative_source_path = relative_source_path
         self.tag = tag
         self.config = config
+        self.temp_dir = self._setup_build_dir()
 
-    def build(self):
-        """
-        Builds source code into an image.
-        """
-        logging.info(f'[ ] Building image: {self.tag}')
+    def _setup_build_dir(self):
+        print(f'[ ] Building image: {self.tag}')
 
         temp_dir = self.__temp_dir()
 
         self.__copy_source_code(temp_dir)
         self._write_additional_files(temp_dir)
 
+        return temp_dir
+
+    def build(self):
+        """
+        Builds source code into an image.
+        """
         no_cache = ''
         if self.__NO_CACHE in self.config and self.config[self.__NO_CACHE]:
             no_cache = '--no-cache=true'
@@ -55,32 +65,33 @@ class ImageBuilder:
         docker_build_command = f'{docker} build {no_cache} ' + \
                                f'--tag {self.tag} '
 
-        docker_build_command += f'--progress=plain {self._build_flags()} '
+        if not os.getenv(self.USE_LEGACY_DOCKER_VERSION):
+            docker_build_command += f'--progress=plain {self._build_flags(self.temp_dir)} '
 
-        docker_build_command += f'{temp_dir}'
+        docker_build_command += f'{self.temp_dir}'
 
         if self._use_buildkit():
             docker_build_command = f'DOCKER_BUILDKIT=1 {docker_build_command}'
 
-        logging.info(docker_build_command)
+        print(docker_build_command)
 
         docker_build_out = ''
         try:
-            docker_build_out = subprocess.check_output(docker_build_command,
-                                                       shell=True, stderr=subprocess.STDOUT,
-                                                       timeout=240)
+            retcode = subprocess.call(docker_build_command, env=os.environ, shell=True, timeout=600)
+            if retcode != 0:
+                raise Exception(f'Failed to build docker image {self.tag}')
         except subprocess.CalledProcessError as e:
             docker_build_out = e.output
             raise e
         finally:
-            logging.info('=' * 80)
+            print('=' * 80)
             for line in str(docker_build_out)[2:-3].split('\\n'):
-                logging.info(line)
-            logging.info('=' * 80)
+                print(line)
+            print('=' * 80)
 
-        self.__remove_dir(temp_dir)
+        self.__remove_dir(self.temp_dir)
 
-        logging.info(f'[X] Building image: {self.tag} (Success).')
+        print(f'[X] Building image: {self.tag} (Success).')
 
         return docker_build_out
 
@@ -133,7 +144,7 @@ class ImageBuilder:
         """
         return []
 
-    def _build_flags(self):
+    def _build_flags(self, temp_dir):
         """
         Additional build flags to add to docker build command.
         """

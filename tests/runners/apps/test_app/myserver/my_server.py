@@ -15,3 +15,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+
+import json
+
+
+def myendpoint1func(input_json):
+    input_dict = json.loads(input_json) if input_json else {}
+    return f'Input was: {input_dict}'
