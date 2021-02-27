@@ -19,6 +19,7 @@ from airflow import DAG
 from liminal.core import environment as env
 from liminal.core.config.config import ConfigUtil
 from liminal.core.util import class_util
+from liminal.runners.airflow.model import executor
 from liminal.runners.airflow.model.task import Task
 
 __DEPENDS_ON_PAST = 'depends_on_past'
@@ -31,8 +32,7 @@ def register_dags(configs_path):
     """
     print(f'Registering DAGs from path: {configs_path}')
     config_util = ConfigUtil(configs_path)
-    # TODO - change is_render_variable to False when runtime resolving is available
-    configs = config_util.safe_load(is_render_variables=True)
+    configs = config_util.safe_load(is_render_variables=False)
 
     dags = []
     print(f'found {len(configs)} liminal configs in path: {configs_path}')
@@ -50,6 +50,8 @@ def register_dags(configs_path):
             if 'always_run' in config and config['always_run']:
                 trigger_rule = 'all_done'
 
+            executors = __initialize_executors(config)
+
             for pipeline in config['pipelines']:
                 default_args = __default_args(pipeline)
                 dag = __initialize_dag(default_args, pipeline, owner)
@@ -65,7 +67,8 @@ def register_dags(configs_path):
                         trigger_rule=trigger_rule,
                         liminal_config=config,
                         pipeline_config=pipeline,
-                        task_config=task
+                        task_config=task,
+                        executor=executors.get(task.get('executor'))
                     )
 
                     parent = task_instance.apply_task_to_dag()
@@ -80,6 +83,17 @@ def register_dags(configs_path):
             traceback.print_exc()
 
     return dags
+
+
+def __initialize_executors(liminal_config):
+    executors = {}
+    for executor_config in liminal_config.get('executors', {}):
+        executors[executor_config['executor']] = get_executor_class(executor_config['type'])(
+            executor_config['executor'],
+            liminal_config,
+            executor_config
+        )
+    return executors
 
 
 def __initialize_dag(default_args, pipeline, owner):
@@ -135,9 +149,19 @@ tasks_by_liminal_name = class_util.find_subclasses_in_packages([impl_packages], 
 
 logging.info(f'Finished loading task implementations: {tasks_by_liminal_name.keys()}')
 
+executors_by_liminal_name = class_util.find_subclasses_in_packages(
+    ['liminal.runners.airflow.executors'],
+    executor.Executor)
+
+print(f'Finished loading executor implementations: {executors_by_liminal_name.keys()}')
+
 
 def get_task_class(task_type):
     return tasks_by_liminal_name[task_type]
+
+
+def get_executor_class(executor_type):
+    return executors_by_liminal_name[executor_type]
 
 
 register_dags(os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR))

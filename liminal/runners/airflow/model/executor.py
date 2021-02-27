@@ -15,27 +15,17 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from liminal.runners.airflow.tasks import containerable
+from abc import ABC
+
+from liminal.runners.airflow.model import dag_mutator
 
 
-class PythonTask(containerable.ContainerTask):
+class Executor(dag_mutator.DagMutator, ABC):
     """
-    Python task.
+    Executor Task.
     """
 
-    def _kubernetes_cmds_and_arguments(self, output_path, output_destination_path):
-        cmds = ['/bin/bash', '-c']
-        arguments = [
-
-            self.__cmd(output_path, output_destination_path)
-        ]
-
-        return cmds, arguments
-
-    def __cmd(self, output_path, output_destination_path):
-        destination_str = output_destination_path if output_destination_path is not None else ''
-
-        return f"sh container-setup.sh && " + \
-               "export PROJECT_VERSION_TAG=$(cat VERSION) && " + \
-               f"{self.task_config['cmd']} && " + \
-               f"sh container-teardown.sh $? {output_path} {destination_str}"
+    def __init__(self, executor_id, liminal_config, executor_config):
+        super().__init__(liminal_config)
+        self.executor_id = executor_id
+        self.executor_config = executor_config

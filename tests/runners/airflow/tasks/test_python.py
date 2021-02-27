@@ -1,68 +1,109 @@
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-import logging
 import os
 import tempfile
 import unittest
 from unittest import TestCase
 
-from liminal.build import liminal_apps_builder
+from liminal.build.image.python.python import PythonImageBuilder
 from liminal.kubernetes import volume_util
+from liminal.runners.airflow import DummyDag
+from liminal.runners.airflow.executors.kubernetes import KubernetesPodExecutor
 from liminal.runners.airflow.tasks import python
 from tests.util import dag_test_utils
 
 
 class TestPythonTask(TestCase):
-    _VOLUME_NAME = 'myvol1'
+    if os.getenv('POD_NAMESPACE') == "jenkins":
+        _VOLUME_NAME = 'unittest'
+    else:
+        _VOLUME_NAME = 'myvol1'
+
+    _WRITE_INPUTS_IMG = 'write_inputs_img'
+    _WRITE_OUTPUTS_IMG = 'write_outputs_img'
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        base_path = os.path.join(os.path.dirname(__file__), '../../apps/app_with_volumes')
+
+        config = {}
+
+        PythonImageBuilder(config=config,
+                           base_path=base_path,
+                           relative_source_path='write_inputs',
+                           tag=cls._WRITE_INPUTS_IMG).build()
+
+        PythonImageBuilder(config=config,
+                           base_path=base_path,
+                           relative_source_path='write_outputs',
+                           tag=cls._WRITE_OUTPUTS_IMG).build()
 
     def setUp(self) -> None:
-        volume_util.delete_local_volume(self._VOLUME_NAME)
-        self.temp_dir = tempfile.mkdtemp()
-        liminal_apps_builder.build_liminal_apps(
-            os.path.join(os.path.dirname(__file__), '../liminal'))
+        if not os.getenv('POD_NAMESPACE') == "jenkins":
+            volume_util.delete_local_volume(self._VOLUME_NAME)
+
+        os.environ['TMPDIR'] = '/tmp'
+
+        if os.getenv('POD_NAMESPACE') == "jenkins":
+            self.temp_dir = '/mnt/vol1'
+            self.sub_path_dir = "unittests"
+            self.temp_dir = os.path.join(self.temp_dir, self.sub_path_dir)
+        else:
+            self.temp_dir = tempfile.mkdtemp()
+            self.sub_path_dir = ""
+
+        self.liminal_config = {
+            'volumes': [
+                {
+                    'volume': self._VOLUME_NAME,
+                    'local': {
+                        'path': self.temp_dir.replace(
+                            "/var/folders",
+                            "/private/var/folders"
+                        )
+                    }
+                }
+            ]
+        }
+
+        if not os.getenv('POD_NAMESPACE') == "jenkins":
+            volume_util.create_local_volumes(self.liminal_config, None)
 
     def test_apply_task_to_dag(self):
         dag = dag_test_utils.create_dag()
 
         task0 = self.__create_python_task(dag,
                                           'my_input_task',
-                                          None,
-                                          'my_python_task_img',
+                                          [],
+                                          self._WRITE_INPUTS_IMG,
                                           'python -u write_inputs.py',
                                           env_vars={
                                               'NUM_FILES': 10,
-                                              'NUM_SPLITS': 3
+                                              'NUM_SPLITS': '{{NUM_SPLITS}}'
                                           })
         task0.apply_task_to_dag()
 
         task1 = self.__create_python_task(dag,
                                           'my_output_task',
-                                          dag.tasks[0],
-                                          'my_parallelized_python_task_img',
+                                          [dag.tasks[0]],
+                                          '{{image}}',
                                           'python -u write_outputs.py',
-                                          executors=3)
+                                          env_vars={
+                                              'NUM_SPLITS': '{{NUM_SPLITS}}'
+                                          })
         task1.apply_task_to_dag()
 
         for task in dag.tasks:
-            logging.info(f'Executing task {task.task_id}')
-            task.execute({})
+            print(f'Executing task {task.task_id}')
+            dummy_dag = DummyDag('my_dag', task.task_id).context
+            dummy_dag.get('dag_run').conf = {'image': self._WRITE_OUTPUTS_IMG,
+                                             'NUM_SPLITS': 3}
+            task.execute(dummy_dag)
 
         inputs_dir = os.path.join(self.temp_dir, 'inputs')
         outputs_dir = os.path.join(self.temp_dir, 'outputs')
 
         self.assertListEqual(os.listdir(self.temp_dir), ['outputs', 'inputs'])
 
-        inputs_dir_contents = os.listdir(inputs_dir)
+        inputs_dir_contents = sorted(os.listdir(inputs_dir))
 
         self.assertListEqual(inputs_dir_contents, ['0', '1', '2'])
 
@@ -93,46 +134,47 @@ class TestPythonTask(TestCase):
                              parent,
                              image,
                              cmd,
-                             env_vars=None,
-                             executors=None):
+                             env_vars=None):
+
+        self.liminal_config['executors'] = [
+            {
+                'executor': 'k8s',
+                'type': 'kubernetes',
+            }
+        ]
+
         task_config = {
             'task': task_id,
             'cmd': cmd,
             'image': image,
+            'executor': 'k8s',
             'env_vars': env_vars if env_vars is not None else {},
             'mounts': [
                 {
                     'mount': 'mymount',
                     'volume': self._VOLUME_NAME,
-                    'path': '/mnt/vol1'
+                    'path': '/mnt/vol1',
+                    'sub_path': self.sub_path_dir
                 }
             ]
         }
 
-        if executors:
-            task_config['executors'] = executors
-
-        return python.PythonTask(
-            task_id=task_id,
-            dag=dag,
-            liminal_config={
-                'volumes': [
-                    {
-                        'volume': self._VOLUME_NAME,
-                        'local': {
-                            'path': self.temp_dir.replace(
-                                "/var/folders",
-                                "/private/var/folders"
-                            )
-                        }
-                    }
-                ]},
-            pipeline_config={
-                'pipeline': 'my_pipeline'
-            },
-            task_config=task_config,
-            parent=parent,
-            trigger_rule='all_success')
+        return python.PythonTask(task_id=task_id,
+                                 dag=dag,
+                                 parent=parent,
+                                 trigger_rule='all_success',
+                                 liminal_config=self.liminal_config,
+                                 pipeline_config={
+                                     'pipeline': 'my_pipeline'
+                                 },
+                                 task_config=task_config,
+                                 executor=KubernetesPodExecutor(
+                                     task_id='k8s',
+                                     liminal_config=self.liminal_config,
+                                     executor_config={
+                                         'executor': 'k8s'
+                                     }
+                                 ))
 
 
 if __name__ == '__main__':
