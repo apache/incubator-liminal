@@ -17,6 +17,20 @@
 # under the License.
 from abc import ABC, abstractmethod
 
+<<<<<<< HEAD:liminal/runners/airflow/tasks/create_cloudformation_stack.py
+from liminal.runners.airflow.model import task
+
+
+class CreateCloudFormationStackTask(task.Task):
+    """
+    Creates cloud_formation stack.
+    """
+
+    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
+        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+
+    def apply_task_to_dag(self):
+=======
 
 class DagMutator(ABC):
     """
@@ -28,4 +42,5 @@ class DagMutator(ABC):
 
     @abstractmethod
     def apply_task_to_dag(self, **kwargs):
+>>>>>>> add config util and images:liminal/runners/airflow/model/dag_mutator.py
         pass
