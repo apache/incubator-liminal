@@ -29,20 +29,20 @@ def register_dags(configs_path):
     """
     Registers pipelines in liminal yml files found in given path (recursively) as airflow DAGs.
     """
-    print(f'Registering DAGs from path: {configs_path}')
+    logging.info(f'Registering DAGs from path: {configs_path}')
     config_util = ConfigUtil(configs_path)
     # TODO - change is_render_variable to False when runtime resolving is available
     configs = config_util.safe_load(is_render_variables=True)
 
     dags = []
-    print(f'found {len(configs)} liminal configs in path: {configs_path}')
+    logging.info(f'found {len(configs)} liminal configs in path: {configs_path}')
     for config in configs:
         name = config['name'] if 'name' in config else None
         try:
             if not name:
                 raise ValueError('liminal.yml missing field `name`')
 
-            print(f"Registering DAGs for {name}")
+            logging.info(f"Registering DAGs for {name}")
 
             owner = config.get('owner')
 
