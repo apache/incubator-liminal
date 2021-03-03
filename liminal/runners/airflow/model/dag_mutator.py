@@ -15,9 +15,17 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import json
+from abc import ABC, abstractmethod
 
 
-def myendpoint1func(input_json):
-    input_dict = json.loads(input_json) if input_json else {}
-    return f'Input was: {input_dict}'
+class DagMutator(ABC):
+    """
+    Liminal Dag mutator.
+    """
+
+    def __init__(self, liminal_config):
+        self.liminal_config = liminal_config
+
+    @abstractmethod
+    def apply_task_to_dag(self, **kwargs):
+        pass
