@@ -71,7 +71,8 @@ class TestHierarchicalConfig(TestCase):
             }
         }
 
-        expected = [{'name': 'my_subliminal_test',
+        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
+                     'name': 'my_subliminal_test',
                      'pipeline_defaults': {'param1': 'param1_value'},
                      'pipelines': [{'description': 'add defaults parameters for all pipelines',
                                     'name': 'mypipe1',
@@ -142,16 +143,21 @@ class TestHierarchicalConfig(TestCase):
 
     @mock.patch("liminal.core.util.files_util.load")
     def test_get_superliminal(self, find_config_files_mock):
-        hyperliminal = {'name': 'hyperliminal',
-                        'pipeline_defaults': {'description': 'add defaults parameters for all '
-                                                             'pipelines',
-                                              'tasks': [{'task': 'start', 'type': 'job_start'},
-                                                        {'task': 'sub_tasks', 'type': 'pipeline'},
-                                                        {'task': 'end', 'type': 'job_end'}]},
-                        'service_defaults': {'description': 'add defaults parameters for all '
-                                                            'services'},
+        hyperliminal = {'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
+                        'name': 'hyperliminal',
+                        'pipeline_defaults': {
+                            'description': 'add defaults parameters for all pipelines',
+                            'tasks': [{'task': 'start', 'type': 'job_start'},
+                                      {'task': 'sub_tasks', 'type': 'pipeline'},
+                                      {'task': 'end', 'type': 'job_end'}]
+                        },
+                        'service_defaults': {
+                            'description': 'add defaults parameters for all services'},
                         'task_defaults': {'description': 'add defaults parameters for all tasks '
-                                                         'separate by task type'},
+                                                         'separate by task type',
+                                          'java': {'executor': 'default_k8s'},
+                                          'python': {'executor': 'default_k8s'},
+                                          'split': {'executor': 'default_k8s'}},
                         'type': 'super'}
         subliminal = {
             "name": "subliminal_test",
@@ -317,7 +323,8 @@ class TestHierarchicalConfig(TestCase):
             }
         }
 
-        expected = [{'name': 'my_subliminal_test',
+        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
+                     'name': 'my_subliminal_test',
                      'pipeline_defaults': {'param1': '-case'},
                      'pipelines': [{'description': 'add defaults parameters for all pipelines',
                                     'global_conf': 'super_var',
@@ -386,50 +393,3 @@ class TestHierarchicalConfig(TestCase):
 
         # validate cache
         self.assertEqual(expected, config_util.loaded_subliminals)
-
-    @mock.patch('os.path.exists')
-    @mock.patch("liminal.core.environment.get_airflow_home_dir")
-    @mock.patch("liminal.core.util.files_util.load")
-    @mock.patch.dict(os.environ, {'LIMINAL_STAND_ALONE_MODE': 'True', 'POD_NAMESPACE': 'my_pod_ns'})
-    def test_liminal_config_snapshot(self, find_config_files_mock,
-                                     get_airflow_dir_mock, path_exists_mock):
-        subliminal = {
-            "name": "my_subliminal_test",
-            "type": "sub",
-            "variables": {
-                "var": 1,
-                "var-2": True
-            },
-            "pipelines": [
-                {"name": "mypipe1", "param": "{{var}}"},
-                {"name": "mypipe2", "param": "{{var-2   }}"}
-            ]
-        }
-
-        expected = {'name': 'my_subliminal_test', 'type': 'sub',
-                    'service_defaults': {'description': 'add defaults parameters for all services'},
-                    'task_defaults': {'description': 'add defaults parameters for all tasks separate by task type'},
-                    'pipeline_defaults': {'description': 'add defaults parameters for all pipelines',
-                                          'tasks': [{'task': 'start', 'type': 'job_start'},
-                                                    {'task': 'sub_tasks', 'type': 'pipeline'},
-                                                    {'task': 'end', 'type': 'job_end'}]},
-                    'variables': {'var': 1, 'var-2': True}, 'pipelines': [
-                {'name': 'mypipe1', 'param': '1', 'description': 'add defaults parameters for all pipelines',
-                 'tasks': [{'task': 'start', 'type': 'job_start'}, {'task': 'sub_tasks', 'type': 'pipeline'},
-                           {'task': 'end', 'type': 'job_end'}]},
-                {'name': 'mypipe2', 'param': 'True', 'description': 'add defaults parameters for all pipelines',
-                 'tasks': [{'task': 'start', 'type': 'job_start'}, {'task': 'sub_tasks', 'type': 'pipeline'},
-                           {'task': 'end', 'type': 'job_end'}]}], 'services': []}
-
-        find_config_files_mock.return_value = {
-            "my_subliminal_test": subliminal
-        }
-
-        get_airflow_dir_mock.return_value = "/tmp"
-        path_exists_mock.return_value = True
-
-        with mock.patch("builtins.open", mock.mock_open()) as m:
-            with mock.patch("yaml.dump") as ydm:
-                ConfigUtil("").safe_load(is_render_variables=True)
-                m.assert_called_once_with(os.path.join('/tmp', '../liminal_config_files/my_subliminal_test.yml'), 'w')
-                ydm.assert_called_once_with(expected, m.return_value, default_flow_style=False)
