@@ -17,10 +17,8 @@
 # under the License.
 
 import logging
-import os
 import traceback
 
-from liminal.core import environment
 from liminal.core.config.defaults import hyperliminal, default_configs
 from liminal.core.util import dict_util
 from liminal.core.util import files_util
@@ -44,7 +42,6 @@ class ConfigUtil:
         self.config_files = files_util.load(configs_path)
         self.hyperliminal = hyperliminal.HYPERLIMINAL
         self.loaded_subliminals = []
-        self.snapshot_path = os.path.join(environment.get_airflow_home_dir(), '../liminal_config_files')
 
     def safe_load(self, is_render_variables):
         """
@@ -71,13 +68,7 @@ class ConfigUtil:
 
         self.loaded_subliminals = enriched_configs
 
-        if os.getenv('POD_NAMESPACE') != "jenkins":
-            self.__snapshot_subliminals()
-
         return self.loaded_subliminals
-
-    def __snapshot_subliminals(self):
-        files_util.dump_liminal_configs(liminal_configs=self.loaded_subliminals, path=self.snapshot_path)
 
     def __merge_configs(self, subliminal, superliminal, is_render_variables):
         if not superliminal:
