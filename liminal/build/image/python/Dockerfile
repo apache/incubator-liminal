@@ -16,8 +16,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+
 # Use an official Python runtime as a parent image
-FROM {{python}}
+FROM python:3.7-slim
 
 # Install aptitude build-essential
 #RUN apt-get install -y --reinstall build-essential
@@ -28,12 +29,36 @@ WORKDIR /app
 # Order of operations is important here for docker's caching & incremental build performance.    !
 # Be careful when changing this code.                                                            !
 
+# Update apt
+RUN echo "Updating apt"
+RUN apt-get update --fix-missing
+
+# Install gcc
+RUN echo "Installing gcc"
+RUN apt-get install -y gcc
+
+# Install git
+RUN echo "Installing git"
+RUN apt-get install -y git
+ARG GIT_USER=no_user_supplied
+ARG GIT_PASSWORD=""
+ARG GIT_AUTH=$GIT_USER":"$GIT_PASSWORD
+
 # Install any needed packages specified in requirements.txt
 COPY ./requirements.txt /app/
+{{copy_pip_conf}}
 
 # mount the secret in the correct location, then run pip install
 RUN pip install --upgrade pip
 RUN {{mount}} pip install -r requirements.txt
+
+# Install pipenv
+RUN echo "Installing pipenv.."
+RUN pip install pipenv
+
+# Install awscli
+RUN echo "Installing awscli.."
+RUN pipenv install awscli
 
 # Copy the current directory contents into the container at /app
 RUN echo "Copying source code.."

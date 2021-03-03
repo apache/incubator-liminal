@@ -16,27 +16,23 @@
 # specific language governing permissions and limitations
 # under the License.
 
-wheel
-docker==4.2.0
-apache-airflow==1.10.12
-docker-pycreds==0.4.0
-click==7.1.1
-Flask==1.1.1
-PyYAML==5.3.1
-boto3==1.12.10
-botocore==1.15.21
-kubernetes==12.0.1
-typing==3.7.4.1
-GitPython==3.1.11
-ddtrace==0.37.0
-moto==1.3.14
-diskcache==3.1.1
-croniter==0.3.31
-pytz==2020.5
-pytzdata==2020.1
-freezegun==1.1.0
-statsd>=3.3.0, <4.0
-sqlalchemy~=1.3.15
-jinja2>=2.10.1, <2.11.0
-python-json-logger==2.0.1
+import json
+import os
 
+inputs_dir = '/mnt/vol1/inputs/'
+
+num_files = int(os.environ['NUM_FILES'])
+num_splits = int(os.environ['NUM_SPLITS'])
+
+# create input files - split by round robin
+for i in range(0, num_files):
+    split_id = i % num_splits
+    split_dir = os.path.join(inputs_dir, str(split_id))
+
+    if not os.path.exists(split_dir):
+        os.makedirs(split_dir)
+
+    filename = os.path.join(split_dir, f'input{i}.json')
+    with open(filename, 'w') as f:
+        print(f'Writing input file {filename}')
+        f.write(json.dumps({'mykey': f'myval{i}'}))
