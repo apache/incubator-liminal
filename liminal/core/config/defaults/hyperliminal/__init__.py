@@ -15,5 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
 
-pillow
+from liminal.core.util import files_util
+
+HYPERLIMINAL = files_util.load(os.path.dirname(__file__))['hyperliminal'].copy()

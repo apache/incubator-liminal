@@ -17,11 +17,9 @@
 # under the License.
 
 import logging
-import os
 import traceback
 
-from liminal.core import environment
-from liminal.core.config.defaults import base, default_configs
+from liminal.core.config.defaults import hyperliminal, default_configs
 from liminal.core.util import dict_util
 from liminal.core.util import files_util
 
@@ -30,7 +28,7 @@ class ConfigUtil:
     """
     Load and enrich config files under configs_path.
     """
-    __BASE = "base"
+    __HYPERLIMINAL = "hyperliminal"
     __PIPELINES = "pipelines"
     __SUPER = "super"
     __TYPE = "type"
@@ -38,16 +36,12 @@ class ConfigUtil:
     __SERVICES = "services"
     __TASKS = "tasks"
     __PIPELINE_DEFAULTS = "pipeline_defaults"
-    __BEFORE_TASKS = "before_tasks"
-    __AFTER_TASKS = "after_tasks"
 
     def __init__(self, configs_path):
         self.configs_path = configs_path
         self.config_files = files_util.load(configs_path)
-        self.base = base.BASE
+        self.hyperliminal = hyperliminal.HYPERLIMINAL
         self.loaded_subliminals = []
-        self.snapshot_path = os.path.join(environment.get_airflow_home_dir(),
-                                          '../liminal_config_files')
 
     def safe_load(self, is_render_variables):
         """
@@ -74,14 +68,7 @@ class ConfigUtil:
 
         self.loaded_subliminals = enriched_configs
 
-        if os.getenv('POD_NAMESPACE') != "jenkins":
-            self.__snapshot_subliminals()
-
         return self.loaded_subliminals
-
-    def __snapshot_subliminals(self):
-        files_util.dump_liminal_configs(liminal_configs=self.loaded_subliminals,
-                                        path=self.snapshot_path)
 
     def __merge_configs(self, subliminal, superliminal, is_render_variables):
         if not superliminal:
@@ -100,10 +87,10 @@ class ConfigUtil:
 
     def __get_superliminal(self, liminal):
         superliminal = {}
-        if not self.__is_base_config(liminal):
+        if not self.__is_hyperliminal(liminal):
             superliminal_name = liminal.get(self.__SUPER, '')
             if not superliminal_name:
-                superliminal = self.base
+                superliminal = self.hyperliminal
             else:
                 superliminal = self.__get_config(superliminal_name)
 
@@ -113,11 +100,11 @@ class ConfigUtil:
 
         return superliminal
 
-    def __get_base_config(self):
-        return self.base
+    def __get_hyperliminal(self):
+        return self.hyperliminal
 
-    def __is_base_config(self, config):
-        return config.get('name', '') == self.__BASE
+    def __is_hyperliminal(self, config):
+        return config.get('name', '') == self.__HYPERLIMINAL
 
     def __is_subliminal(self, config):
         is_subliminal = config.get(self.__TYPE, self.__SUB) != self.__SUPER
@@ -145,16 +132,13 @@ class ConfigUtil:
     def __merge_superliminals(self, super1, super2):
         super1_pipeline_defaults = super1.get(self.__PIPELINE_DEFAULTS, {}).copy()
         super2_pipeline_defaults = super2.get(self.__PIPELINE_DEFAULTS, {}).copy()
-
-        super1[self.__PIPELINE_DEFAULTS][self.__BEFORE_TASKS] = \
-            super2_pipeline_defaults.pop(self.__BEFORE_TASKS, []) + super1_pipeline_defaults.pop(
-                self.__BEFORE_TASKS, [])
-
-        super1[self.__PIPELINE_DEFAULTS][self.__AFTER_TASKS] = \
-            super1_pipeline_defaults.pop(self.__AFTER_TASKS, []) + super2_pipeline_defaults.pop(
-                self.__AFTER_TASKS, [])
-
         # merge supers tasks
+        super1[self.__PIPELINE_DEFAULTS] = default_configs.apply_task_defaults(
+            subliminal=super1_pipeline_defaults,
+            superliminal=super2_pipeline_defaults,
+            pipeline=super1_pipeline_defaults,
+            superliminal_tasks=super2_pipeline_defaults.pop(self.__TASKS, [])
+        )
         return dict_util.merge_dicts(super1, super2, True)
 
     @staticmethod

@@ -59,12 +59,15 @@ class TestDefaultsPipelineConfig(TestCase):
             "pipeline_defaults": {
                 "param2": "param2super_value",
                 "param3": "param3super_value",
-                "before_tasks": [
+                "tasks": [
                     {
                         "task": "first_task",
                         "type": "python"
-                    }],
-                "after_tasks": [
+                    },
+                    {
+                        "task": "extensions",
+                        "type": "pipeline"
+                    },
                     {
                         "task": "end_task",
                         "type": "python"
@@ -118,5 +121,4 @@ class TestDefaultsPipelineConfig(TestCase):
             "param1": "param1_value"
         }
 
-        self.assertEqual(expected, default_configs.apply_pipeline_defaults(subliminal, superliminal,
-                                                                           pipeline))
+        self.assertEqual(expected, default_configs.apply_pipeline_defaults(subliminal, superliminal, pipeline))
