@@ -71,8 +71,7 @@ class TestHierarchicalConfig(TestCase):
             }
         }
 
-        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
-                     'name': 'my_subliminal_test',
+        expected = [{'name': 'my_subliminal_test',
                      'pipeline_defaults': {'param1': 'param1_value'},
                      'pipelines': [{'description': 'add defaults parameters for all pipelines',
                                     'name': 'mypipe1',
@@ -143,21 +142,16 @@ class TestHierarchicalConfig(TestCase):
 
     @mock.patch("liminal.core.util.files_util.load")
     def test_get_superliminal(self, find_config_files_mock):
-        hyperliminal = {'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
-                        'name': 'hyperliminal',
-                        'pipeline_defaults': {
-                            'description': 'add defaults parameters for all pipelines',
-                            'tasks': [{'task': 'start', 'type': 'job_start'},
-                                      {'task': 'sub_tasks', 'type': 'pipeline'},
-                                      {'task': 'end', 'type': 'job_end'}]
-                        },
-                        'service_defaults': {
-                            'description': 'add defaults parameters for all services'},
+        hyperliminal = {'name': 'hyperliminal',
+                        'pipeline_defaults': {'description': 'add defaults parameters for all '
+                                                             'pipelines',
+                                              'tasks': [{'task': 'start', 'type': 'job_start'},
+                                                        {'task': 'sub_tasks', 'type': 'pipeline'},
+                                                        {'task': 'end', 'type': 'job_end'}]},
+                        'service_defaults': {'description': 'add defaults parameters for all '
+                                                            'services'},
                         'task_defaults': {'description': 'add defaults parameters for all tasks '
-                                                         'separate by task type',
-                                          'java': {'executor': 'default_k8s'},
-                                          'python': {'executor': 'default_k8s'},
-                                          'split': {'executor': 'default_k8s'}},
+                                                         'separate by task type'},
                         'type': 'super'}
         subliminal = {
             "name": "subliminal_test",
@@ -323,8 +317,7 @@ class TestHierarchicalConfig(TestCase):
             }
         }
 
-        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
-                     'name': 'my_subliminal_test',
+        expected = [{'name': 'my_subliminal_test',
                      'pipeline_defaults': {'param1': '-case'},
                      'pipelines': [{'description': 'add defaults parameters for all pipelines',
                                     'global_conf': 'super_var',
