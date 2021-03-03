@@ -15,7 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+import logging
 import os
 
 import yaml
@@ -59,10 +59,10 @@ def find_config_files(path):
     :returns list of all liminal.y[a]ml files under config path
     """
     files = []
-    print(path)
+    logging.info(path)
     for r, d, f in os.walk(path):
         for file in f:
             if os.path.basename(file) in ['liminal.yml', 'liminal.yaml']:
-                print(os.path.join(r, file))
+                logging.info(os.path.join(r, file))
                 files.append(os.path.join(r, file))
     return files
