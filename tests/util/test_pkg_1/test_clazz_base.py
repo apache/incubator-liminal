@@ -19,7 +19,3 @@
 
 class A:
     pass
-
-
-class Z(A):
-    pass

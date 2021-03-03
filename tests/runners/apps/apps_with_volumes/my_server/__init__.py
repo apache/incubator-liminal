@@ -15,26 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-"""
-Default base task.
-"""
-from abc import abstractmethod
-
-from liminal.runners.airflow.model.task import Task
-
-
-class JobPhaseTask(Task):
-    """
-    Job phase task. A task that runs automatically at a specific phase in the pipeline.
-    """
-
-    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
-        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
-        metrics = self.liminal_config.get('metrics', {})
-        self.metrics_namespace = metrics.get('namespace', '')
-        self.metrics_backends = metrics.get('backends', [])
-
-    @abstractmethod
-    def apply_task_to_dag(self):
-        pass
