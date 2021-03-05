@@ -19,29 +19,50 @@
 import logging
 import os
 
-from liminal.build.image_builder import ImageBuilder
-from liminal.core.config.config import ConfigUtil
-from liminal.core.util import class_util, files_util
+import yaml
+
+from liminal.build.image_builder import ImageBuilder, ServiceImageBuilderMixin
+from liminal.core.util import files_util, class_util
 
 
 def build_liminal_apps(path):
     """
     Build images for liminal apps in path.
     """
-    config_util = ConfigUtil(path)
-    configs = config_util.safe_load(is_render_variables=True)
+    config_files = files_util.find_config_files(path)
 
-    for liminal_config in configs:
-        base_path = os.path.dirname(files_util.resolve_pipeline_source_file(liminal_config['name']))
-        logging.info(base_path)
+    for config_file in config_files:
+        logging.info(f'Building artifacts for file: {config_file}')
 
-        for image in liminal_config.get('images', []):
-            image_type = image['type']
-            builder_class = __get_image_build_class(image_type)
-            if builder_class:
-                __build_image(base_path, image, builder_class)
-            else:
-                raise ValueError(f'No such image type: {image_type}')
+        base_path = os.path.dirname(config_file)
+
+        with open(config_file) as stream:
+            liminal_config = yaml.safe_load(stream)
+
+            if 'pipelines' in liminal_config:
+                for pipeline in liminal_config['pipelines']:
+                    for task in pipeline['tasks']:
+                        task_name = task['task']
+
+                        if 'source' in task:
+                            task_type = task['type']
+                            builder_class = __get_task_build_class(task_type)
+                            if builder_class:
+                                __build_image(base_path, task, builder_class)
+                            else:
+                                raise ValueError(f'No such task type: {task_type}')
+                        else:
+                            logging.info(
+                                f'No source configured for task {task_name}, skipping build..')
+
+            if 'services' in liminal_config:
+                for service in liminal_config['services']:
+                    service_type = service['type']
+                    builder_class = __get_service_build_class(service_type)
+                    if builder_class:
+                        __build_image(base_path, service, builder_class)
+                    else:
+                        raise ValueError(f'No such service type: {service_type}')
 
 
 def __build_image(base_path, builder_config, builder):
@@ -56,8 +77,12 @@ def __build_image(base_path, builder_config, builder):
         logging.info(f"No source provided for {builder_config['name']}, skipping.")
 
 
-def __get_image_build_class(image_type):
-    return image_build_types.get(image_type, None)
+def __get_task_build_class(task_type):
+    return task_build_types.get(task_type, None)
+
+
+def __get_service_build_class(service_type):
+    return service_build_types.get(service_type, None)
 
 
 logging.info(f'Loading image builder implementations..')
@@ -66,8 +91,20 @@ logging.info(f'Loading image builder implementations..')
 image_builders_package = 'liminal.build.image'
 # user_image_builders_package = 'TODO: user_image_builders_package'
 
-image_build_types = class_util.find_subclasses_in_packages(
+task_build_types = class_util.find_subclasses_in_packages(
     [image_builders_package],
     ImageBuilder)
 
-logging.info(f'Finished loading image builder implementations: {image_build_types.keys()}')
+
+logging.info(f'Finished loading image builder implementations: {task_build_types}')
+logging.info(f'Loading service image builder implementations..')
+
+# TODO: add configuration for user service image builders package
+service_builders_package = 'liminal.build.service'
+# user_service_builders_package = 'TODO: user_service_builders_package'
+
+service_build_types = class_util.find_subclasses_in_packages(
+    [service_builders_package],
+    ServiceImageBuilderMixin)
+
+logging.info(f'Finished loading service image builder implementations: {service_build_types}')
