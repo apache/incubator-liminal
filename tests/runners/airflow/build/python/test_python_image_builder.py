@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import logging
 import os
 import shutil
 import tempfile
@@ -24,11 +25,11 @@ from unittest import TestCase
 import docker
 
 from liminal.build.image.python.python import PythonImageBuilder
+from liminal.build.python import PythonImageVersions
 
 
 class TestPythonImageBuilder(TestCase):
-    __IMAGE_NAME = 'liminal_image'
-    __OUTPUT_PATH = '/mnt/vol1/my_output.json'
+    __IMAGE_NAME = 'my_python_task_img'
 
     def setUp(self) -> None:
         super().setUp()
@@ -42,12 +43,16 @@ class TestPythonImageBuilder(TestCase):
         self.__remove_dir(self.temp_airflow_dir)
 
     def test_build(self):
-        self.__test_build()
+        for python_version in [None,
+                               PythonImageVersions().supported_versions[0]]:
+            build_out = self.__test_build(python_version=python_version)
+        self.assertTrue('RUN pip install -r requirements.txt' in build_out,
+                        'Incorrect pip command')
 
         self.__test_image()
 
     def test_build_with_pip_conf(self):
-        self.__test_build(use_pip_conf=True)
+        build_out = self.__test_build(use_pip_conf=True)
 
         self.assertTrue(
             'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
@@ -55,17 +60,24 @@ class TestPythonImageBuilder(TestCase):
 
         self.__test_image()
 
-    def __test_build(self, use_pip_conf=False):
+    def test_with_unsupported_python_version(self):
+        with self.assertRaises(ValueError):
+            self.__test_build(python_version='3.5.2')
+
+    def __test_build(self, use_pip_conf=False, python_version=None):
         config = self.__create_conf('my_task')
 
-        base_path = os.path.join(os.path.dirname(__file__), '../../../apps/test_app')
+        base_path = os.path.join(os.path.dirname(__file__), '../../liminal')
 
         if use_pip_conf:
             config['pip_conf'] = os.path.join(base_path, 'pip.conf')
 
+        if python_version:
+            config['python_version'] = python_version
+
         builder = PythonImageBuilder(config=config,
                                      base_path=base_path,
-                                     relative_source_path='helloworld',
+                                     relative_source_path='write_inputs',
                                      tag=self.__IMAGE_NAME)
 
         build_out = str(builder.build())
@@ -76,10 +88,7 @@ class TestPythonImageBuilder(TestCase):
         docker_client = docker.from_env()
         docker_client.images.get(self.__IMAGE_NAME)
 
-        cmd = 'sh container-setup.sh && ' + \
-              'python hello_world.py && ' + \
-              f'sh container-teardown.sh $? {self.__OUTPUT_PATH}'
-        cmds = ['/bin/bash', '-c', cmd]
+        cmds = ['/bin/bash', '-c', 'python write_inputs.py']
 
         container_log = docker_client.containers.run(self.__IMAGE_NAME,
                                                      cmds,
@@ -87,21 +96,30 @@ class TestPythonImageBuilder(TestCase):
                                                          self.temp_dir: {
                                                              'bind': '/mnt/vol1',
                                                              'mode': 'rw'
-                                                         },
-                                                         self.temp_airflow_dir: {
-                                                             'bind': '/airflow/xcom',
-                                                             'mode': 'rw'},
+                                                         }
+                                                     },
+                                                     environment={
+                                                         'NUM_FILES': 10,
+                                                         'NUM_SPLITS': 3
                                                      })
 
         docker_client.close()
 
-        print(container_log)
+        logging.info(container_log)
 
         self.assertEqual(
-            "b'Writing liminal input..\\n" +
-            "Starting application..\\n"
-            "Hello world!\\n\\n" +
-            "Writing liminal output..\\n'",
+            "b'"
+            "Writing input file /mnt/vol1/inputs/0/input0.json\\n"
+            "Writing input file /mnt/vol1/inputs/1/input1.json\\n"
+            "Writing input file /mnt/vol1/inputs/2/input2.json\\n"
+            "Writing input file /mnt/vol1/inputs/0/input3.json\\n"
+            "Writing input file /mnt/vol1/inputs/1/input4.json\\n"
+            "Writing input file /mnt/vol1/inputs/2/input5.json\\n"
+            "Writing input file /mnt/vol1/inputs/0/input6.json\\n"
+            "Writing input file /mnt/vol1/inputs/1/input7.json\\n"
+            "Writing input file /mnt/vol1/inputs/2/input8.json\\n"
+            "Writing input file /mnt/vol1/inputs/0/input9.json\\n"
+            "'",
             str(container_log))
 
     def __create_conf(self, task_id):
@@ -110,10 +128,7 @@ class TestPythonImageBuilder(TestCase):
             'cmd': 'foo bar',
             'image': self.__IMAGE_NAME,
             'source': 'baz',
-            'input_type': 'my_input_type',
-            'input_path': 'my_input',
             'no_cache': True,
-            'output_path': self.__OUTPUT_PATH,
         }
 
     @staticmethod
