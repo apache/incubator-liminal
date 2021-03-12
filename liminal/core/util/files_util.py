@@ -67,3 +67,19 @@ def find_config_files(path):
                 logging.info(os.path.join(r, file))
                 files.append(os.path.join(r, file))
     return files
+
+
+def dump_liminal_configs(liminal_configs, path):
+    if not (os.path.exists(path)):
+        os.mkdir(path)
+
+    logging.info(f"Starting to dump liminal configs into {path}")
+
+    for liminal_config in liminal_configs:
+        dump_liminal_config(liminal_config, f'{path}/{liminal_config["name"]}.yml')
+
+
+def dump_liminal_config(liminal_config, file_path):
+    with open(file_path, 'w') as config_file:
+        logging.info(f"Dumping {liminal_config['name']} into {file_path}")
+        yaml.dump(liminal_config, config_file, default_flow_style=False)
