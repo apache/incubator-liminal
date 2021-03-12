@@ -37,8 +37,9 @@ def apply_variable_substitution(subliminal, superliminal, is_render_variables=Fa
                                              superliminal.get(keyword, {}), True)
     if is_render_variables:
         for k, v in merged_variables.items():
-            if isinstance(v, str):
-                merged_variables[k] = dict_util.replace_placholders_in_string(v, merged_variables)
+            if isinstance(v, str) or (not isinstance(v, dict) and not isinstance(v, list)):
+                merged_variables[k] = dict_util.replace_placholders_in_string(str(v), merged_variables)
+
         merged_variables = dict_util.replace_placeholders(merged_variables, merged_variables)
         return dict_util.replace_placeholders(subliminal, merged_variables)
     else:
