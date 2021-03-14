@@ -15,3 +15,21 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from datetime import datetime
+
+TASK_ID_SEPARATOR = '.'
+
+
+class DummyDag:
+
+    def __init__(self, dag_id, task_id):
+        self.dag_id = dag_id
+        self.task_id = task_id
+        self.try_number = 0
+        self.is_subdag = False
+        self.context = {
+            'dag': self,
+            'task': self,
+            'ti': self,
+            'ts': datetime.now().timestamp()
+        }
