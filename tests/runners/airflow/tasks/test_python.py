@@ -24,6 +24,7 @@ from unittest import TestCase
 
 from liminal.build import liminal_apps_builder
 from liminal.kubernetes import volume_util
+from liminal.runners.airflow import DummyDag
 from liminal.runners.airflow.tasks import python
 from tests.util import dag_test_utils
 
@@ -33,7 +34,23 @@ class TestPythonTask(TestCase):
 
     def setUp(self) -> None:
         volume_util.delete_local_volume(self._VOLUME_NAME)
+        os.environ['TMPDIR'] = '/tmp'
         self.temp_dir = tempfile.mkdtemp()
+        self.liminal_config = {
+            'volumes': [
+                {
+                    'volume': self._VOLUME_NAME,
+                    'local': {
+                        'path': self.temp_dir.replace(
+                            "/var/folders",
+                            "/private/var/folders"
+                        )
+                    }
+                }
+            ]
+        }
+        volume_util.create_local_volumes(self.liminal_config, None)
+
         liminal_apps_builder.build_liminal_apps(
             os.path.join(os.path.dirname(__file__), '../liminal'))
 
@@ -60,15 +77,15 @@ class TestPythonTask(TestCase):
         task1.apply_task_to_dag()
 
         for task in dag.tasks:
-            logging.info(f'Executing task {task.task_id}')
-            task.execute({})
+            print(f'Executing task {task.task_id}')
+            task.execute(DummyDag('my_dag', task.task_id).context)
 
         inputs_dir = os.path.join(self.temp_dir, 'inputs')
         outputs_dir = os.path.join(self.temp_dir, 'outputs')
 
-        self.assertListEqual(os.listdir(self.temp_dir), ['outputs', 'inputs'])
+        self.assertListEqual(sorted(os.listdir(self.temp_dir)), sorted(['outputs', 'inputs']))
 
-        inputs_dir_contents = os.listdir(inputs_dir)
+        inputs_dir_contents = sorted(os.listdir(inputs_dir))
 
         self.assertListEqual(inputs_dir_contents, ['0', '1', '2'])
 
