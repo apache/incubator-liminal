@@ -18,14 +18,18 @@
 
 FROM apache/airflow:1.10.12-python3.6
 
-ARG LIMINAL_VERSION='apache-liminal'
 ARG DAG_FOLDER='/opt/airflow/dags/'
 ADD scripts/* ${DAG_FOLDER}
 
 RUN ls -ls ${DAG_FOLDER}
 ADD liminal/runners/airflow/dag/liminal_dags.py ${DAG_FOLDER}
 
+USER root
+
+RUN apt update -y
+RUN apt install git -y
+
 USER airflow
 
 RUN pip --disable-pip-version-check install -r /opt/airflow/dags/requirements-airflow.txt --user
-RUN pip --disable-pip-version-check install --user --no-deps ${LIMINAL_VERSION}
+RUN pip --disable-pip-version-check install --user --no-deps git+https://github.com/apache/incubator-liminal.git
