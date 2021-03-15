@@ -32,7 +32,7 @@ Before you begin, ensure you have met the following requirements:
 * You have the kubectl command line [(kubectl CLI)][homebrew-kubectl] installed
 * You have the current [context][cluster-access-kubeconfig] in kubernetes' kubeconfig file
 * You have Airflow on Kubernetes with AWS EFS
-* You have already created [custom DAGs][custom-dag] following the liminal [Getting Started Documentation][liminalGetStarted-doc]
+* You have already created [Liminal Yaml file][liminal-yaml-file] following the liminal [Getting Started Documentation][liminalGetStarted-doc]
 * Make sure that the [example repository][liminal-getting-started-project] is your workspace
 
 ### Supported Distributions
@@ -96,7 +96,11 @@ done
 ```
 
 #### Setting up liminal:
+There are two different ways to deploy Yamls in Airflow:
+* The machine which deploys the Yamls also needs to mount the same EFS and define Liminal home as sitting on the EFS.
+* The user can deploy the Yamls by using kubectl in order to copy the Yamls to the mounted file system.
 
+In this case, we chose to use kubectl to copy the Yamls to the mounted EFS.
 ```sh
 echo "Deploying liminal"
 webPodName=$(echo -e $webPodName)
@@ -112,7 +116,7 @@ kubectl cp liminal.yml ${namespace}/$webPodName:/opt/airflow/dags/pipelines/
 [homebrew-kubectl]: <https://formulae.brew.sh/formula/kubernetes-cli>
 [homebrew-helm]: <https://formulae.brew.sh/formula/helm>
 [cluster-access-kubeconfig]: <https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#context>
-[custom-dag]: <https://github.com/apache/incubator-liminal#example-yaml-config-file>
+[liminal-yaml-file]: <https://github.com/apache/incubator-liminal#example-yaml-config-file>
 [liminalGetStarted-doc]: <https://github.com/apache/incubator-liminal/blob/master/docs/source/getting_started_with_liminal.md>
 [liminal-installation-script]: <https://github.com/apache/incubator-liminal/tree/master/docs/source/install_liminal_in_airflow_on_kubernetes.sh>
 [liminal-getting-started-project]: <https://github.com/apache/incubator-liminal/tree/master/examples/liminal-getting-started>
