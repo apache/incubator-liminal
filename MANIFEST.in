@@ -17,5 +17,5 @@
 # under the License.
 
 
-include scripts/*
+include scripts/* requirements.txt
 recursive-include liminal/build/ *
