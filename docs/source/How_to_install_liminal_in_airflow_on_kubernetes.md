@@ -18,6 +18,7 @@ under the License.
 -->
 
 # Install Liminal in Airflow
+* [Workflow](#workflow)
 * [Prerequisites](#prerequisites)
    * [Supported Distributions](#supported-distributions)
 * [Get Started](#Get-Started)
@@ -25,13 +26,19 @@ under the License.
    * [Manual Installation](#manual-installation)
 * [References and other resources](#references-and-other-resources)
 
+## Workflow
+Liminal deploys into the Airflow components and the Yamls home folder is mounted by EFS.
+The process of liminal is emphasized on the following diagram:
+
+![](assets/liminal-diagram.png)
+
 ## Prerequisites
 Before you begin, ensure you have met the following requirements:
 
 * You have a Kubernetes cluster running with [Helm][homebrew-helm] (and Tiller if using Helm v2.x) installed
 * You have the kubectl command line [(kubectl CLI)][homebrew-kubectl] installed
 * You have the current [context][cluster-access-kubeconfig] in kubernetes' kubeconfig file
-* You have Airflow on Kubernetes with AWS EFS
+* You have [Airflow on Kubernetes with AWS EFS][airflowInstallation]
 * You have already created [Liminal Yaml file][liminal-yaml-file] following the liminal [Getting Started Documentation][liminalGetStarted-doc]
 * Make sure that the [example repository][liminal-getting-started-project] is your workspace
 
@@ -96,18 +103,45 @@ done
 ```
 
 #### Setting up liminal:
-There are two different ways to deploy Yamls in Airflow:
-* The machine which deploys the Yamls also needs to mount the same EFS and define Liminal home as sitting on the EFS.
-* The user can deploy the Yamls by using kubectl in order to copy the Yamls to the mounted file system.
-
-In this case, we chose to use kubectl to copy the Yamls to the mounted EFS.
-```sh
-echo "Deploying liminal"
-webPodName=$(echo -e $webPodName)
-kubectl exec -it $webPodName  -- bash -c "find '/home/airflow/' -path  '*liminal/runners/airflow/dag/liminal_dags.py'| xargs -I {} cp -p {} /opt/airflow/dags/"
-kubectl exec -it $webPodName  -- bash -c "mkdir -p /opt/airflow/dags/pipelines/"
-kubectl cp liminal.yml ${namespace}/$webPodName:/opt/airflow/dags/pipelines/
-```
+There are a couple of ways to deploy Yamls in Airflow.
+1. Mount your Amazon EFS file system on a Linux instance:
+    ```
+    sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <EFS_ID>:/ /opt/airflow/dags
+    ```
+2. Use gitsync function in order to sync Yamls in the Amazon EFS file system. In this case, we chose to use a kubernetes job:
+    ```
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      namespace: production
+      name: airflower-production-git
+    spec:
+      activeDeadlineSeconds: 60
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+          - name: git
+            image: alpine/git
+            command: ["/bin/sh","-c"]
+            args: ["cd /dags; git fetch && git reset --hard origin/master"]
+            volumeMounts:
+            - mountPath: /dags
+              name: dags
+          volumes:
+          - name: dags
+            persistentVolumeClaim:
+              claimName: airflow-production
+          restartPolicy: Never
+    ```
+3. Deploy the Yamls by using kubectl in order to copy the Yamls to the mounted file system. In this case, we chose to use kubectl to copy the Yamls to the mounted EFS:
+    ```sh
+    echo "Deploying liminal"
+    webPodName=$(echo -e $webPodName)
+    kubectl exec -it $webPodName  -- bash -c "find '/home/airflow/' -path  '*liminal/runners/airflow/dag/liminal_dags.py'| xargs -I {} cp -p {} /opt/airflow/dags/"
+    kubectl exec -it $webPodName  -- bash -c "mkdir -p /opt/airflow/dags/pipelines/"
+    kubectl cp liminal.yml ${namespace}/$webPodName:/opt/airflow/dags/pipelines/
+    ```
 
 ## References and other resources
 
