@@ -71,7 +71,9 @@ class ConfigUtil:
 
         self.loaded_subliminals = enriched_configs
 
-        self.__snapshot_subliminals()
+        if os.getenv('POD_NAMESPACE') != "jenkins":
+            self.__snapshot_subliminals()
+
         return self.loaded_subliminals
 
     def __snapshot_subliminals(self):
