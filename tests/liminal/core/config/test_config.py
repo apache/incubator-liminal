@@ -390,6 +390,7 @@ class TestHierarchicalConfig(TestCase):
     @mock.patch('os.path.exists')
     @mock.patch("liminal.core.environment.get_airflow_home_dir")
     @mock.patch("liminal.core.util.files_util.load")
+    @mock.patch.dict(os.environ, {'LIMINAL_STAND_ALONE_MODE': 'True', 'POD_NAMESPACE': 'my_pod_ns'})
     def test_liminal_config_snapshot(self, find_config_files_mock,
                                      get_airflow_dir_mock, path_exists_mock):
         subliminal = {
