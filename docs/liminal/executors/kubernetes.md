@@ -17,10 +17,27 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# Liminal yaml file explained
+# kubernetes executor
 
-## Main Structure of liminal.yml 
-TDB
-## main properties
-### task
-### service
+The `kubernetes` executor allows you to run tasks on kubernetes.
+
+```yaml
+  - executor: my_kubernetes_executor
+    type: kubernetes
+```
+
+## attributes
+
+If running pipelines on Airflow, any attribute of
+[KubernetesPodOperator](https://airflow.apache.org/docs/apache-airflow/1.10.12/_api/airflow/contrib/operators/kubernetes_pod_operator/index.html)
+can be set as an attribute of the executor.
+
+Note that some of these attributes are set in the `task`:
+```
+image
+cmd
+mounts
+name
+env_vars
+```
+For example, see: [python task](../tasks/python.md)
