@@ -69,7 +69,7 @@ There are a couple of ways to deploy Yamls in Airflow.
     * Add a requirements txt file for the liminal package installation
 
 ### Mount the EFS file system onto a deployment box
-Now that Airflow contains the liminal package, we need to deploy the actual Yamls (DAGs) into airflow - by placing the Yaml files in each components\` `/opt/airflow/dags` folder.
+Our goal is to deploy the actual Yamls (DAGs) into airflow - by placing the Yaml files in each components\` `/opt/airflow/dags` folder.
 
 There are multiple ways to achieve this.
 
@@ -78,13 +78,21 @@ To this end, you will need to perform the deployment from a (separate) linux box
 
 One time setup:
 
-1. Create an EFS file system
+1. Use the EFS file system that you created for Airflow DAGs folder
 2. Mount the EFS file system onto a deployment box:
 ```sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <EFS_ID>:/ /mnt/efs```
 3. Create a folder on an EFS drive. This will be our target for deployment
 ```mkdir -p /mnt/efs/opt/airflow/liminal_home```
 4. ```export LIMINAL_HOME=/mnt/efs/opt/airflow/liminal_home```
-5. Follow the guide <<<>>> for deploying Airflow on K8S, with EFS mount.
+5. Ensure liminal package to be installed on every restart:
+    ```
+    echo "apache-liminal" > $LIMINAL_HOME/requirements.txt
+    ```
+6. Copy the liminal_dags.py that generates the Yamls:
+    ```
+    cp https://github.com/apache/incubator-liminal/blob/master/liminal/runners/airflow/dag/liminal_dags.py $LIMINAL_HOME
+    ```
+7. Follow the guide <<<>>> for deploying Airflow on K8S, with EFS mount.
 Point the pods' PV to the right EFS folder, like so:
     ```
     volumeMounts:
@@ -98,7 +106,9 @@ Once this setup is done (one time), you have:
 2. Airflow pods which will pick up the Yamls from that folder automatically.
 
 Each time you want to deploy the Liminal Yamls from the deployment box:
-liminal deploy <<<path to liminal user code>>>
+```
+liminal deploy --path <<<path to liminal user code>>>
+```
 
 ### A kubernetes job example
     apiVersion: batch/v1
