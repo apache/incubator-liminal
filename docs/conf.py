@@ -29,23 +29,23 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-
+#
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../'))
+
+sys.path.insert(0, os.path.abspath('source'))
+sys.path.insert(0, os.path.abspath('/'))
 
 # -- Project information -----------------------------------------------------
 
 project = u'Apchae Liminal'
 copyright = u'Apache Liminal'
-author = u'Amihay Zer-Kavod'
+author = u'Apache Software Foundation'
 
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
 release = u'0.0.1'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -84,11 +84,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['README.md', '**/README.md']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
-
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -124,7 +123,6 @@ html_static_path = ['nstatic']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'ApchaeLiminaldoc'
 
-
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
@@ -150,9 +148,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'ApchaeLiminal.tex', u'Apchae Liminal Documentation',
-     u'Amihay Zer-Kavod', 'manual'),
+     u'Apache Software Foundation', 'manual'),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 
@@ -162,7 +159,6 @@ man_pages = [
     (master_doc, 'apchaeliminal', u'Apchae Liminal Documentation',
      [author], 1)
 ]
-
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -174,7 +170,6 @@ texinfo_documents = [
      author, 'ApchaeLiminal', 'One line description of project.',
      'Miscellaneous'),
 ]
-
 
 # -- Options for Epub output -------------------------------------------------
 
@@ -192,3 +187,14 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
+
+
+def on_missing_reference(app, env, node, contnode):
+    if node['reftype'] == 'any':
+        return contnode
+    else:
+        return None
+
+
+def setup(app):
+    app.connect('missing-reference', on_missing_reference)

@@ -34,8 +34,14 @@ non-functional tasks, and allowing them to focus on machine learning code and ar
 Using simple YAML configuration, create your own schedule data pipelines (a sequence of tasks to
 perform), application servers,  and more.
 
-## Getting Started Documentation
-A simple getting stated guide for Liminal can be found [here](docs/source/getting_started_with_liminal.md)
+## Getting Started
+A simple getting stated guide for Liminal can be found [here](docs/getting_started.md)
+
+## Apache Liminal Documentation
+Full documentation of Apache Liminal can be found [here](docs/liminal)
+
+## High Level Architecture
+High level architecture documentation can be found [here](docs/architecture.md)
 
 ## Example YAML config file
 ```yaml
@@ -193,5 +199,9 @@ You should see the steps in your pipeline getting executed in "real time" by cli
 
 ![Pipeline activation](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow_trigger.png)
 
-### Running Tests (for contributors)
+# Contributing
+
+More information on contributing can be found [here](CONTRIBUTING.md)
+
+## Running Tests (for contributors)
 When doing local development and running Liminal unit-tests, make sure to set LIMINAL_STAND_ALONE_MODE=True

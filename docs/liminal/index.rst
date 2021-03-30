@@ -24,21 +24,20 @@
    under the License.
 ..
 
-Welcome to Apchae Liminal's documentation!
-==========================================
+Apache Liminal Documentation
+============================
+
+Chapters:
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
 
-   getting_started_with_liminal
-   liminal_architecture
-   liminal_yaml_guide
-   howto_contrib_to_liminal_docs
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   liminal.yml
+   images/index.rst
+   pipelines
+   tasks/index.rst
+   services
+   monitoring
+   metrics_backends/index.rst
+   advanced.liminal.yml
+   executors/index.rst
