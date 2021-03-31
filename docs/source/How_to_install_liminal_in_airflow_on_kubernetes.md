@@ -22,7 +22,8 @@ under the License.
 * [Prerequisites](#prerequisites)
    * [Supported Distributions](#supported-distributions)
 * [Get Started](#Get-Started)
-   * [Liminal installation](#liminal-installation)
+   * [Package dependency](#package-dependency)
+   * [Mount the EFS](#mount-the-EFS)
    * [Liminal deployment](#liminal-deployment)
 * [References and other resources](#references-and-other-resources)
 

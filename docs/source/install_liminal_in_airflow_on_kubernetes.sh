@@ -62,8 +62,21 @@ restart_airflow_components() {
 	kubectl rollout restart deployment airflow-scheduler
 }
 
+install_liminal_on_remote_machine() {
+	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
+	pip install apache-liminal
+EOF
+}
+
 deploy_yaml() {
-        echo "Deployment"
+	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
+	echo 'Find the the mounted path of the Airflow'
+	airflow_path=$(find /mnt/efs/ -name "liminal_home")
+
+	echo 'Export the liminal home'
+	export LIMINAL_HOME=${airflow_path}
+	liminal deploy --path $LIMINAL_HOME
+EOF
 }
 
 case $ACTION in
@@ -80,6 +93,7 @@ case $ACTION in
 		exit 0
 	;;
 	deployment)
+                install_liminal_on_remote_machine
                 deploy_yaml
 		exit 0
 	;;
