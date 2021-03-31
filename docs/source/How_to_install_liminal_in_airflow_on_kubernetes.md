@@ -86,11 +86,17 @@ One time setup:
 4. ```export LIMINAL_HOME=/mnt/efs/opt/airflow/liminal_home```
 5. Ensure liminal package to be installed on every restart:
     ```
-    echo "apache-liminal" > $LIMINAL_HOME/requirements.txt
+    echo "apache-liminal==0.0.1" > $LIMINAL_HOME/requirements.txt
     ```
-6. Copy the liminal_dags.py that generates the Yamls:
+6. Rollout restart the Airflow components:
     ```
-    cp https://github.com/apache/incubator-liminal/blob/master/liminal/runners/airflow/dag/liminal_dags.py $LIMINAL_HOME
+    kubectl rollout restart statefulset airflow-worker
+    kubectl rollout restart deployment airflow-web
+    kubectl rollout restart deployment airflow-scheduler
+    ```
+6. Find and copy the liminal_dags.py that generates the Yamls:
+    ```
+    kubectl exec -it <AirflowComponent> -n <Namespace> -- bash -c "find '/home/airflow/' -path '*liminal/runners/airflow/dag/liminal_dags.py'| xargs -I {} cp -p {} /opt/airflow/dags/"
     ```
 7. Follow the guide <<<>>> for deploying Airflow on K8S, with EFS mount.
 Point the pods' PV to the right EFS folder, like so:
