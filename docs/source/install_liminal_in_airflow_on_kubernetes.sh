@@ -1,36 +1,90 @@
 #! /bin/bash
 
-# Read namespace
-read -r -p "Please enter a namespace: " namespace
-
-function green() {
-  printf "\e[32m"
-  echo "$1"
-  printf "\e[0m"
+help() {
+    echo "$0: Get Started"
+    echo "Usage: $0 -o option"
+		echo "Liminal available options:          "
+		echo "installation "
+		echo "deployment"
 }
 
-components=("web" "scheduler" "worker")
-namespace=${namespace}
-podNames=()
-for component in ${components[@]}
-do
-        podNames+="$(kubectl get pod -n ${namespace} -l "app=airflow,component=${component}" --no-headers -o custom-columns=":metadata.name")\n"
+if [[ "$#" -lt 2 ]]; then
+	help
+	exit
+fi
 
+# Arguments processing
+while getopts ":o:" opt; do #installation, deployment
+	case $opt in
+	o)
+	  option=$OPTARG
+	  case $option in
+	    installation)
+	      ACTION="installation"
+	    ;;
+	    deployment)
+	      ACTION="deployment"
+	    ;;
+	  esac
+	esac
 done
 
-echo -e "The following Airflow pods are:\n${podNames}"
+mount_efs() {
+	local EFS_ID=$1
+	local SSH_KEY=$2
+	local USERNAME='admin'
+	local HOST_IP=$3
+	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
+	EFS_ID=$EFS_ID
+	echo "The EFS_ID is: ${EFS_ID}"
 
-IFS=$'\n'|''; set -f; podNames=( ${podNames} )
-webPodName=$(echo -e ${podNames[${#podNames[@]} - 1]} | head -n 1)
+	echo 'Create /mnt/efs'
+	mkdir /mnt/efs:wq
 
-for podName in `echo -e ${podNames[@]}`
-do
-        green "Installing liminal in pod: ${podName}"
-        kubectl exec -it -n ${namespace} ${podName} -- bash -c 'pip install --user apache-liminal'
-done
+	echo 'Mount the /mnt/efs'
+	sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${EFS_ID}:/ /mnt/efs
 
-green "Deploying liminal"
-kubectl exec -it $webPodName -n ${namespace} -- bash -c "find '/home/airflow/' -path  '*liminal/runners/airflow/dag/liminal_dags.py'| xargs -I {} cp -p {} /opt/airflow/dags/"
-kubectl exec -it $webPodName -n ${namespace} -- bash -c "mkdir -p /opt/airflow/dags/pipelines/"
-kubectl exec -it $webPodName -n ${namespace} -- bash -c "mkdir -p /opt/airflow/dags/pipelines/example-repository/"
-kubectl cp liminal.yml ${namespace}/$webPodName:/opt/airflow/dags/pipelines/example-repository/
+	echo 'Find the the mounted path of the Airflow'
+	airflow_path=$(find /mnt/efs/ -name "liminal_home")
+
+	echo 'Export the liminal home'
+	export LIMINAL_HOME=${airflow_path}
+
+	echo 'Append apache-liminal pacakge to the requirements file'
+	echo "apache-liminal" >$LIMINAL_HOME/requirements.txt
+EOF
+}
+
+restart_airflow_components() {
+	echo 'Rollout restart Airflow components'
+	kubectl rollout restart statefulset airflow-worker
+	kubectl rollout restart deployment airflow-web
+	kubectl rollout restart deployment airflow-scheduler
+}
+
+deploy_yaml() {
+        echo "Deployment"
+}
+
+case $ACTION in
+	installation)
+                read -r -p "Please enter EFS ID: " EFS_ID
+                read -r -p "Please enter ssh key path: " SSH_KEY
+                read -r -p "Please enter host ip: " HOST_IP
+
+                EFS_ID=${EFS_ID}
+                SSH_KEY=${SSH_KEY}
+                HOST_IP=${HOST_IP}
+                mount_efs $EFS_ID $SSH_KEY $HOST_IP
+                restart_airflow_components
+		exit 0
+	;;
+	deployment)
+                deploy_yaml
+		exit 0
+	;;
+*)
+  help
+  exit
+  ;;
+esac
