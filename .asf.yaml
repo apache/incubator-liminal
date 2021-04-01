@@ -27,8 +27,10 @@ github:
     - ai
     - ml 
     - workflows
+    
  notifications:
   commits:      commits@liminal.apache.org
   issues:       issues@liminal.apache.org
   pullrequests: dev@liminal.apache.org
   jira_options: link label worklog
+  
