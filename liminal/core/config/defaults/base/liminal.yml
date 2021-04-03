@@ -24,9 +24,10 @@ task_defaults:
   description: add defaults parameters for all tasks separate by task type
 pipeline_defaults:
   description: add defaults parameters for all pipelines
-  before_tasks:
+  tasks:
     - task: start
       type: job_start
-  after_tasks:
+    - task: sub_tasks
+      type: pipeline
     - task: end
       type: job_end
