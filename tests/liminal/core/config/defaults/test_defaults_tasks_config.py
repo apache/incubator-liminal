@@ -70,13 +70,14 @@ class TestDefaultsTaskConfig(TestCase):
         self.assertEqual(expected, default_configs.apply_task_defaults(subliminal,
                                                                        superliminal,
                                                                        pipeline=pipeline,
-                                                                       superliminal_tasks=[{
+                                                                       superliminal_before_tasks=[{
                                                                            "task": "start",
                                                                            "type": "python",
                                                                            "env_vars": {
                                                                                "env1": "env1value"
                                                                            }
-                                                                       }]))
+                                                                       }],
+                                                                       superliminal_after_tasks=[]))
 
     def test_missing_tasks_from_supr(self):
         pipeline = {
@@ -122,9 +123,8 @@ class TestDefaultsTaskConfig(TestCase):
         self.assertEqual(expected, default_configs.apply_task_defaults(subliminal,
                                                                        superliminal,
                                                                        pipeline=pipeline,
-                                                                       superliminal_tasks=superliminal[
-                                                                           'task_defaults'].get(
-                                                                           'tasks', [])))
+                                                                       superliminal_before_tasks=[],
+                                                                       superliminal_after_tasks=[]))
 
     def test_missing_tasks_from_sub(self):
         pipeline = {
@@ -143,23 +143,6 @@ class TestDefaultsTaskConfig(TestCase):
                 "spark": {
                     "task_param": "task_start_param",
                 }
-            },
-            "pipeline_defaults": {
-                "tasks": [
-                    {
-                        "task": "start",
-                        "task_param": "task_middle_param",
-                        "type": "spark"
-                    },
-                    {
-                        "env_vars": {
-                            "env2": "env2value"
-                        },
-                        "task": "end",
-                        "task_param": "task_end_param",
-                        "type": "pipeline"
-                    }
-                ]
             }
         }
 
@@ -171,11 +154,22 @@ class TestDefaultsTaskConfig(TestCase):
                         {'env_vars': {'env2': 'env2value'},
                          'task': 'end',
                          'task_param': 'task_end_param',
-                         'type': 'pipeline'}]}
+                         'type': 'end'}]}
 
-        self.assertEqual(expected, default_configs.apply_task_defaults(subliminal,
-                                                                       superliminal,
-                                                                       pipeline=pipeline,
-                                                                       superliminal_tasks=superliminal[
-                                                                           'pipeline_defaults'].pop(
-                                                                           'tasks', [])))
+        self.assertEqual(expected,
+                         default_configs.apply_task_defaults(subliminal,
+                                                             superliminal,
+                                                             pipeline=pipeline,
+                                                             superliminal_before_tasks=[{
+                                                                 "task": "start",
+                                                                 "task_param": "task_middle_param",
+                                                                 "type": "spark"
+                                                             }],
+                                                             superliminal_after_tasks=[{
+                                                                 "env_vars": {
+                                                                     "env2": "env2value"
+                                                                 },
+                                                                 "task": "end",
+                                                                 "task_param": "task_end_param",
+                                                                 "type": "end"
+                                                             }]))
