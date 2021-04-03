@@ -19,4 +19,4 @@ import os
 
 from liminal.core.util import files_util
 
-HYPERLIMINAL = files_util.load(os.path.dirname(__file__))['hyperliminal'].copy()
+BASE = files_util.load(os.path.dirname(__file__))['base'].copy()

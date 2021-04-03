@@ -142,7 +142,7 @@ class TestHierarchicalConfig(TestCase):
 
     @mock.patch("liminal.core.util.files_util.load")
     def test_get_superliminal(self, find_config_files_mock):
-        hyperliminal = {'name': 'hyperliminal',
+        base = {'name': 'base',
                         'pipeline_defaults': {'description': 'add defaults parameters for all '
                                                              'pipelines',
                                               'tasks': [{'task': 'start', 'type': 'job_start'},
@@ -164,11 +164,11 @@ class TestHierarchicalConfig(TestCase):
 
         config_util = ConfigUtil("")
 
-        self.assertEqual(hyperliminal,
+        self.assertEqual(base,
                          config_util._ConfigUtil__get_superliminal(subliminal))
 
         self.assertEqual({},
-                         config_util._ConfigUtil__get_superliminal(hyperliminal))
+                         config_util._ConfigUtil__get_superliminal(base))
 
         liminal = {
             "name": "subliminal_test",

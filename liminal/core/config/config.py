@@ -21,7 +21,7 @@ import os
 import traceback
 
 from liminal.core import environment
-from liminal.core.config.defaults import hyperliminal, default_configs
+from liminal.core.config.defaults import base, default_configs
 from liminal.core.util import dict_util
 from liminal.core.util import files_util
 
@@ -30,7 +30,7 @@ class ConfigUtil:
     """
     Load and enrich config files under configs_path.
     """
-    __HYPERLIMINAL = "hyperliminal"
+    __BASE = "base"
     __PIPELINES = "pipelines"
     __SUPER = "super"
     __TYPE = "type"
@@ -42,7 +42,7 @@ class ConfigUtil:
     def __init__(self, configs_path):
         self.configs_path = configs_path
         self.config_files = files_util.load(configs_path)
-        self.hyperliminal = hyperliminal.HYPERLIMINAL
+        self.base = base.BASE
         self.loaded_subliminals = []
         self.snapshot_path = os.path.join(environment.get_airflow_home_dir(), '../liminal_config_files')
 
@@ -96,10 +96,10 @@ class ConfigUtil:
 
     def __get_superliminal(self, liminal):
         superliminal = {}
-        if not self.__is_hyperliminal(liminal):
+        if not self.__is_base_config(liminal):
             superliminal_name = liminal.get(self.__SUPER, '')
             if not superliminal_name:
-                superliminal = self.hyperliminal
+                superliminal = self.base
             else:
                 superliminal = self.__get_config(superliminal_name)
 
@@ -109,11 +109,11 @@ class ConfigUtil:
 
         return superliminal
 
-    def __get_hyperliminal(self):
-        return self.hyperliminal
+    def __get_base_config(self):
+        return self.base
 
-    def __is_hyperliminal(self, config):
-        return config.get('name', '') == self.__HYPERLIMINAL
+    def __is_base_config(self, config):
+        return config.get('name', '') == self.__BASE
 
     def __is_subliminal(self, config):
         is_subliminal = config.get(self.__TYPE, self.__SUB) != self.__SUPER

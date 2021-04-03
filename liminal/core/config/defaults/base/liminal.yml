@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 ---
-name: hyperliminal
+name: base
 type: super
 service_defaults:
   description: add defaults parameters for all services
