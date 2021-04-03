@@ -85,7 +85,6 @@ class TestHierarchicalConfig(TestCase):
                                                'task_def2': {'task_def2_1': 'task_def2_1_value'},
                                                'task_sub_def': 'task_sub_def_value',
                                                'type': 'job_start'},
-                                              {'task': 'sub_tasks', 'type': 'pipeline'},
                                               {'task': 'end', 'type': 'job_end'}]},
                                    {'description': 'add defaults parameters for all pipelines',
                                     'name': 'mypipe2',
@@ -99,7 +98,6 @@ class TestHierarchicalConfig(TestCase):
                                                'task_def2': {'task_def2_1': 'task_def2_1_value'},
                                                'task_sub_def': 'task_sub_def_value',
                                                'type': 'job_start'},
-                                              {'task': 'sub_tasks', 'type': 'pipeline'},
                                               {'task': 'end', 'type': 'job_end'}]}],
                      'service_defaults': {'description': 'add defaults parameters for all '
                                                          'services'},
@@ -143,16 +141,15 @@ class TestHierarchicalConfig(TestCase):
     @mock.patch("liminal.core.util.files_util.load")
     def test_get_superliminal(self, find_config_files_mock):
         base = {'name': 'base',
-                        'pipeline_defaults': {'description': 'add defaults parameters for all '
-                                                             'pipelines',
-                                              'tasks': [{'task': 'start', 'type': 'job_start'},
-                                                        {'task': 'sub_tasks', 'type': 'pipeline'},
-                                                        {'task': 'end', 'type': 'job_end'}]},
-                        'service_defaults': {'description': 'add defaults parameters for all '
-                                                            'services'},
-                        'task_defaults': {'description': 'add defaults parameters for all tasks '
-                                                         'separate by task type'},
-                        'type': 'super'}
+                'pipeline_defaults': {'after_tasks': [{'task': 'end', 'type': 'job_end'}],
+                                      'before_tasks': [{'task': 'start', 'type': 'job_start'}],
+                                      'description': 'add defaults parameters for all '
+                                                     'pipelines'},
+                'service_defaults': {'description': 'add defaults parameters for all '
+                                                    'services'},
+                'task_defaults': {'description': 'add defaults parameters for all tasks '
+                                                 'separate by task type'},
+                'type': 'super'}
         subliminal = {
             "name": "subliminal_test",
             "type": "sub"
@@ -186,10 +183,11 @@ class TestHierarchicalConfig(TestCase):
             "type": "super",
             "super": "super_superliminal",
             "pipeline_defaults": {
-                "tasks": [
+                "before_tasks": [
                     {"task": "start-2", "type": "spark"},
-                    {"task": "middle-2", "type": "pipeline"},
-                    {"task": "end-2", "type": "spark"}
+                ],
+                "after_tasks": [
+                    {"task": "end-1", "type": "spark"}
                 ]
             },
             "task_defaults": {
@@ -201,10 +199,10 @@ class TestHierarchicalConfig(TestCase):
             "name": "super_superliminal",
             "type": "super",
             "pipeline_defaults": {
-                "tasks": [
-                    {"task": "start-1", "type": "spark"},
-                    {"task": "middle-1", "type": "pipeline"},
-                    {"task": "end-1", "type": "spark"}
+                "before_tasks": [
+                    {"task": "start-1", "type": "spark"}],
+                "after_tasks": [
+                    {"task": "end-2", "type": "spark"}
                 ]
             }
         }
@@ -216,26 +214,18 @@ class TestHierarchicalConfig(TestCase):
             "superliminal": superliminal
         }
 
-        expected = {
-            'name': 'my_superliminal_test',
-            'super': 'super_superliminal',
-            'pipeline_defaults': {
-                'tasks': [
-                    {'task': 'start-1', 'type': 'spark'},
-                    {'task': 'start-2', 'type': 'spark'},
-                    {'task': 'middle-2', 'type': 'pipeline'},
-                    {'task': 'end-2', 'type': 'spark'},
-                    {'task': 'end-1', 'type': 'spark'}
-                ]
-            },
-            'task_defaults':
-                {
-                    'task_def1': 'task_def1_value'
-                },
-            'type': 'super'}
+        expected = {'name': 'my_superliminal_test',
+                    'pipeline_defaults': {'after_tasks': [{'task': 'end-1', 'type': 'spark'},
+                                                          {'task': 'end-2', 'type': 'spark'}],
+                                          'before_tasks': [{'task': 'start-1', 'type': 'spark'},
+                                                           {'task': 'start-2', 'type': 'spark'}]},
+                    'super': 'super_superliminal',
+                    'task_defaults': {'task_def1': 'task_def1_value'},
+                    'type': 'super'}
 
-        self.assertEqual(expected, config_util._ConfigUtil__merge_superliminals(superliminal,
-                                                                                super_superliminal))
+        self.assertEqual(expected,
+                         dict(config_util._ConfigUtil__merge_superliminals(superliminal,
+                                                                           super_superliminal)))
 
     @mock.patch("liminal.core.util.files_util.load")
     @mock.patch.dict(os.environ, {'env': 'myenv', 'LIMINAL_STAND_ALONE_MODE': 'True'})
@@ -254,8 +244,15 @@ class TestHierarchicalConfig(TestCase):
                 "c": "{{a}}{{b}}2"
             },
             "pipelines": [
-                {"name": "mypipe1", "param": "{{var}}"},
-                {"name": "mypipe2", "param": "{{var-2   }}"}
+                {"name": "mypipe1", "param": "{{var}}",
+                 "tasks": [
+                     {'task': 'sub_tasks',
+                      'type': 'dummy'},
+                 ]},
+                {"name": "mypipe2", "param": "{{var-2   }}", "tasks": [
+                    {'task': 'sub_tasks',
+                     'type': 'dummy'},
+                ]}
             ],
             "pipeline_defaults": {
                 "param1": "{{var-2}}"
@@ -291,7 +288,10 @@ class TestHierarchicalConfig(TestCase):
             "super": "super_superliminal",
             "pipeline_defaults": {
                 "param2": "{{pipe-var}}",
-                "param3": "param3super_value"
+                "param3": "param3super_value",
+                "before_tasks": [
+                    {'task': 'second_task', 'type': 'dummy'},
+                ]
             },
             "task_defaults": {
                 "pipeline": {
@@ -313,7 +313,10 @@ class TestHierarchicalConfig(TestCase):
                 "global_conf": "{{var3}}",
                 "param2": "param2super_value",
                 "param3": "param3hyper_value",
-                "param4": "param4hyper_value"
+                "param4": "param4hyper_value",
+                "after_tasks": [
+                    {'task': 'before_last_task', 'type': 'dummy'},
+                ]
             }
         }
 
@@ -330,11 +333,9 @@ class TestHierarchicalConfig(TestCase):
                                     'tasks': [{'task': 'start',
                                                'task_def1:': 'task_sub_def_value',
                                                'type': 'job_start'},
-                                              {'path': '-case',
-                                               'task': 'sub_tasks',
-                                               'task_def1': 'task_def1_value',
-                                               'task_def2': {'task_def2_1': 'task_def2_1_value'},
-                                               'type': 'pipeline'},
+                                              {'task': 'second_task', 'type': 'dummy'},
+                                              {'task': 'sub_tasks', 'type': 'dummy'},
+                                              {'task': 'before_last_task', 'type': 'dummy'},
                                               {'task': 'end', 'type': 'job_end'}]},
                                    {'description': 'add defaults parameters for all pipelines',
                                     'global_conf': 'super_var',
@@ -347,11 +348,9 @@ class TestHierarchicalConfig(TestCase):
                                     'tasks': [{'task': 'start',
                                                'task_def1:': 'task_sub_def_value',
                                                'type': 'job_start'},
-                                              {'path': '-case',
-                                               'task': 'sub_tasks',
-                                               'task_def1': 'task_def1_value',
-                                               'task_def2': {'task_def2_1': 'task_def2_1_value'},
-                                               'type': 'pipeline'},
+                                              {'task': 'second_task', 'type': 'dummy'},
+                                              {'task': 'sub_tasks', 'type': 'dummy'},
+                                              {'task': 'before_last_task', 'type': 'dummy'},
                                               {'task': 'end', 'type': 'job_end'}]}],
                      'service_defaults': {'description': 'add defaults parameters for all '
                                                          'services'},
@@ -408,17 +407,20 @@ class TestHierarchicalConfig(TestCase):
 
         expected = {'name': 'my_subliminal_test', 'type': 'sub',
                     'service_defaults': {'description': 'add defaults parameters for all services'},
-                    'task_defaults': {'description': 'add defaults parameters for all tasks separate by task type'},
-                    'pipeline_defaults': {'description': 'add defaults parameters for all pipelines',
-                                          'tasks': [{'task': 'start', 'type': 'job_start'},
-                                                    {'task': 'sub_tasks', 'type': 'pipeline'},
-                                                    {'task': 'end', 'type': 'job_end'}]},
+                    'task_defaults': {
+                        'description': 'add defaults parameters for all tasks separate by task type'},
+                    'pipeline_defaults': {
+                        'description': 'add defaults parameters for all pipelines',
+                        'before_tasks': [{'task': 'start', 'type': 'job_start'}],
+                        'after_tasks': [{'task': 'end', 'type': 'job_end'}]},
                     'variables': {'var': 1, 'var-2': True}, 'pipelines': [
-                {'name': 'mypipe1', 'param': '1', 'description': 'add defaults parameters for all pipelines',
-                 'tasks': [{'task': 'start', 'type': 'job_start'}, {'task': 'sub_tasks', 'type': 'pipeline'},
+                {'name': 'mypipe1', 'param': '1',
+                 'description': 'add defaults parameters for all pipelines',
+                 'tasks': [{'task': 'start', 'type': 'job_start'},
                            {'task': 'end', 'type': 'job_end'}]},
-                {'name': 'mypipe2', 'param': 'True', 'description': 'add defaults parameters for all pipelines',
-                 'tasks': [{'task': 'start', 'type': 'job_start'}, {'task': 'sub_tasks', 'type': 'pipeline'},
+                {'name': 'mypipe2', 'param': 'True',
+                 'description': 'add defaults parameters for all pipelines',
+                 'tasks': [{'task': 'start', 'type': 'job_start'},
                            {'task': 'end', 'type': 'job_end'}]}], 'services': []}
 
         find_config_files_mock.return_value = {
@@ -431,5 +433,6 @@ class TestHierarchicalConfig(TestCase):
         with mock.patch("builtins.open", mock.mock_open()) as m:
             with mock.patch("yaml.dump") as ydm:
                 ConfigUtil("").safe_load(is_render_variables=True)
-                m.assert_called_once_with(os.path.join('/tmp', '../liminal_config_files/my_subliminal_test.yml'), 'w')
+                m.assert_called_once_with(
+                    os.path.join('/tmp', '../liminal_config_files/my_subliminal_test.yml'), 'w')
                 ydm.assert_called_once_with(expected, m.return_value, default_flow_style=False)
