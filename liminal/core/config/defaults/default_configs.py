@@ -21,6 +21,8 @@ from liminal.core.util.dict_util import merge_dicts
 
 __SERVICES = "services"
 __TASKS = "tasks"
+__BEFORE_TASKS = "before_tasks"
+__AFTER_TASKS = "after_tasks"
 
 
 def apply_variable_substitution(subliminal, superliminal, is_render_variables=False):
@@ -38,7 +40,8 @@ def apply_variable_substitution(subliminal, superliminal, is_render_variables=Fa
     if is_render_variables:
         for k, v in merged_variables.items():
             if isinstance(v, str) or (not isinstance(v, dict) and not isinstance(v, list)):
-                merged_variables[k] = dict_util.replace_placholders_in_string(str(v), merged_variables)
+                merged_variables[k] = dict_util.replace_placholders_in_string(str(v),
+                                                                              merged_variables)
 
         merged_variables = dict_util.replace_placeholders(merged_variables, merged_variables)
         return dict_util.replace_placeholders(subliminal, merged_variables)
@@ -76,27 +79,31 @@ def apply_pipeline_defaults(subliminal, superliminal, pipeline):
     keyword = "pipeline_defaults"
     superliminal_pipe_defaults = superliminal.get(keyword, {}).copy()
     subliminal_pipe_defaults = subliminal.get(keyword, {}).copy()
-    superliminal_tasks = superliminal_pipe_defaults.pop(__TASKS, [])
+    superliminal_before_tasks = superliminal_pipe_defaults.pop(__BEFORE_TASKS, [])
+    superliminal_after_tasks = superliminal_pipe_defaults.pop(__AFTER_TASKS, [])
     merged_pipeline_defaults = merge_dicts(subliminal_pipe_defaults, superliminal_pipe_defaults,
                                            True)
     pipeline = merge_dicts(pipeline, merged_pipeline_defaults, True)
 
     return apply_task_defaults(subliminal, superliminal, pipeline,
-                               superliminal_tasks=superliminal_tasks)
+                               superliminal_before_tasks=superliminal_before_tasks,
+                               superliminal_after_tasks=superliminal_after_tasks)
 
 
-def apply_task_defaults(subliminal, superliminal, pipeline, superliminal_tasks):
+def apply_task_defaults(subliminal, superliminal, pipeline, superliminal_before_tasks,
+                        superliminal_after_tasks):
     """Apply defaults task values on given pipeline
            :param subliminal: subliminal config
            :param superliminal: superliminal config
            :param  pipeline: where 'tasks' list can be found it
-           :param  superliminal_tasks: superliminal tasks list
+           :param  superliminal_before_tasks: superliminal before subtasks list
+           :param  superliminal_after_tasks: superliminal after subtasks list
 
            :returns: pipeline after enrich with superliminal.tasks and superliminal.task_defaults
             and subliminal.task_defaults
     """
     pipeline[__TASKS] = __apply_task_defaults(subliminal, superliminal, pipeline.get(__TASKS, []),
-                                              superliminal_tasks)
+                                              superliminal_before_tasks, superliminal_after_tasks)
 
     return pipeline
 
@@ -104,31 +111,22 @@ def apply_task_defaults(subliminal, superliminal, pipeline, superliminal_tasks):
 def __apply_task_defaults(subliminal,
                           superliminal,
                           subliminal_tasks,
-                          superliminal_tasks):
+                          superliminal_before_tasks,
+                          superliminal_after_tasks):
     keyword = "task_defaults"
     subliminal_tasks_defaults = subliminal.get(keyword, {})
     superliminal_tasks_defaults = superliminal.get(keyword, {})
     merged_task_defaults = merge_dicts(subliminal_tasks_defaults, superliminal_tasks_defaults,
                                        recursive=True)
 
-    return __enrich_tasks(subliminal_tasks, superliminal_tasks, merged_task_defaults)
+    return __enrich_tasks(subliminal_tasks, superliminal_before_tasks, superliminal_after_tasks,
+                          merged_task_defaults)
 
 
-def __enrich_tasks(sub_tasks, super_tasks, task_defaults):
-    result = []
-    subtasks_added = False
-    for task in super_tasks:
-        if task.get('type') in ['pipeline'] and sub_tasks:
-            result.extend(sub_tasks)
-            subtasks_added = True
-        else:
-            result.append(task)
-
-    # in case 'pipeline' keyword is missing from super - add subtasks at the end
-    if not subtasks_added:
-        result.extend(sub_tasks)
+def __enrich_tasks(sub_tasks, super_before_tasks, super_after_tasks, task_defaults):
+    merged_tasks = super_before_tasks + sub_tasks + super_after_tasks
 
     return [
         merge_dicts(task, task_defaults.get(task.get('type', ''), {}), recursive=True)
-        for task in result
+        for task in merged_tasks
     ]
