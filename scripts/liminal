@@ -117,9 +117,10 @@ def docker_compose_command(command_name, args):
 
 @cli.command("deploy", short_help="deploys your liminal.yaml files to $LIMINAL_HOME folder")
 @click.option('--path', default=os.getcwd(), help="folder containing liminal.yaml files")
+@click.option('--local', '-l', is_flag=True, default=True, help="use local mount")
 @click.option('--clean', is_flag=True, default=False,
               help="re-deploy liminal airflow components from scratch")
-def deploy_liminal_apps(path, clean):
+def deploy_liminal_apps(path, local, clean):
     click.echo("deploying liminal yaml files")
     liminal_home = environment.get_liminal_home()
     os.makedirs(liminal_home, exist_ok=True)
@@ -131,9 +132,10 @@ def deploy_liminal_apps(path, clean):
         yml_name = os.path.basename(config_file)
         target_yml_name = os.path.join(environment.get_dags_dir(), yml_name)
         shutil.copyfile(config_file, target_yml_name)
-        with open(config_file) as stream:
-            config = yaml.safe_load(stream)
-            volume_util.create_local_volumes(config, os.path.dirname(config_file))
+        if local:
+            with open(config_file) as stream:
+                config = yaml.safe_load(stream)
+                volume_util.create_local_volumes(config, os.path.dirname(config_file))
 
 
 def liminal_is_running():
