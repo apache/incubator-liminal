@@ -39,7 +39,7 @@ mount_efs() {
 	echo "The EFS_ID is: ${EFS_ID}"
 
 	echo 'Create /mnt/efs'
-	mkdir /mnt/efs:wq
+	mkdir /mnt/efs
 
 	echo 'Mount the /mnt/efs'
 	sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${EFS_ID}:/ /mnt/efs
@@ -63,6 +63,10 @@ restart_airflow_components() {
 }
 
 install_liminal_on_remote_machine() {
+	local SSH_KEY=$1
+	local USERNAME='admin'
+	local HOST_IP=$2
+
 	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
 	pip install apache-liminal
 EOF
@@ -71,11 +75,11 @@ EOF
 deploy_yaml() {
 	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
 	echo 'Find the the mounted path of the Airflow'
-	airflow_path=$(find /mnt/efs/ -name "liminal_home")
+	# airflow_path=$(find /mnt/efs/ -name "liminal_home")
 
 	echo 'Export the liminal home'
-	export LIMINAL_HOME=${airflow_path}
-	liminal deploy --path $LIMINAL_HOME
+	# export LIMINAL_HOME=${airflow_path}
+	# liminal deploy --path $LIMINAL_HOME
 EOF
 }
 
@@ -93,7 +97,10 @@ case $ACTION in
 		exit 0
 	;;
 	deployment)
-                install_liminal_on_remote_machine
+                read -r -p "Please enter ssh key path: " SSH_KEY
+                read -r -p "Please enter host ip: " HOST_IP
+
+                install_liminal_on_remote_machine $SSH_KEY $HOST_IP
                 deploy_yaml
 		exit 0
 	;;
