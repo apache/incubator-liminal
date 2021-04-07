@@ -18,11 +18,16 @@
 
 import logging
 import os
+import sys
 
 from kubernetes import client, config
 from kubernetes.client import V1PersistentVolume, V1PersistentVolumeClaim
 
-config.load_kube_config()
+try:
+    config.load_kube_config()
+except:
+    msg = "Kubernetes is not running\n"
+    sys.stdout.write(f"INFO: {msg}")
 
 _LOG = logging.getLogger('volume_util')
 _LOCAL_VOLUMES = set([])
