@@ -127,10 +127,9 @@ def deploy_liminal_apps(path, clean):
     deploy_liminal_core_internal(clean)
     config_files = files_util.find_config_files(path)
     for config_file in config_files:
-        yml_name = os.path.relpath(config_file, path)
         click.echo(f"deploying liminal file: {config_file}")
+        yml_name = os.path.basename(config_file)
         target_yml_name = os.path.join(environment.get_dags_dir(), yml_name)
-        os.makedirs(pathlib.Path(target_yml_name).parent, exist_ok=True)
         shutil.copyfile(config_file, target_yml_name)
 
 def liminal_is_running():
@@ -169,7 +168,6 @@ def create(local_volume_path):
         with open(config_file) as stream:
             config = yaml.safe_load(stream)
             volume_util.create_local_volumes(config, os.path.dirname(config_file))
-
 
 @cli.command("start",
              short_help="starts a local airflow in docker compose. should be run after deploy. " +
