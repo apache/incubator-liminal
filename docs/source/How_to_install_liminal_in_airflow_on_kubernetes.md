@@ -32,7 +32,10 @@ To deploy and run liminal on airflow, we need to complete two tasks:
    Here, our recommended approach is to use a folder on a shared filesystem (EFS) to host the airflow DAGs (and Liminal Yamls). 
    This folder will be mounted into Airflow pods' DAGs folder - thus enabling each of the pods to pick the files up and run the Liminal DAGs.
 
+
+
 ![](assets/liminal_deployment_diagram.png)
+
 
 Below is a description of how to achieve this task using a commonly used Helm chart for Airflow on Kubernetes.
 
@@ -41,7 +44,7 @@ Below is a description of how to achieve this task using a commonly used Helm ch
 This guide assumes you have successfully installed Airflow on Kubernetes.
 
 If you haven't done so yet, we found the following Helm chart useful for achieving this goal:
-[Airflow Helm Chart] [airflow-helm-chart-7.16.0]
+[airflow-helm-chart-7.16.0]
 
 You'll need to add the chart to your Helm installation and follow the instructions from the README.md
 ```sh
@@ -66,10 +69,10 @@ you can add apache-liminal installation during the build:
 2. If you already have a running Airflow on Kubernetes, you can run a command which iterates over Airflow pods and executes a ```pip install apache-liminal``` 
 on each of the pods. 
 
-3. If you used the [Airflow Helm Chart] [airflow-helm-chart-7.16.0], you just need to specifiy apache-liminal inside the ````requirements.txt``` file as per the instructions[here][airflow-helm-chart-7.16.0]
+3. If you used the [airflow-helm-chart-7.16.0], you just need to specifiy apache-liminal inside the ```requirements.txt``` file as per the instructions [here][airflow-helm-chart-7.16.0]
 
 
-### Preparing a "deployment box" and preparing the EFS folder
+### Preparing a "deployment box" and an EFS folder to host the Liminal Yaml files
 The "deployment box" is the machine which has access to the Yamls you want to deploy.
 This machine will also mount the same EFS folder as Airflow, and use ```liminal deploy``` to push the Yamls into that folder.
 
@@ -87,15 +90,17 @@ This machine will also mount the same EFS folder as Airflow, and use ```liminal 
 ### Mounting the EFS folder into Airflow pods
 
 Now that we have an EFS drive, and we've created the shared folder on it, it's time to mount it onto the Airflow pods` Dags folder.
-The [guide][airflowInstallation]includes details on how to expose EFS as a Persistent Volume for kubernetes.
+The [guide] [airflowInstallation]includes details on how to expose EFS as a Persistent Volume for kubernetes.
 
 Make sure to point the pods' PV to the right EFS folder, like so:
-    ```
-    volumeMounts:
-        - name: efs-data
-          mountPath: /opt/airflow/dags
-    ```
-    where efs-data is a PVC pointing to `<EFS_ID>:/opt/airflow/liminal_home`
+
+```
+volumeMounts:
+    - name: efs-data
+      mountPath: /opt/airflow/dags
+```
+
+where efs-data is a PVC pointing to `<EFS_ID>:/opt/airflow/liminal_home`
 
 
 ## Deploying your Yaml files
