@@ -88,6 +88,3 @@ case $ACTION in
   exit
   ;;
 esac
-
-
-# fs-ee333d5b.efs.us-east-1.amazonaws.com
