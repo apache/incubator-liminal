@@ -20,71 +20,78 @@ under the License.
 # Install Liminal in Airflow
 * [Workflow](#workflow)
 * [Prerequisites](#prerequisites)
-   * [Supported Distributions](#supported-distributions)
-* [Get Started](#Get-Started)
-   * [Package dependency](#package-dependency)
-   * [Mount the EFS](#mount-the-EFS)
-   * [Liminal deployment](#liminal-deployment)
+* [One time setup](#One-time-setup)
+* [Deploying your Yaml files](#Deploying-your-Yaml-files)
 * [References and other resources](#references-and-other-resources)
 
 ## Workflow
 To deploy and run liminal on airflow, we need to complete two tasks:
 1. Ensure that the Liminal python package is installed inside each one of Airflow's pods (schedulers and Web Server)
+   This is a standard airflow management task, which can be achieved in multiple ways depending on your setup (we will cover a few later in this guide).
 2. Ensure that the user's Liminal code (i.e. Yamls) are present in each of the pods' DAGs folder (typically located in /opt/airflow/dags)
+   Here, our recommended approach is to use a folder on a shared filesystem (EFS) to host the airflow DAGs (and Liminal Yamls). 
+   This folder will be mounted into Airflow pods' DAGs folder - thus enabling each of the pods to pick the files up and run the Liminal DAGs.
 
-The first task is accomplished by iterating over Airflows' k8s pods and running a pip install on each of them.
-
-The second task is accomplished by using a folder on a shared filesystem (EFS) to host the airflow DAGs (and Liminal Yamls). \
-This folder is mounted into Airflow pods' DAGs folder - thus enables each of the pods to pick the files up and run the Liminal DAGs.
-
-The process of liminal is emphasized on the following diagram:
+The process of liminal is depicted on the following diagram:
 
 ![](assets/liminal_deployment_diagram.png)
 
+Below is a description of how to achieve this task using a commonly used Helm chart for Airflow on Kubernetes.
+
 ## Prerequisites
-Before you begin, ensure you have met the following requirements: 
-* You have the kubectl command line [(kubectl CLI)][homebrew-kubectl] installed
-* You have the current [context][cluster-access-kubeconfig] in kubernetes' kubeconfig file
-* You have [Airflow on Kubernetes with AWS EFS][airflowInstallation]
+### Airflow on Kubernetes
+This guide assumes you have successfully installed Airflow on Kubernetes.
 
-### Supported Distributions
+If you haven't done so yet, we found the following Helm chart useful for achieving this goal:
+[Airflow Helm Chart] [airflow-helm-chart-7.16.0]
 
-|Distribution | Versions |
-|-|-|
-|[Airflow][airflowImage] | apache/airflow:1.10.14-python3.8 |
-|[Airflow Helm Chart][airflowChart] | [7.16.0][airflow-helm-chart-7.16.0] |
-
-#### You may need to add the Repo
-
+You'll need to add the chart to your Helm installation and follow the instructions from the README.md
 ```sh
 helm repo add airflow-stable https://airflow-helm.github.io/charts
 helm repo update
 ```
 
-## Get Started
-#### Package dependency
-There are multiple ways to install liminal in Airflow and it depends on what will be useful in your environment.\
-1. Use kubectl to execute pip install on the pods.
-2. Add `apache-liminal` as a requirement package to be installed once Airflow starts.
+### A provisioned EFS file system
+EFS is an AWS solution which offers an NFS as a service.
+You can read up about EFS [here](https://aws.amazon.com/efs/features/) and set it up via AWS console or CLI.
 
-#### Mount the EFS
-There are a couple of ways to deploy Yamls in Airflow our goal is to deploy the actual Yamls (DAGs) into airflow - by placing the Yaml files in each components\` `/opt/airflow/dags` folder.
+## One time environment setup
+### Adding the Apache Liminal package to Apache Airflow pods
 
-There are multiple ways to achieve this.
+There are multiple ways to install liminal into the Airflow pods, depending on how you deployed Airflow on Kubernetes.
+In principle, it requires the package to be pip-installed into the Airflow docker - either during build time or in run time.
 
-Our recommended approach is to use EFS as a shared folder containing the Liminal Yamls. \
-To this end, you will need to perform the deployment from a (separate) linux box, which can get hold of the Liminal Yamls and deploy them into the EFS - which we shall name "the deployment box".
+1. If you are rolling out your own Airflow Docker images based on the [official docker image](https://github.com/apache/airflow), 
+you can add apache-liminal installation during the build: 
+```docker build --build-arg ADDITIONAL_PYTHON_DEPS="apache-liminal"```
 
-One time setup:
+2. If you already have a running Airflow on Kubernetes, you can run a command which iterates over Airflow pods and executes a ```pip install apache-liminal``` 
+on each of the pods. 
 
-1. Use the EFS file system that you created for Airflow DAGs folder
-2. Mount the EFS file system onto a deployment box:
+3. If you used the [Airflow Helm Chart] [airflow-helm-chart-7.16.0], you just need to specifiy apache-liminal inside the ````requirements.txt``` file as per the instructions[here][airflow-helm-chart-7.16.0]
+
+
+### Preparing a "deployment box" and preparing the EFS folder
+The "deployment box" is the machine which has access to the Yamls you want to deploy.
+This machine will also mount the same EFS folder as Airflow, and use ```liminal deploy``` to push the Yamls into that folder.
+
+1. Provision an EC2 instance which has access to the EFS
+
+3. Mount the EFS onto the EC2 instance
+
 ```sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <EFS_ID>:/ /mnt/efs```
+
 3. Create a folder on an EFS drive. This will be our target for deployment
 ```mkdir -p /mnt/efs/opt/airflow/liminal_home```
+
 4. ```export LIMINAL_HOME=/mnt/efs/opt/airflow/liminal_home```
-5. Follow the guide <<<>>> for deploying Airflow on K8S, with EFS mount.
-Point the pods' PV to the right EFS folder, like so:
+
+### Mounting the EFS folder into Airflow pods
+
+Now that we have an EFS drive, and we've created the shared folder on it, it's time to mount it onto the Airflow pods` Dags folder.
+The [guide][airflowInstallation]includes details on how to expose EFS as a Persistent Volume for kubernetes.
+
+Make sure to point the pods' PV to the right EFS folder, like so:
     ```
     volumeMounts:
         - name: efs-data
@@ -92,27 +99,34 @@ Point the pods' PV to the right EFS folder, like so:
     ```
     where efs-data is a PVC pointing to `<EFS_ID>:/opt/airflow/liminal_home`
 
-Once this setup is done (one time), you have:
+
+## Deploying your Yaml files
+
+Finally, the one time setup is done, and by this point, you should have:
 1. A deployment box which can deploy Liminal to an EFS folder
 2. Airflow pods which will pick up the Yamls from that folder automatically.
 
-#### Liminal deployment
+Deploying the actual Yaml files is the simple part. 
+
 Each time you want to deploy the Liminal Yamls from the deployment box:
 ```
 liminal deploy --path <<<path to liminal user code>>>
 ```
 
-#### Scripted Installation
-Launch EC2 in the same environment of the Airflow and [Use `install_liminal_in_airflow_on_kubernetes.sh`][liminal-installation-script] in order to install liminal.
-
-Script steps to run:
-1. `install_liminal_in_airflow_on_kubernetes.sh` -o clone
-2. `install_liminal_in_airflow_on_kubernetes.sh` -o installation
-3. `install_liminal_in_airflow_on_kubernetes.sh` -o deployment
-
 ## References and other resources
 
-* You can refer to the following blog with a step by step configuration on [Setting up Airflow on Kubernetes with AWS EFS][airflowInstallation]
+### Setting up Airflow on Kubernetes with EFS
+[Setting up Airflow on Kubernetes with AWS EFS][airflowInstallation]
+
+### Example script
+In order to make it easier to undernstad all the steps, we include a script which performs the Liminal-specific steps in the deployment.
+This script should be run from an EC2 machine which has access to the EFS you've provisioned.
+
+1. `install_liminal_in_airflow_on_kubernetes.sh` -o installation # Covers mounting the EFS and setting environment parameters
+2. `install_liminal_in_airflow_on_kubernetes.sh` -o clone  # clones an example Liminal Yaml from our Github repository in order to deploy it
+3. `install_liminal_in_airflow_on_kubernetes.sh` -o deployment # deploys that Yaml onto the EFS folder
+
+
 
 [airflow-helm-chart-7.16.0]: <https://github.com/airflow-helm/charts/tree/airflow-7.16.0>
 [homebrew-kubectl]: <https://formulae.brew.sh/formula/kubernetes-cli>
