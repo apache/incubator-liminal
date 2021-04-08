@@ -32,8 +32,6 @@ To deploy and run liminal on airflow, we need to complete two tasks:
    Here, our recommended approach is to use a folder on a shared filesystem (EFS) to host the airflow DAGs (and Liminal Yamls). 
    This folder will be mounted into Airflow pods' DAGs folder - thus enabling each of the pods to pick the files up and run the Liminal DAGs.
 
-The process of liminal is depicted on the following diagram:
-
 ![](assets/liminal_deployment_diagram.png)
 
 Below is a description of how to achieve this task using a commonly used Helm chart for Airflow on Kubernetes.
