@@ -131,10 +131,6 @@ def deploy_liminal_apps(path, clean):
         yml_name = os.path.basename(config_file)
         target_yml_name = os.path.join(environment.get_dags_dir(), yml_name)
         shutil.copyfile(config_file, target_yml_name)
-        with open(config_file) as stream:
-            config = yaml.safe_load(stream)
-            volume_util.create_local_volumes(config, os.path.dirname(config_file))
-
 
 def liminal_is_running():
     stdout, stderr = docker_compose_command('ps', [])
@@ -163,6 +159,15 @@ def logs(follow, tail):
             stdout, stderr = docker_compose_command('logs', [f'--tail={tail}'])
             logging.info(stdout)
 
+@cli.command("create", short_help="create a kubernetes local volume")
+@click.option('--local-volume-path', default=os.getcwd(), help="folder containing liminal.yaml files")
+def create(local_volume_path):
+    click.echo("creating a kubernetes local volume")
+    config_files = files_util.find_config_files(local_volume_path)
+    for config_file in config_files:
+        with open(config_file) as stream:
+            config = yaml.safe_load(stream)
+            volume_util.create_local_volumes(config, os.path.dirname(config_file))
 
 @cli.command("start",
              short_help="starts a local airflow in docker compose. should be run after deploy. " +

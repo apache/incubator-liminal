@@ -154,7 +154,15 @@ liminal build
 
 You'll see that a number of outputs indicating various docker images built.
 
-3. Deploy the pipeline:
+3. Create a kubernetes local volume \
+In case your Yaml includes working with [volumes](https://github.com/apache/incubator-liminal/blob/6253f8b2c9dc244af032979ec6d462dc3e07e170/docs/getting_started.md#mounted-volumes)
+please first run the following command:
+```bash
+cd </path/to/your/liminal/code> 
+liminal create
+```
+
+4. Deploy the pipeline:
 ```bash
 cd </path/to/your/liminal/code> 
 liminal deploy
@@ -166,17 +174,17 @@ liminal deploy --clean
 
 This will rebuild the airlfow docker containers from scratch with a fresh version of liminal, ensuring consistency.
 
-4. Start the server
+5. Start the server
 ```bash
 liminal start
 ```
 
-5. Stop the server
+6. Stop the server
 ```bash
 liminal stop
 ```
 
-6. Display the server logs
+7. Display the server logs
 ```bash
 liminal logs --follow/--tail
 
@@ -187,12 +195,12 @@ Follow log output:
 liminal logs --follow
 ```
 
-6. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
+8. Navigate to [http://localhost:8080/admin](http://localhost:8080/admin)
 
-7. You should see your ![pipeline](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow.png)
+9. You should see your ![pipeline](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow.png)
 The pipeline is scheduled to run according to the ```json schedule: 0 * 1 * *``` field in the .yml file you provided.
 
-8. To manually activate your pipeline:
+10. To manually activate your pipeline:
 Click your pipeline and then click "trigger DAG"
 Click "Graph view"
 You should see the steps in your pipeline getting executed in "real time" by clicking "Refresh" periodically.
