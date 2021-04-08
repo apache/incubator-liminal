@@ -155,6 +155,8 @@ liminal build
 You'll see that a number of outputs indicating various docker images built.
 
 3. Create a kubernetes local volume
+In case your Yaml includes working with [volumes](https://github.com/apache/incubator-liminal/blob/6253f8b2c9dc244af032979ec6d462dc3e07e170/docs/getting_started.md#mounted-volumes)
+please first run the following command:
 ```bash
 cd </path/to/your/liminal/code> 
 liminal create
