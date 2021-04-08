@@ -4,6 +4,7 @@ help() {
     echo "$0: Get Started"
     echo "Usage: $0 -o option"
 		echo "Liminal available options:          "
+		echo "clone"
 		echo "installation "
 		echo "deployment"
 }
@@ -19,6 +20,9 @@ while getopts ":o:" opt; do #installation, deployment
 	o)
 	  option=$OPTARG
 	  case $option in
+	    clone)
+	      ACTION="clone"
+	    ;;
 	    installation)
 	      ACTION="installation"
 	    ;;
@@ -30,77 +34,52 @@ while getopts ":o:" opt; do #installation, deployment
 done
 
 mount_efs() {
-	local EFS_ID=$1
-	local SSH_KEY=$2
-	local USERNAME='admin'
-	local HOST_IP=$3
-	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
-	EFS_ID=$EFS_ID
+	EFS_ID=$1
 	echo "The EFS_ID is: ${EFS_ID}"
 
-	echo 'Create /mnt/efs'
+	echo "Create /mnt/efs"
 	mkdir /mnt/efs
 
-	echo 'Mount the /mnt/efs'
+	echo "Mount the /mnt/efs"
 	sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${EFS_ID}:/ /mnt/efs
+}
 
+install_liminal() {
+	echo "Installing liminal on Airflow components"
+	docker ps | grep k8s_airflow | awk '{print $1}' | xargs -I {} docker exec {} bash -c 'pip install apache-liminal'
+
+	echo "Installing liminal locally"
+	pip install apache-liminal
+}
+
+deploy_yaml() {
 	echo 'Find the the mounted path of the Airflow'
 	airflow_path=$(find /mnt/efs/ -name "liminal_home")
+	echo "The mounted Airflow path is: $airflow_path"
 
 	echo 'Export the liminal home'
 	export LIMINAL_HOME=${airflow_path}
 
-	echo 'Append apache-liminal pacakge to the requirements file'
-	echo "apache-liminal" >$LIMINAL_HOME/requirements.txt
-EOF
+	liminal deploy --path "incubator-liminal/examples/liminal-getting-started"
 }
 
-restart_airflow_components() {
-	echo 'Rollout restart Airflow components'
-	kubectl rollout restart statefulset airflow-worker
-	kubectl rollout restart deployment airflow-web
-	kubectl rollout restart deployment airflow-scheduler
-}
-
-install_liminal_on_remote_machine() {
-	local SSH_KEY=$1
-	local USERNAME='admin'
-	local HOST_IP=$2
-
-	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
-	pip install apache-liminal
-EOF
-}
-
-deploy_yaml() {
-	ssh -i ${SSH_KEY} ${USERNAME}@${HOST_IP} 'sudo bash -s' <<EOF
-	echo 'Find the the mounted path of the Airflow'
-	# airflow_path=$(find /mnt/efs/ -name "liminal_home")
-
-	echo 'Export the liminal home'
-	# export LIMINAL_HOME=${airflow_path}
-	# liminal deploy --path $LIMINAL_HOME
-EOF
+clone() {
+	echo 'Cloning incubator-liminal'
+	git clone https://github.com/apache/incubator-liminal.git
 }
 
 case $ACTION in
+	clone)
+                clone
+		exit 0
+	;;
 	installation)
                 read -r -p "Please enter EFS ID: " EFS_ID
-                read -r -p "Please enter ssh key path: " SSH_KEY
-                read -r -p "Please enter host ip: " HOST_IP
-
-                EFS_ID=${EFS_ID}
-                SSH_KEY=${SSH_KEY}
-                HOST_IP=${HOST_IP}
-                mount_efs $EFS_ID $SSH_KEY $HOST_IP
-                restart_airflow_components
+                mount_efs $EFS_ID
+                install_liminal
 		exit 0
 	;;
 	deployment)
-                read -r -p "Please enter ssh key path: " SSH_KEY
-                read -r -p "Please enter host ip: " HOST_IP
-
-                install_liminal_on_remote_machine $SSH_KEY $HOST_IP
                 deploy_yaml
 		exit 0
 	;;
@@ -109,3 +88,6 @@ case $ACTION in
   exit
   ;;
 esac
+
+
+# fs-ee333d5b.efs.us-east-1.amazonaws.com

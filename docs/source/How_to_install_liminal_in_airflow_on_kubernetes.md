@@ -64,7 +64,8 @@ helm repo update
 ## Get Started
 #### Package dependency
 There are multiple ways to install liminal in Airflow and it depends on what will be useful in your environment.\
-We chose to add `apache-liminal` as a requirement package to be installed once Airflow starts.
+1. Use kubectl to execute pip install on the pods.
+2. Add `apache-liminal` as a requirement package to be installed once Airflow starts.
 
 #### Mount the EFS
 There are a couple of ways to deploy Yamls in Airflow our goal is to deploy the actual Yamls (DAGs) into airflow - by placing the Yaml files in each components\` `/opt/airflow/dags` folder.
@@ -102,7 +103,12 @@ liminal deploy --path <<<path to liminal user code>>>
 ```
 
 #### Scripted Installation
-[Use `install_liminal_in_airflow_on_kubernetes.sh`][liminal-installation-script] to install liminal in Airflow.
+Launch EC2 in the same environment of the Airflow and [Use `install_liminal_in_airflow_on_kubernetes.sh`][liminal-installation-script] in order to install liminal.
+
+Script steps to run:
+1. `install_liminal_in_airflow_on_kubernetes.sh` -o clone
+2. `install_liminal_in_airflow_on_kubernetes.sh` -o installation
+3. `install_liminal_in_airflow_on_kubernetes.sh` -o deployment
 
 ## References and other resources
 
