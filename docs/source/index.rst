@@ -32,7 +32,6 @@ Welcome to Apchae Liminal's documentation!
    liminal_architecture
    liminal_yaml_guide
    howto_contrib_to_liminal_docs
-   How_to_install_liminal_in_airflow_on_kubernetes
 
 Indices and tables
 ==================
