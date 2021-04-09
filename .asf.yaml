@@ -17,7 +17,7 @@
 # under the License.
 
 github:
-  description: "Apache Liminals goal is to operationalise the machine learning process, allowing data scientists to quickly transition from a successful experiment to an automated pipeline of model training, validation, deployment and inference in production. Liminal provides a Domain Specific Language (DSL) to build data science workflows on top of Apache Airflow."
+  description: "Apache Liminals goal is to operationalise the machine learning process, allowing data scientists to quickly transition from a successful experiment to an automated pipeline of model training, validation, deployment and inference in production. Liminal provides a Domain Specific Language to build ML workflows on top of Apache Airflow."
   homepage: https://liminal.apache.org
   labels:
     - data-science
