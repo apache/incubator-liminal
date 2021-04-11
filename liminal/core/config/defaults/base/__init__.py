@@ -15,19 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
 
-from liminal.runners.airflow.model import task
+from liminal.core.util import files_util
 
-
-class SparkTask(task.Task):
-    """
-    Executes an SQL application.
-    """
-
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                         task_config)
-
-    def apply_task_to_dag(self):
-        pass
+BASE = files_util.load(os.path.dirname(__file__))['base'].copy()

@@ -16,17 +16,22 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from liminal.runners.airflow.model import task
 from liminal.runners.airflow.operators.job_status_operator import JobStartOperator
-from liminal.runners.airflow.tasks.defaults.job_phase_task import JobPhaseTask
 
 
-class JobStartTask(JobPhaseTask):
+class JobStartTask(task.Task):
     """
     Job start task. Reports job start metrics.
     """
 
-    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
-        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                 task_config):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                         task_config)
+        metrics = self.liminal_config.get('metrics', {})
+        self.metrics_namespace = metrics.get('namespace', '')
+        self.metrics_backends = metrics.get('backends', [])
 
     def apply_task_to_dag(self):
         job_start_task = JobStartOperator(

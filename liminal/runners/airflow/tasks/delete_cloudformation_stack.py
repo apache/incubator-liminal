@@ -24,8 +24,10 @@ class DeleteCloudFormationStackTask(task.Task):
     Deletes cloud_formation stack.
     """
 
-    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
-        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                 task_config):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                         task_config)
 
     def apply_task_to_dag(self):
         pass
