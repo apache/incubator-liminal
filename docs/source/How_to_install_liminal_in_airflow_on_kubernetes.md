@@ -20,7 +20,7 @@ under the License.
 # Install Liminal in Airflow
 * [Workflow](#workflow)
 * [Prerequisites](#prerequisites)
-* [One time setup](#One-time-setup)
+* [One time setup](#One-time-environment-setup)
 * [Deploying your Yaml files](#Deploying-your-Yaml-files)
 * [References and other resources](#references-and-other-resources)
 
@@ -125,11 +125,11 @@ liminal deploy --path <<<path to liminal user code>>>
 In order to make it easier to undernstad all the steps, we include a script which performs the Liminal-specific steps in the deployment.
 This script should be run from an EC2 machine which has access to the EFS you've provisioned.
 
-1. `install_liminal_in_airflow_on_kubernetes.sh` -o installation # Covers mounting the EFS and setting environment parameters
-2. `install_liminal_in_airflow_on_kubernetes.sh` -o clone  # clones an example Liminal Yaml from our Github repository in order to deploy it
-3. `install_liminal_in_airflow_on_kubernetes.sh` -o deployment # deploys that Yaml onto the EFS folder
+1. [`install_liminal_in_airflow_on_kubernetes.sh`][liminal-installation-script] -o installation # Covers mounting the EFS and setting environment parameters
+2. [`install_liminal_in_airflow_on_kubernetes.sh`][liminal-installation-script] -o clone  # clones an example Liminal Yaml from our Github repository in order to deploy it
+3. [`install_liminal_in_airflow_on_kubernetes.sh`][liminal-installation-script] -o deployment # deploys that Yaml onto the EFS folder
 
-
+![](assets/liminal_installation_on_cloud.gif)
 
 [airflow-helm-chart-7.16.0]: <https://github.com/airflow-helm/charts/tree/airflow-7.16.0>
 [homebrew-kubectl]: <https://formulae.brew.sh/formula/kubernetes-cli>

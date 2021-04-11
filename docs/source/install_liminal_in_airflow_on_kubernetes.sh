@@ -61,6 +61,9 @@ deploy_yaml() {
 	export LIMINAL_HOME=${airflow_path}
 
 	liminal deploy --path "incubator-liminal/examples/liminal-getting-started"
+
+	echo "Restarting Airflow components"
+	docker ps | grep k8s_airflow | awk '{print $1}' | xargs -I {} docker restart {}
 }
 
 clone() {
