@@ -23,8 +23,8 @@ In this section you will learn about advanced features of liminal.yml
 
 ## Variables
 
-Much like in programming languages, you can define variables for re-use across your
-liminal.yml file.
+Much like in programming languages, you can define variables for re-use across your liminal.yml
+file.
 
 ```yaml
 variables:
@@ -40,6 +40,7 @@ You can use placeholders of format `{{myplaceholder}}` in most any string value 
 Make sure that any string that includes placeholders is surrounded by single or double quotes.
 
 For example:
+
 ```yaml
 variables:
   image_name: myorg/myrepo:myapp
@@ -66,13 +67,15 @@ When running pipelines placeholders will be rendered by replacing values from so
 following order:
 
 1. Current [DAG run conf](https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html)
-(Airflow).
+   (Airflow).
 2. liminal.yml [variables](#variables) section.
 3. [Airflow variables](https://airflow.apache.org/docs/apache-airflow/stable/howto/variable.html)
-(Airflow).
+   (Airflow).
 4. [Airflow macros](https://airflow.apache.org/docs/apache-airflow/stable/macros-ref.html) (Airflow)
-. For example: `"{{yesterday_ds}}"`. For more information see:
-5. Airflow [Jinja Templating](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#jinja-templating)
+   . For example: `"{{yesterday_ds}}"`. For more information see:
+5.
+
+Airflow [Jinja Templating](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#jinja-templating)
 (Airflow).
 
 #### Build placeholder rendering
@@ -86,7 +89,8 @@ following order:
 ## Task variables
 
 In addition to the variables section you can also set specific variables for specific `task`s using
-the `variables` attribute of that task. For example:
+the `variables`
+attribute of that task. For example:
 
 ```yaml
   - task: my_task
@@ -146,7 +150,7 @@ pipelines:
 In the example above we define an `executor` of type `kubernetes` with custom resources
 configuration.
 
-`executors` is a section in the root of your liminal.yml file and is a list of `executor`s defined 
+`executors` is a section in the root of your liminal.yml file and is a list of `executor`s defined
 by the following attributes:
 
 ### executor attributes
@@ -160,7 +164,8 @@ Different executor types support their own additional configuration.
 ## Task Defaults
 
 `task_defaults` is a section in the root of your liminal.yml file in which default attributes can be
-set for each `task` type.
+set for each `task`
+type.
 
 ```yaml
 task_defaults:
@@ -178,7 +183,7 @@ default to the setting in `task_defaults`.
 If the same attribute is defined in both `task_defaults` and in the `task`, definitions from the
 `task` take precedence. If a map (dictionary) of values (for example `env_vars`) is defined in both
 `task_defaults` the two maps will be merged, with definitions in the `task` taking precedence in
-case key is defined in both maps. 
+case key is defined in both maps.
 
 ## Pipeline Defaults
 
@@ -195,26 +200,25 @@ In the example above we set default attributes for any `pipeline` defined in our
 Each `pipeline` that does not set these attributes will default to the setting in
 `pipeline_defaults`.
 
-If the same attribute is defined in both `pipeline_defaults` and in the `pipeline`, definitions
-from the `pipeline` take precedence.
+If the same attribute is defined in both `pipeline_defaults` and in the `pipeline`, definitions from
+the `pipeline` take precedence.
 
 If `tasks` section is defined in `pipeline_defaults` each pipeline defined in our liminal.yml file
 will have the tasks defined in `pipeline_defaults`.
 
-A special `task` type `pipeline` may be used in `pipeline_defaults` `tasks` section. This task
-type is interpreted as "tasks defined in pipeline go here". This allows flexibility of defining
-common tasks to be run before and after the tasks of each pipeline defined in our liminal.yml
-file. For example:
+A special `task` type `pipeline` may be used in `pipeline_defaults` `tasks` section. This task type
+is interpreted as "
+tasks defined in pipeline go here". This allows flexibility of defining common tasks to be run
+before and after the tasks of each pipeline defined in our liminal.yml file. For example:
 
 ```yaml
 pipeline_defaults:
-  tasks:
+  before_tasks:
     - task: my_common_setup_task
       type: python
       image: myorg/myrepo:mypythonapp
       cmd: python -u my_setup_module.py
-    - task: pipeline_tasks
-      type: pipeline
+  after_tasks:
     - task: my_common_teardown_task1
       type: python
       image: myorg/myrepo:mypythonapp
@@ -239,7 +243,7 @@ name: my_system
 super: my_super
 ```
 
-A super is found by this name if a liminal.yml file in your environment exists with that name. A 
+A super is found by this name if a liminal.yml file in your environment exists with that name. A
 superliminal layer liminal.yml file needs to define its `type` as `super`:
 
 ```yaml
@@ -257,11 +261,11 @@ type: super
 super: my_other_super
 ```
 
-A liminal system can have 1 subliminal layer but many superliminal layers using inheritence.
-This allows us to chain common behaviors of our systems into several superliminal layers.
+A liminal system can have 1 subliminal layer but many superliminal layers using inheritence. This
+allows us to chain common behaviors of our systems into several superliminal layers.
 
 If no `super` is defined for a liminal.yml file then it defaults to having the
-[hyperliminal](https://github.com/Natural-Intelligence/liminal/blob/master/liminal/core/config/defaults/hyperliminal/liminal.yml)
+[base](https://github.com/incubator-liminal/liminal/core/config/defaults/base/liminal.yml)
 be its super.
 
 ### superliminal attribtues
@@ -276,5 +280,5 @@ task_defaults
 pipeline_defaults
 ```
 
-If the same attribute section is defined in both a superliminal and a lower layer of the system
-they will be merged, with key collisions favoring the lower level layer.
+If the same attribute section is defined in both a superliminal and a lower layer of the system they
+will be merged, with key collisions favoring the lower level layer.

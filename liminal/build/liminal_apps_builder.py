@@ -91,28 +91,20 @@ logging.info(f'Loading image builder implementations..')
 image_builders_package = 'liminal.build.image'
 # user_image_builders_package = 'TODO: user_image_builders_package'
 
-TASK_BUILD_CLASSES = class_util.find_subclasses_in_packages(
+task_build_types = class_util.find_subclasses_in_packages(
     [image_builders_package],
     ImageBuilder)
 
 
-def get_types_dict(task_build_classes):
-    # take module name from class name
-    return {x.split(".")[-2]: c for x, c in task_build_classes.items()}
-
-
-task_build_types = get_types_dict(TASK_BUILD_CLASSES)
-
-logging.info(f'Finished loading image builder implementations: {TASK_BUILD_CLASSES}')
+logging.info(f'Finished loading image builder implementations: {task_build_types}')
 logging.info(f'Loading service image builder implementations..')
 
 # TODO: add configuration for user service image builders package
 service_builders_package = 'liminal.build.service'
 # user_service_builders_package = 'TODO: user_service_builders_package'
 
-service_build_classes = class_util.find_subclasses_in_packages(
+service_build_types = class_util.find_subclasses_in_packages(
     [service_builders_package],
     ServiceImageBuilderMixin)
 
-service_build_types = get_types_dict(service_build_classes)
-logging.info(f'Finished loading service image builder implementations: {service_build_classes}')
+logging.info(f'Finished loading service image builder implementations: {service_build_types}')

@@ -16,18 +16,4 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from liminal.runners.airflow.model import task
-
-
-class SparkTask(task.Task):
-    """
-    Executes an SQL application.
-    """
-
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                         task_config)
-
-    def apply_task_to_dag(self):
-        pass
+print('Hello world!\n')

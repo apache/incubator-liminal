@@ -18,8 +18,9 @@
 
 import os
 import unittest
-from unittest import TestCase
+from unittest import TestCase, mock
 
+from liminal.core.config.config import ConfigUtil
 from liminal.runners.airflow.dag import liminal_dags
 from liminal.runners.airflow.operators.job_status_operator import JobEndOperator, JobStartOperator
 
@@ -59,8 +60,10 @@ class Test(TestCase):
         self.assertIn('default_object_loaded', keys)
 
     @staticmethod
-    def get_register_dags():
-        base_path = os.path.join(os.path.dirname(__file__), '../liminal')
+    @mock.patch.object(ConfigUtil, "snapshot_final_liminal_configs")
+    def get_register_dags(mock_snapshot_final_liminal_configs):
+        mock_snapshot_final_liminal_configs.side_effect = None
+        base_path = os.path.join(os.path.dirname(__file__), '../../apps/test_app')
         return liminal_dags.register_dags(base_path)
 
 

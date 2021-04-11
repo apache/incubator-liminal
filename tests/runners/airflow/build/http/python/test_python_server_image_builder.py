@@ -54,9 +54,9 @@ class TestPythonServer(TestCase):
     def test_build_python_server_with_pip_conf(self):
         build_out = self.__test_build_python_server(use_pip_conf=True)
 
-        # self.assertTrue(
-        #     'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
-        #     'Incorrect pip command')
+        self.assertTrue(
+            'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
+            'Incorrect pip command')
 
     def __test_build_python_server(self, use_pip_conf=False,
                                    python_version=None):

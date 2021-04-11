@@ -15,19 +15,32 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+import logging
 import os
 from os import environ
+from sqlite3 import OperationalError
 
 from airflow.models import Variable
 
 LIMINAL_STAND_ALONE_MODE_KEY = "LIMINAL_STAND_ALONE_MODE"
 
 
+# noinspection PyBroadException
 def get_variable(key, default_val):
     if liminal_local_mode():
         return os.environ.get(key, default_val)
     else:
-        return Variable.get(key, default_var=default_val)
+        try:
+            return Variable.get(key, default_var=default_val)
+        except OperationalError as e:
+            logging.warning(
+                f'Failed to find variable {key} in Airflow variables table.'
+                f' Error: {e.__class__.__module__}.{e.__class__.__name__}'
+            )
+        except Exception as e:
+            logging.warning(f'Failed to find variable {key} in Airflow variables table. Error: {e}')
+            return default_val
 
 
 def liminal_local_mode():
