@@ -35,8 +35,10 @@ class PythonTask(task.Task):
     Python task.
     """
 
-    def __init__(self, dag, liminal_config, pipeline_config, task_config, parent, trigger_rule):
-        super().__init__(dag, liminal_config, pipeline_config, task_config, parent, trigger_rule)
+    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                 task_config):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                         task_config)
         self.task_name = self.task_config['task']
         self.image = self.task_config['image']
         self.volumes = self._volumes()

@@ -1,0 +1,53 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+name: extra_liminal
+type: super
+super: default_liminal
+service_defaults:
+  endpoints:
+    - endpoint: /myendpoint1
+      module: myserver.my_server
+      function: myendpoint1func
+images:
+  - image: my_static_input_task_image
+    type: python
+    source: helloworld
+  - image: my_task_output_input_task_image
+    type: python
+    source: helloworld
+pipeline_defaults:
+  tasks:
+    - task: my_static_input_task
+      type: python
+      description: static input task
+      image: my_static_input_task_image
+      env_vars:
+        env2: "b"
+      cmd: python -u hello_world.py
+    - task: extenable
+      type: pipeline
+      description: optional sub tasks
+    - task: my_task_output_input_task
+      type: python
+      description: task with input from other task's output
+      image: my_task_output_input_task_image
+      env_vars:
+        env1: "c"
+        env2: "b"
+      cmd: python -u hello_world.py

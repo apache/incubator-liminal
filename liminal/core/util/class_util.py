@@ -42,8 +42,7 @@ def find_subclasses_in_packages(packages, parent_class):
                         subclasses.add(child)
                         break
 
-    result = {sc.__module__ + "." + sc.__name__: sc for sc in subclasses}
-    return result
+    return dict([(sc.__module__.split(".")[-1], sc) for sc in subclasses])
 
 
 def import_module(package, recursive=True):

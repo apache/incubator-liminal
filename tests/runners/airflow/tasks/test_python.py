@@ -135,14 +135,27 @@ class TestPythonTask(TestCase):
         if executors:
             task_config['executors'] = executors
 
-        return python.PythonTask(dag=dag,
-                                 liminal_config=self.liminal_config,
-                                 pipeline_config={
-                                     'pipeline': 'my_pipeline'
-                                 },
-                                 task_config=task_config,
-                                 parent=parent,
-                                 trigger_rule='all_success')
+        return python.PythonTask(
+            task_id=task_id,
+            dag=dag,
+            liminal_config={
+                'volumes': [
+                    {
+                        'volume': self._VOLUME_NAME,
+                        'local': {
+                            'path': self.temp_dir.replace(
+                                "/var/folders",
+                                "/private/var/folders"
+                            )
+                        }
+                    }
+                ]},
+            pipeline_config={
+                'pipeline': 'my_pipeline'
+            },
+            task_config=task_config,
+            parent=parent,
+            trigger_rule='all_success')
 
 
 if __name__ == '__main__':
