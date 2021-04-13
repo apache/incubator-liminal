@@ -19,7 +19,7 @@
 name: GettingStartedPipeline
 volumes:
   - volume: gettingstartedvol
-    pvc: gettingstartedvol-pvc
+    claim_name: gettingstartedvol-pvc
     local:
       path: .
 pipelines:
@@ -48,7 +48,7 @@ pipelines:
         mounts:
           - mount: mymount
             volume: dags-data
-            pvc: airflow-pg-dags
+            claim_name: airflow-pg-dags
             path: /opt/airflow/dags
             sub_path: opt/airflow/liminal_home
         cmd: python -u hello_world.py
@@ -62,7 +62,7 @@ pipelines:
         mounts:
           - mount: mymount
             volume: dags-data
-            pvc: airflow-pg-dags
+            claim_name: airflow-pg-dags
             path: /opt/airflow/dags
             sub_path: opt/airflow/liminal_home
         split_input: True
@@ -78,7 +78,7 @@ pipelines:
         mounts:
           - mount: mymount
             volume: dags-data
-            pvc: airflow-pg-dags
+            claim_name: airflow-pg-dags
             path: /opt/airflow/dags
             sub_path: opt/airflow/liminal_home
         cmd: python -u hello_world.py

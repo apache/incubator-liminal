@@ -62,7 +62,7 @@ def create_local_volume(conf, namespace='default') -> None:
         if not len(matching_volumes) > 0:
             _create_local_volume(conf, name)
 
-        pvc_name = conf['pvc']
+        pvc_name = conf.get('claim_name', f'{name}-pvc')
 
         matching_claims = _kubernetes.list_persistent_volume_claim_for_all_namespaces(
             field_selector=f'metadata.name={pvc_name}'
@@ -74,7 +74,7 @@ def create_local_volume(conf, namespace='default') -> None:
         _LOCAL_VOLUMES.add(name)
 
 
-def delete_local_volume(name, pvc_name, namespace='default'):
+def delete_local_volume(name, namespace='default'):
     matching_volumes = _kubernetes.list_persistent_volume(
         field_selector=f'metadata.name={name}'
     ).to_dict()['items']
@@ -82,6 +82,8 @@ def delete_local_volume(name, pvc_name, namespace='default'):
     if len(matching_volumes) > 0:
         _LOG.info(f'Deleting persistent volume {name}')
         _kubernetes.delete_persistent_volume(name)
+
+    pvc_name = f'{name}-pvc'
 
     matching_claims = _kubernetes.list_persistent_volume_claim_for_all_namespaces(
         field_selector=f'metadata.name={pvc_name}'
