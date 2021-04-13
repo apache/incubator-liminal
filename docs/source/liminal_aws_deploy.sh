@@ -4,7 +4,8 @@ help() {
     echo "$0: Get Started"
     echo "Usage: $0 -o option"
 		echo "Liminal available options:          "
-		echo "install "
+		echo "install"
+		echo "build "
 		echo "deploy"
 }
 
@@ -14,13 +15,16 @@ if [[ "$#" -lt 2 ]]; then
 fi
 
 # Arguments processing
-while getopts ":o:" opt; do #install, deploy
+while getopts ":o:" opt; do #install, build, deploy
 	case $opt in
 	o)
 	  option=$OPTARG
 	  case $option in
 	    install)
 	      ACTION="install"
+	    ;;
+	    build)
+	      ACTION="build"
 	    ;;
 	    deploy)
 	      ACTION="deploy"
@@ -60,14 +64,26 @@ deploy_yaml() {
 	docker ps | grep k8s_airflow | awk '{print $1}' | xargs -I {} docker restart {}
 }
 
+build() {
+	BUILD_PATH=$1
+	echo "The BUILD_PATH is: ${BUILD_PATH}"
+
+	liminal build --path "${BUILD_PATH}"
+}
+
 case $ACTION in
-	installation)
+	install)
                 read -r -p "Please enter the EFS ID: " EFS_ID
                 mount_efs $EFS_ID
                 install_liminal
 		exit 0
 	;;
-	deployment)
+	build)
+				read -r -p "Please enter the path to the liminal project: " BUILD_PATH
+                build $BUILD_PATH
+		exit 0
+	;;
+	deploy)
 				read -r -p "Please enter the liminal yaml path: " DEPLOY_PATH
                 deploy_yaml $DEPLOY_PATH
 		exit 0

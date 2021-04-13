@@ -58,7 +58,9 @@ class PythonTask(task.Task):
         volumes = []
         for volume_config in volumes_config:
             name = volume_config['volume']
-            claim_name = volume_config.get('claim_name', f"{name}-pvc")
+            claim_name = volume_config.get('claim_name')
+            if not claim_name and 'local' in volume_config:
+                claim_name = f'{name}-pvc'
             volume = Volume(
                 name=name,
                 configs={
