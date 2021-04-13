@@ -58,7 +58,7 @@ class PythonTask(task.Task):
         volumes = []
         for volume_config in volumes_config:
             name = volume_config['volume']
-            pvc_name = volume_config['claim_name']
+            pvc_name = volume_config['pvc']
             volume = Volume(
                 name=name,
                 configs={
