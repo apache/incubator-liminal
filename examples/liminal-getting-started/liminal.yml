@@ -18,8 +18,6 @@
 ---
 name: GettingStartedPipeline
 volumes:
-  - volume: dags-data
-volumes:
   - volume: gettingstartedvol
     pvc: gettingstartedvol-pvc
     local:
