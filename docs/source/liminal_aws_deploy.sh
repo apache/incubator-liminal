@@ -4,9 +4,8 @@ help() {
     echo "$0: Get Started"
     echo "Usage: $0 -o option"
 		echo "Liminal available options:          "
-		echo "clone"
-		echo "installation "
-		echo "deployment"
+		echo "install "
+		echo "deploy"
 }
 
 if [[ "$#" -lt 2 ]]; then
@@ -15,16 +14,16 @@ if [[ "$#" -lt 2 ]]; then
 fi
 
 # Arguments processing
-while getopts ":o:" opt; do #installation, deployment
+while getopts ":o:" opt; do #install, deploy
 	case $opt in
 	o)
 	  option=$OPTARG
 	  case $option in
-	    installation)
-	      ACTION="installation"
+	    install)
+	      ACTION="install"
 	    ;;
-	    deployment)
-	      ACTION="deployment"
+	    deploy)
+	      ACTION="deploy"
 	    ;;
 	  esac
 	esac

@@ -18,7 +18,10 @@
 ---
 name: GettingStartedPipeline
 volumes:
+  - volume: dags-data
+volumes:
   - volume: gettingstartedvol
+    pvc: gettingstartedvol-pvc
     local:
       path: .
 pipelines:
@@ -46,8 +49,10 @@ pipelines:
           env2: "b"
         mounts:
           - mount: mymount
-            volume: gettingstartedvol
-            path: /mnt/gettingstartedvol
+            volume: dags-data
+            pvc: airflow-pg-dags
+            path: /opt/airflow/dags
+            sub_path: opt/airflow/liminal_home
         cmd: python -u hello_world.py
       - task: parallelized_hello_world_example_task
         type: python
@@ -58,8 +63,10 @@ pipelines:
           env2: "b"
         mounts:
           - mount: mymount
-            volume: gettingstartedvol
-            path: /mnt/gettingstartedvol
+            volume: dags-data
+            pvc: airflow-pg-dags
+            path: /opt/airflow/dags
+            sub_path: opt/airflow/liminal_home
         split_input: True
         executors: 2
         cmd: python -u hello_world.py
@@ -72,8 +79,10 @@ pipelines:
           env2: "b"
         mounts:
           - mount: mymount
-            volume: gettingstartedvol
-            path: /mnt/gettingstartedvol
+            volume: dags-data
+            pvc: airflow-pg-dags
+            path: /opt/airflow/dags
+            sub_path: opt/airflow/liminal_home
         cmd: python -u hello_world.py
 services:
   - service:

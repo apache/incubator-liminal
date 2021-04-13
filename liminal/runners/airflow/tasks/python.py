@@ -58,11 +58,12 @@ class PythonTask(task.Task):
         volumes = []
         for volume_config in volumes_config:
             name = volume_config['volume']
+            pvc_name = volume_config['claim_name']
             volume = Volume(
                 name=name,
                 configs={
                     'persistentVolumeClaim': {
-                        'claimName': f"{name}-pvc"
+                        'claimName': f"{claim_name}"
                     }
                 }
             )
