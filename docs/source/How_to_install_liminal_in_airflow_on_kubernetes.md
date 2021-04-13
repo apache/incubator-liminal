@@ -133,7 +133,7 @@ The below steps runs the example project of [liminal-getting-started][liminal-ge
 * Deploy the Yaml onto the EFS folder:
   * [`liminal_aws_deploy.sh`][liminal-aws-deploy] -o deployment
 
-![](assets/liminal_installation_on_cloud.gif)
+![](assets/liminal_aws_deploy.gif)
 
 ##### Seting up a docker registry
 1. `liminal_aws_deploy.sh -o build` will build dockers from the given liminal project path. \
