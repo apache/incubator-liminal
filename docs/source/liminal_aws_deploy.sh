@@ -73,19 +73,19 @@ build() {
 
 case $ACTION in
 	install)
-                read -r -p "Please enter the EFS ID: " EFS_ID
-                mount_efs $EFS_ID
-                install_liminal
+		read -r -p "Please enter the EFS ID: " EFS_ID
+		mount_efs $EFS_ID
+		install_liminal
 		exit 0
 	;;
 	build)
-				read -r -p "Please enter the path to the liminal project: " BUILD_PATH
-                build $BUILD_PATH
+		read -r -p "Please enter the path to the liminal project: " BUILD_PATH
+		build $BUILD_PATH
 		exit 0
 	;;
 	deploy)
-				read -r -p "Please enter the liminal yaml path: " DEPLOY_PATH
-                deploy_yaml $DEPLOY_PATH
+		read -r -p "Please enter the liminal yaml path: " DEPLOY_PATH
+		deploy_yaml $DEPLOY_PATH
 		exit 0
 	;;
 *)
