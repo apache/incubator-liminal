@@ -48,7 +48,6 @@ pipelines:
         mounts:
           - mount: mymount
             volume: gettingstartedvol
-            claim_name: gettingstartedvol-pvc
             path: /mnt/gettingstartedvol
         cmd: python -u hello_world.py
       - task: parallelized_hello_world_example_task
@@ -61,7 +60,6 @@ pipelines:
         mounts:
           - mount: mymount
             volume: gettingstartedvol
-            claim_name: gettingstartedvol-pvc
             path: /mnt/gettingstartedvol
         split_input: True
         executors: 2
@@ -76,7 +74,6 @@ pipelines:
         mounts:
           - mount: mymount
             volume: gettingstartedvol
-            claim_name: gettingstartedvol-pvc
             path: /mnt/gettingstartedvol
         cmd: python -u hello_world.py
 services:
