@@ -1,3 +1,4 @@
+#! /bin/bash
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -15,15 +16,14 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#! /bin/bash
 
 help() {
     echo "$0: Get Started"
     echo "Usage: $0 -o option"
-		echo "Liminal available options:          "
-		echo "clone"
-		echo "installation "
-		echo "deployment"
+		echo "Liminal available options:"
+		echo "install"
+		echo "build"
+		echo "deploy"
 }
 
 if [[ "$#" -lt 2 ]]; then
@@ -32,19 +32,19 @@ if [[ "$#" -lt 2 ]]; then
 fi
 
 # Arguments processing
-while getopts ":o:" opt; do #installation, deployment
+while getopts ":o:" opt; do #install, build, deploy
 	case $opt in
 	o)
 	  option=$OPTARG
 	  case $option in
-	    clone)
-	      ACTION="clone"
+	    install)
+	      ACTION="install"
 	    ;;
-	    installation)
-	      ACTION="installation"
+	    build)
+	      ACTION="build"
 	    ;;
-	    deployment)
-	      ACTION="deployment"
+	    deploy)
+	      ACTION="deploy"
 	    ;;
 	  esac
 	esac
@@ -70,34 +70,36 @@ install_liminal() {
 }
 
 deploy_yaml() {
-	echo 'Find the the mounted path of the Airflow'
-	airflow_path=$(find /mnt/efs/ -name "liminal_home")
-	echo "The mounted Airflow path is: $airflow_path"
-
+	DEPLOY_PATH=$1
+	echo "The DEPLOY_PATH is: ${DEPLOY_PATH}"
 	echo 'Export the liminal home'
-	export LIMINAL_HOME=${airflow_path}
+	export LIMINAL_HOME=$(find /mnt/efs/ -name "liminal_home")
 
-	liminal deploy --path "incubator-liminal/examples/liminal-getting-started"
+	liminal deploy --path "${DEPLOY_PATH}"
 }
 
-clone() {
-	echo 'Cloning incubator-liminal'
-	git clone https://github.com/apache/incubator-liminal.git
+build() {
+	BUILD_PATH=$1
+	echo "The BUILD_PATH is: ${BUILD_PATH}"
+
+	liminal build --path "${BUILD_PATH}"
 }
 
 case $ACTION in
-	clone)
-                clone
+	install)
+		read -r -p "Please enter the EFS ID: " EFS_ID
+		mount_efs $EFS_ID
+		install_liminal
 		exit 0
 	;;
-	installation)
-                read -r -p "Please enter EFS ID: " EFS_ID
-                mount_efs $EFS_ID
-                install_liminal
+	build)
+		read -r -p "Please enter the path to the liminal project: " BUILD_PATH
+		build $BUILD_PATH
 		exit 0
 	;;
-	deployment)
-                deploy_yaml
+	deploy)
+		read -r -p "Please enter the liminal yaml path: " DEPLOY_PATH
+		deploy_yaml $DEPLOY_PATH
 		exit 0
 	;;
 *)
