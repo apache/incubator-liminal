@@ -22,7 +22,7 @@ import sys
 
 from termcolor import colored
 
-EXCLUDED_EXTENSIONS = ['.png', '.pyc', 'LICENSE', 'DISCLAIMER', 'NOTICE']
+EXCLUDED_EXTENSIONS = ['.gif', '.png', '.pyc', 'LICENSE', 'DISCLAIMER', 'NOTICE']
 EXCLUDED_DIRS = ['docs/build', '.git', '.idea']
 
 PYTHON_LICENSE_HEADER = """
