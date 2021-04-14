@@ -65,7 +65,7 @@ class PythonTask(task.Task):
                 name=name,
                 configs={
                     'persistentVolumeClaim': {
-                        'claimName': f"{claim_name}"
+                        'claimName': claim_name
                     }
                 }
             )

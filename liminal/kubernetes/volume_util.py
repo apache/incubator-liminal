@@ -116,7 +116,7 @@ def _create_persistent_volume_claim(pvc_name, volume_name, namespace):
         V1PersistentVolumeClaim(
             api_version='v1',
             kind='PersistentVolumeClaim',
-            metadata={'name': f'{pvc_name}'},
+            metadata={'name': pvc_name},
             spec=spec
         )
     )

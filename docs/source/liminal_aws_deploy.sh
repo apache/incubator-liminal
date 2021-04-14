@@ -3,9 +3,9 @@
 help() {
     echo "$0: Get Started"
     echo "Usage: $0 -o option"
-		echo "Liminal available options:          "
+		echo "Liminal available options:"
 		echo "install"
-		echo "build "
+		echo "build"
 		echo "deploy"
 }
 
@@ -59,9 +59,6 @@ deploy_yaml() {
 	export LIMINAL_HOME=$(find /mnt/efs/ -name "liminal_home")
 
 	liminal deploy --path "${DEPLOY_PATH}"
-
-	echo "Restarting Airflow components"
-	docker ps | grep k8s_airflow | awk '{print $1}' | xargs -I {} docker restart {}
 }
 
 build() {
