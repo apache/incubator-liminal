@@ -57,7 +57,7 @@ def create_local_volume(conf, namespace='default') -> None:
         if not len(matching_volumes) > 0:
             _create_local_volume(conf, name)
 
-        pvc_name = f'{name}-pvc'
+        pvc_name = conf.get('claim_name', f'{name}-pvc')
 
         matching_claims = _kubernetes.list_persistent_volume_claim_for_all_namespaces(
             field_selector=f'metadata.name={pvc_name}'
@@ -111,7 +111,7 @@ def _create_persistent_volume_claim(pvc_name, volume_name, namespace):
         V1PersistentVolumeClaim(
             api_version='v1',
             kind='PersistentVolumeClaim',
-            metadata={'name': f'{volume_name}-pvc'},
+            metadata={'name': pvc_name},
             spec=spec
         )
     )

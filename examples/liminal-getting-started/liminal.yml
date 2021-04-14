@@ -19,6 +19,7 @@
 name: GettingStartedPipeline
 volumes:
   - volume: gettingstartedvol
+    claim_name: gettingstartedvol-pvc
     local:
       path: .
 pipelines:
