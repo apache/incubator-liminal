@@ -154,6 +154,8 @@ class PythonTask(task.Task):
             'resources': self.resources,
             'dag': self.dag,
             'volumes': self.volumes,
+            'config_file': get_variable('kube_config_path', default_val='~/.kube/config'),
+            'cluster_context': get_variable('cluster_context', default_val='None'),
             'volume_mounts': [
                 VolumeMount(mount['volume'],
                             mount['path'],

@@ -49,7 +49,7 @@
                 - EXECUTOR=Local
                 - KUBECONFIG=/home/airflow/kube/config
                 - AIRFLOW__WEBSERVER__WORKERS=1
-                - LIMINAL_HOME=/opt/airflow/dags
+                - AIRFLOW__CORE__LIMINAL_HOME=/opt/airflow/dags
                 - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
                 - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
                 - AIRFLOW_CONN_METADATA_DB=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
