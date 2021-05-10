@@ -23,11 +23,14 @@ import subprocess
 DEFAULT_DAGS_ZIP_NAME = 'liminal.zip'
 DEFAULT_LIMINAL_HOME = os.path.expanduser('~/liminal_home')
 DEFAULT_PIPELINES_SUBDIR = "pipelines"
-LIMINAL_HOME_PARAM_NAME = "AIRFLOW__CORE__LIMINAL_HOME"
+LIMINAL_HOME_PARAM_NAME = "LIMINAL_HOME"
+LIMINAL_HOME_CLOUD_PARAM_NAME = "AIRFLOW__CORE__LIMINAL_HOME"
 LIMINAL_VERSION_PARAM_NAME = 'LIMINAL_VERSION'
 
 
 def get_liminal_home():
+    if os.environ.get(LIMINAL_HOME_CLOUD_PARAM_NAME):
+        return os.environ.get(LIMINAL_HOME_CLOUD_PARAM_NAME)
     if not os.environ.get(LIMINAL_HOME_PARAM_NAME):
         logging.info("no environment parameter called LIMINAL_HOME detected")
         logging.info(f"registering {DEFAULT_LIMINAL_HOME} as the LIMINAL_HOME directory")
