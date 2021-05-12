@@ -29,7 +29,7 @@ LIMINAL_VERSION_PARAM_NAME = 'LIMINAL_VERSION'
 
 
 def get_liminal_home():
-    if os.environ.get(LIMINAL_HOME_CLOUD_PARAM_NAME):
+    if LIMINAL_HOME_CLOUD_PARAM_NAME in os.environ:
         return os.environ.get(LIMINAL_HOME_CLOUD_PARAM_NAME)
     if not os.environ.get(LIMINAL_HOME_PARAM_NAME):
         logging.info("no environment parameter called LIMINAL_HOME detected")
