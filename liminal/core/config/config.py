@@ -40,6 +40,7 @@ class ConfigUtil:
     __PIPELINE_DEFAULTS = "pipeline_defaults"
     __BEFORE_TASKS = "before_tasks"
     __AFTER_TASKS = "after_tasks"
+    __EXECUTORS = "executors"
 
     def __init__(self, configs_path):
         self.configs_path = configs_path
@@ -85,6 +86,8 @@ class ConfigUtil:
 
         merged_superliminal = self.__merge_configs(supr, self.__get_superliminal(supr),
                                                    is_render_variables)
+
+        sub[self.__EXECUTORS] = self.__merge_executors(sub, merged_superliminal)
 
         if self.__is_subliminal(sub):
             return self.__merge_sub_and_super(sub, merged_superliminal, is_render_variables)
@@ -154,6 +157,18 @@ class ConfigUtil:
         files_util.dump_liminal_configs(liminal_configs=self.loaded_subliminals,
                                         path=self.snapshot_path)
 
+    def __merge_executors(self, subliminal, superliminal):
+        return self.__deep_list_keyword_merge('executor', subliminal.get(self.__EXECUTORS, []),
+                                              superliminal.get(self.__EXECUTORS, []))
+
     @staticmethod
     def __apply_pipeline_defaults(subliminal, superliminal, pipeline):
         return default_configs.apply_pipeline_defaults(subliminal, superliminal, pipeline)
+
+    @staticmethod
+    def __deep_list_keyword_merge(unique_key_name, subliminal_list_conf, superliminal_list_conf):
+        subliminal_key_map = {item[unique_key_name]: item for item in subliminal_list_conf}
+        superliminal_key_map = {item[unique_key_name]: item for item in superliminal_list_conf}
+
+        return list(dict_util.merge_dicts(superliminal_key_map, subliminal_key_map,
+                                          recursive=True).values())

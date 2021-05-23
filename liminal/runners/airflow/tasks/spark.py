@@ -16,18 +16,18 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from liminal.runners.airflow.model import task
+from liminal.runners.airflow.tasks import hadoop
 
 
-class SparkTask(task.Task):
+class SparkTask(hadoop.HadoopTask):
     """
     Executes a Spark application.
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
+                 task_config, executor):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                         task_config)
+                         task_config, executor)
 
-    def apply_task_to_dag(self):
-        pass
+    def get_runnable_command(self):
+        raise NotImplementedError()

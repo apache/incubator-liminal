@@ -16,28 +16,25 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""
-Base task.
-"""
 from abc import ABC, abstractmethod
 
 
-class Task(ABC):
+class Executor(ABC):
     """
-    Task.
+    Executor Task.
     """
+    # list of task types supported by the executor
+    supported_task_types = []
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, executor=None):
+    def __init__(self, executor_id, liminal_config, executor_config):
         self.liminal_config = liminal_config
-        self.dag = dag
-        self.pipeline_config = pipeline_config
-        self.task_id = task_id
-        self.parent = parent
-        self.trigger_rule = trigger_rule
-        self.task_config = task_config
-        self.executor = executor
+        self.executor_id = executor_id
+        self.executor_config = executor_config
 
     @abstractmethod
     def apply_task_to_dag(self, **kwargs):
         pass
+
+    def _validate_task_type(self, task):
+        assert any([isinstance(task, tYp) for tYp in self.supported_task_types]), \
+            f'supported task types: {self.supported_task_types}'
