@@ -25,6 +25,7 @@ from unittest import TestCase
 from liminal.build import liminal_apps_builder
 from liminal.kubernetes import volume_util
 from liminal.runners.airflow import DummyDag
+from liminal.runners.airflow.executors.kubernetes import KubernetesPodExecutor
 from liminal.runners.airflow.tasks import python
 from tests.util import dag_test_utils
 
@@ -118,6 +119,12 @@ class TestPythonTask(TestCase):
                              cmd,
                              env_vars=None,
                              executors=None):
+        self.liminal_config['executors'] = [
+            {
+                'executor': 'k8s',
+                'type': 'kubernetes',
+            }
+        ]
         task_config = {
             'task': task_id,
             'cmd': cmd,
@@ -155,7 +162,15 @@ class TestPythonTask(TestCase):
             },
             task_config=task_config,
             parent=parent,
-            trigger_rule='all_success')
+            trigger_rule='all_success',
+            executor=KubernetesPodExecutor(
+                task_id='k8s',
+                liminal_config=self.liminal_config,
+                executor_config={
+                    'executor': 'k8s',
+                    'name': 'mypod'
+                }
+            ))
 
 
 if __name__ == '__main__':
