@@ -59,7 +59,8 @@ class KubernetesPodExecutor(executor.Executor):
             **self.__kubernetes_kwargs(task),
         )
 
-        parent.set_downstream(pod_task)
+        if parent:
+            parent.set_downstream(pod_task)
 
         return pod_task
 
