@@ -119,6 +119,18 @@ class TestPythonTask(TestCase):
                              cmd,
                              env_vars=None,
                              executors=None):
+        self.liminal_config['volumes'] = [
+            {
+                'volume': self._VOLUME_NAME,
+                'local': {
+                    'path': self.temp_dir.replace(
+                        "/var/folders",
+                        "/private/var/folders"
+                    )
+                }
+            }
+        ]
+
         self.liminal_config['executors'] = [
             {
                 'executor': 'k8s',
@@ -145,18 +157,7 @@ class TestPythonTask(TestCase):
         return python.PythonTask(
             task_id=task_id,
             dag=dag,
-            liminal_config={
-                'volumes': [
-                    {
-                        'volume': self._VOLUME_NAME,
-                        'local': {
-                            'path': self.temp_dir.replace(
-                                "/var/folders",
-                                "/private/var/folders"
-                            )
-                        }
-                    }
-                ]},
+            liminal_config=self.liminal_config,
             pipeline_config={
                 'pipeline': 'my_pipeline'
             },

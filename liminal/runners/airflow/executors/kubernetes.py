@@ -56,7 +56,9 @@ class KubernetesPodExecutor(executor.Executor):
         parent = kwargs.get('parent', task.parent)
 
         pod_task = KubernetesPodOperator(
-            **self.__kubernetes_kwargs(task),
+            dag=task.dag,
+            trigger_rule=task.trigger_rule,
+            **self.__kubernetes_kwargs(task)
         )
 
         if parent:
