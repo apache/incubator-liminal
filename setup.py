@@ -20,18 +20,7 @@
 import logging
 import os
 
-import setuptools, subprocess
-from setuptools.command.install import install
-from distutils.sysconfig import get_python_lib
-
-LIMINAL_HOME_DAG="/opt/airflow/dags/liminal_dags.py"
-LIMINAL_RUNNER="liminal/runners/airflow/dag/liminal_dags.py"
-
-class PostInstallDependencies(install):
-    """Post-installation for dependencies"""
-    def run(self):
-        install.run(self)
-        command = subprocess.run(['ln', '-sf', f'{get_python_lib()}/{LIMINAL_RUNNER}', LIMINAL_HOME_DAG], capture_output=True)
+import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -50,7 +39,6 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/apache/incubator-liminal",
     packages=setuptools.find_packages(),
-    cmdclass={'install': PostInstallDependencies},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
