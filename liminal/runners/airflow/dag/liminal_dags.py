@@ -17,5 +17,15 @@
 # under the License.
 
 import liminal.runners.airflow.dag as liminal
+import logging
+import traceback
 
-liminal.register_dags()
+pipelines = liminal.register_dags()
+
+for pipeline, dag in pipelines:
+    try:
+        globals()[pipeline] = dag
+        logging.info(f'registered DAG {dag.dag_id}: {dag.tasks}')
+    except Exception:
+        logging.error(f'Failed to register DAGs for {pipeline}')
+        traceback.print_exc()

@@ -80,8 +80,7 @@ def register_dags(configs_path):
 
                 logging.info(f'registered DAG {dag.dag_id}: {dag.tasks}')
 
-                globals()[pipeline['pipeline']] = dag
-                dags.append(dag)
+                dags.append((pipeline['pipeline'], dag))
 
         except Exception:
             logging.error(f'Failed to register DAGs for {name}')

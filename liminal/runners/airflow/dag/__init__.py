@@ -21,4 +21,4 @@ from liminal.core import environment as env
 from liminal.runners.airflow.dag import liminal_register_dags
 
 def register_dags():
-    liminal_register_dags.register_dags(os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR))
+    return liminal_register_dags.register_dags(os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR))
