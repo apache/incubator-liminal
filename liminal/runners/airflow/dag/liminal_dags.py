@@ -16,6 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from liminal.runners.airflow.dag as liminal
+import liminal.runners.airflow.dag as liminal
 
 liminal.register_dags()
