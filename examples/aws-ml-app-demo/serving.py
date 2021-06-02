@@ -14,3 +14,6 @@ def predict(input_json):
     result = str(model.predict_proba([[input_dict[_PETAL_WIDTH]]])[0][1])
     print(f'result={result}')
     return result
+
+def healthcheck(self):
+    return 'Server is up!'

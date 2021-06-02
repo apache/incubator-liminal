@@ -1,9 +1,9 @@
 import pickle
 import time
 
-import boto3
+import boto3, os
 
-BUCKET = 'ni-ml-ab-dev'
+AWS_DEFAULT_BUCKET = os.environ.get(AWS_DEFAULT_BUCKET, 'ml-ab-dev')
 PRODUCTION = 'production'
 CANDIDATE = 'candidate'
 
@@ -30,16 +30,16 @@ class ModelStore:
 
         model_pkl = open("/tmp/model.p", "rb").read()
         s3_key = f'{self.env}/{version}/model.p'
-        self._s3.put_object(Bucket=BUCKET, Key=s3_key, Body=model_pkl)
+        self._s3.put_object(Bucket=AWS_DEFAULT_BUCKET, Key=s3_key, Body=model_pkl)
 
     def _download_latest_model(self):
         file_path = '/tmp/downloaded_model.p'
-        s3_objects = self._s3.list_objects(Bucket=BUCKET, Prefix=self.env)['Contents']
+        s3_objects = self._s3.list_objects(Bucket=AWS_DEFAULT_BUCKET, Prefix=self.env)['Contents']
         models = list(
             reversed(sorted([obj['Key'] for obj in s3_objects if obj['Key'].endswith('.p')]))
         )
         latest_s3_key = models[0]
         version = latest_s3_key.split('/')[1]
         print(f'Loading model version {version}')
-        self._s3.download_file(BUCKET, latest_s3_key, file_path)
+        self._s3.download_file(AWS_DEFAULT_BUCKET, latest_s3_key, file_path)
         return pickle.load(open(file_path, 'rb')), version

@@ -4,17 +4,20 @@ owner: Bosco Albert Baracus
 images:
   - image: myorg/mydatascienceapp
     type: python
-    source: .
 services:
   - service:
     name: my_datascience_server
     type: python_server
     description: my ds server
     image: myorg/mydatascienceapp
+    source: .
     endpoints:
       - endpoint: /predict
         module: serving
         function: predict
+      - endpoint: /healthcheck
+        module: serving
+        function: healthcheck
 pipelines:
   - pipeline: my_datascience_pipeline
     start_date: 1970-01-01
@@ -31,6 +34,8 @@ pipelines:
         description: train model
         image: myorg/mydatascienceapp
         cmd: python -u training.py train
+        env_vars:
+          AWS_DEFAULT_BUCKET: "ml-ab-dev"
       - task: validate
         type: python
         input_type: static
@@ -38,3 +43,5 @@ pipelines:
         description: validate model and deploy
         image: myorg/mydatascienceapp
         cmd: python -u training.py validate
+        env_vars:
+          AWS_DEFAULT_BUCKET: "ml-ab-dev"
