@@ -19,6 +19,7 @@
 import copy
 import datetime
 import logging
+import os
 
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.kubernetes.volume import Volume
@@ -71,16 +72,14 @@ class KubernetesPodExecutor(executor.Executor):
         volumes = []
         for volume_config in volumes_config:
             name = volume_config['volume']
-            if env_util.is_running_on_jenkins():
-                claimName = 'jenkins-mvn-cache'
-            else:
-                claimName = f"{name}-pvc"
-
+            claim_name = volume_config.get('claim_name')
+            if not claim_name and 'local' in volume_config:
+                claim_name = f'{name}-pvc'
             volume = Volume(
                 name=name,
                 configs={
                     'persistentVolumeClaim': {
-                        'claimName': f"{claimName}"
+                        'claimName': claim_name
                     }
                 }
             )
@@ -89,14 +88,13 @@ class KubernetesPodExecutor(executor.Executor):
 
     def __kubernetes_kwargs(self, task: ContainerTask):
         config = copy.deepcopy(self.executor_config)
-
         kubernetes_kwargs = {
             'task_id': task.task_id,
             'image': task.image,
             'arguments': task.arguments,
             'namespace': get_variable('kubernetes_namespace', default_val='default'),
             'name': task.task_id.replace('_', '-'),
-            'in_cluster': get_variable('in_kubernetes_cluster', default_val=False),
+            'in_cluster': os.environ.get('AIRFLOW__KUBERNETES__IN_CLUSTER', 'False'),
             'image_pull_policy': get_variable('image_pull_policy', default_val='IfNotPresent'),
             'get_logs': config.pop('get_logs', True),
             'is_delete_operator_pod': config.pop('is_delete_operator_pod', True),
@@ -105,6 +103,8 @@ class KubernetesPodExecutor(executor.Executor):
             'do_xcom_push': task.task_config.get('do_xcom_push', False),
             'image_pull_secrets': config.pop('image_pull_secrets', 'regcred'),
             'volumes': self.volumes,
+            'config_file': os.environ.get('AIRFLOW__KUBERNETES__CONFIG_FILE', '~/.kube/config'),
+            'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__CLUSTER_CONTEXT', 'None'),
             'cmds': task.cmds,
             'volume_mounts': [
                 VolumeMount(mount['volume'],
