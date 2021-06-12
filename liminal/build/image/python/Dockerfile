@@ -16,17 +16,25 @@
 # specific language governing permissions and limitations
 # under the License.
 
-.idea
-bin
-include
-lib
-venv
-venv2
-.Python
-*.pyc
-pip-selfcheck.json
-.DS_Store
-apache_liminal.egg-info
-scripts/*.tar.gz
-scripts/*.whl
-dist
+# Use an official Python runtime as a parent image
+FROM {{python}}
+
+# Install aptitude build-essential
+#RUN apt-get install -y --reinstall build-essential
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Order of operations is important here for docker's caching & incremental build performance.    !
+# Be careful when changing this code.                                                            !
+
+# Install any needed packages specified in requirements.txt
+COPY ./requirements.txt /app/
+
+# mount the secret in the correct location, then run pip install
+RUN pip install --upgrade pip
+RUN {{mount}} pip install -r requirements.txt
+
+# Copy the current directory contents into the container at /app
+RUN echo "Copying source code.."
+COPY . /app/

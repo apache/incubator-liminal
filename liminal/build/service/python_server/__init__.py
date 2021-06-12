@@ -15,18 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-.idea
-bin
-include
-lib
-venv
-venv2
-.Python
-*.pyc
-pip-selfcheck.json
-.DS_Store
-apache_liminal.egg-info
-scripts/*.tar.gz
-scripts/*.whl
-dist

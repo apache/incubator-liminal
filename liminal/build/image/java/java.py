@@ -16,17 +16,27 @@
 # specific language governing permissions and limitations
 # under the License.
 
-.idea
-bin
-include
-lib
-venv
-venv2
-.Python
-*.pyc
-pip-selfcheck.json
-.DS_Store
-apache_liminal.egg-info
-scripts/*.tar.gz
-scripts/*.whl
-dist
+import os
+import subprocess
+
+from liminal.build.image_builder import ImageBuilder
+
+
+class JavaImageBuilder(ImageBuilder):
+
+    def __init__(self, config, base_path, relative_source_path, tag):
+        super().__init__(config, base_path, relative_source_path, tag)
+
+    def build(self):
+        build_cmd = self.config.get('build_cmd')
+        if build_cmd:
+            exit_code = subprocess.call(build_cmd, cwd=self.temp_dir, env=os.environ,
+                                        shell=True, timeout=600)
+            if exit_code == 0:
+                return super().build()
+            else:
+                raise Exception('Java application build failed')
+
+    @staticmethod
+    def _dockerfile_path():
+        return os.path.join(os.path.dirname(__file__), 'Dockerfile')
