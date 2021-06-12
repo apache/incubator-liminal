@@ -15,29 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-docker==4.2.0
-apache-airflow==1.10.12
-click==7.1.1
-Flask==1.1.1
-pyyaml==5.3.1
-boto3==1.12.10
-botocore==1.15.21
-kubernetes==12.0.1
-wheel==0.36.2
-termcolor~=1.1.0
-docker-pycreds==0.4.0
-typing==3.7.4.1
-GitPython==3.1.11
-moto==1.3.14
-diskcache==3.1.1
-croniter==0.3.31
-pytz==2020.5
-pytzdata==2020.1
-freezegun==1.1.0
-statsd>=3.3.0, <4.0
-sqlalchemy~=1.3.15
-jinja2>=2.10.1, <2.11.0
-python-json-logger==2.0.1
-pyspark==3.0.0
-pyspark-test==0.1.0
