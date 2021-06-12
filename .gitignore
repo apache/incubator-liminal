@@ -21,6 +21,7 @@ bin
 include
 lib
 venv
+venv2
 .Python
 *.pyc
 pip-selfcheck.json
