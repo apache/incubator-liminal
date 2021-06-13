@@ -4,11 +4,7 @@ import glob
 
 import boto3, os
 
-<<<<<<< Updated upstream
-AWS_DEFAULT_BUCKET = os.environ.get(AWS_DEFAULT_BUCKET, 'ml-ab-dev')
-=======
 MOUNT_PATH = os.environ.get('MOUNT_PATH', '/mnt/gettingstartedvol')
->>>>>>> Stashed changes
 PRODUCTION = 'production'
 CANDIDATE = 'candidate'
 
