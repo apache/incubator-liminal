@@ -10,7 +10,6 @@ from sklearn.linear_model import LogisticRegression
 _CANDIDATE_MODEL_STORE = ModelStore(model_store.CANDIDATE)
 _PRODUCTION_MODEL_STORE = ModelStore(model_store.PRODUCTION)
 
-
 def train_model():
     iris = datasets.load_iris()
 
@@ -25,7 +24,6 @@ def train_model():
     print(f'Saving model with version {version} to candidate model store.')
     _CANDIDATE_MODEL_STORE.save_model(model, version)
 
-
 def validate_model():
     model, version = _CANDIDATE_MODEL_STORE.load_latest_model()
     print(f'Validating model with version {version} to candidate model store.')
@@ -33,7 +31,6 @@ def validate_model():
         raise ValueError('Invalid model')
     print(f'Deploying model with version {version} to production model store.')
     _PRODUCTION_MODEL_STORE.save_model(model, version)
-
 
 if __name__ == '__main__':
     cmd = sys.argv[1]

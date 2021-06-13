@@ -1,6 +1,11 @@
 ---
 name: MyDataScienceApp
 owner: Bosco Albert Baracus
+volumes:
+  - volume: pvc-a2826866-7acb-4daf-b125-7eb0e147eb36
+    claim_name: airflow-eks-dags
+    local:
+      path: .
 images:
   - image: myorg/mydatascienceapp
     type: python
@@ -34,8 +39,12 @@ pipelines:
         description: train model
         image: myorg/mydatascienceapp
         cmd: python -u training.py train
-        env_vars:
-          AWS_DEFAULT_BUCKET: "ml-ab-dev"
+        env:
+          MOUNT_PATH: /mnt/gettingstartedvol
+        mounts:
+          - mount: mymount
+            volume: pvc-a2826866-7acb-4daf-b125-7eb0e147eb36
+            path: /mnt/gettingstartedvol
       - task: validate
         type: python
         input_type: static
@@ -43,5 +52,9 @@ pipelines:
         description: validate model and deploy
         image: myorg/mydatascienceapp
         cmd: python -u training.py validate
-        env_vars:
-          AWS_DEFAULT_BUCKET: "ml-ab-dev"
+        env:
+          MOUNT_PATH: /mnt/gettingstartedvol
+        mounts:
+          - mount: mymount
+            volume: pvc-a2826866-7acb-4daf-b125-7eb0e147eb36
+            path: /mnt/gettingstartedvol
