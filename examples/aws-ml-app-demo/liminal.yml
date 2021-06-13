@@ -43,7 +43,7 @@ pipelines:
           MOUNT_PATH: /mnt/gettingstartedvol
         mounts:
           - mount: mymount
-            volume: pvc-a2826866-7acb-4daf-b125-7eb0e147eb36
+            volume: gettingstartedvol
             path: /mnt/gettingstartedvol
       - task: validate
         type: python
@@ -56,5 +56,5 @@ pipelines:
           MOUNT_PATH: /mnt/gettingstartedvol
         mounts:
           - mount: mymount
-            volume: pvc-a2826866-7acb-4daf-b125-7eb0e147eb36
+            volume: gettingstartedvol
             path: /mnt/gettingstartedvol
