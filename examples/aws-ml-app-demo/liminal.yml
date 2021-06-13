@@ -2,8 +2,8 @@
 name: MyDataScienceApp
 owner: Bosco Albert Baracus
 volumes:
-  - volume: pvc-a2826866-7acb-4daf-b125-7eb0e147eb36
-    claim_name: airflow-eks-dags
+  - volume: gettingstartedvol
+    claim_name: gettingstartedvol-pvc
     local:
       path: .
 images:
@@ -24,7 +24,7 @@ services:
         module: serving
         function: healthcheck
 pipelines:
-  - pipeline: my_datascience_pipeline
+  - pipeline: my_datascience_server
     start_date: 1970-01-01
     timeout_minutes: 45
     schedule: 0 * 1 * *
