@@ -15,7 +15,7 @@ class ModelStore:
     def __init__(self, env):
         self.env = env
         self._latest_model = None
-        self.latest_version = None
+        self._latest_version = None
         self._last_check = time.time()
 
     def load_latest_model(self, force=False):
