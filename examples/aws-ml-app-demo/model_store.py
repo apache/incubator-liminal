@@ -2,7 +2,7 @@ import pickle
 import time
 import glob
 
-import boto3, os
+import os
 
 MOUNT_PATH = os.environ.get('MOUNT_PATH', '/mnt/gettingstartedvol')
 PRODUCTION = 'production'
@@ -35,6 +35,6 @@ class ModelStore:
         s3_objects = (glob.glob(f'{MOUNT_PATH}/{self.env}/**/*'))
         models = list(reversed(sorted([obj for obj in s3_objects if obj.endswith('.p')])))
         latest_s3_key = models[0]
-        version = latest_s3_key.split('/')[4]
+        version = latest_s3_key.rsplit('/')[-2]
         print(f'Loading model version {version}')
         return pickle.load(open(latest_s3_key, 'rb')), version
