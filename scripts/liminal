@@ -128,8 +128,9 @@ def deploy_liminal_apps(path, clean):
     config_files = files_util.find_config_files(path)
     for config_file in config_files:
         click.echo(f"deploying liminal file: {config_file}")
-        yml_name = os.path.basename(config_file)
-        target_yml_name = os.path.join(environment.get_dags_dir(), yml_name)
+        relative_path = os.path.relpath(config_file)
+        target_yml_name = os.path.join(environment.get_dags_dir(), relative_path)
+        pathlib.Path(target_yml_name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(config_file, target_yml_name)
 
 def liminal_is_running():
