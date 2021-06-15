@@ -119,6 +119,7 @@ class TestPythonTask(TestCase):
                              cmd,
                              env_vars=None,
                              executors=None):
+    
         self.liminal_config['volumes'] = [
             {
                 'volume': self._VOLUME_NAME,

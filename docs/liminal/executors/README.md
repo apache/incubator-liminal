@@ -55,3 +55,4 @@ Different executor types support their own additional configuration.
 ## task types
 
 1. [kubernetes](kubernetes.md)
+2. [emr](emr.md)
