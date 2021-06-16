@@ -103,8 +103,8 @@ class KubernetesPodExecutor(executor.Executor):
             'do_xcom_push': task.task_config.get('do_xcom_push', False),
             'image_pull_secrets': config.pop('image_pull_secrets', 'regcred'),
             'volumes': self.volumes,
-            'config_file': os.environ.get('AIRFLOW__KUBERNETES__CONFIG_FILE', '~/.kube/config'),
-            'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__CLUSTER_CONTEXT', 'None'),
+            'config_file': os.environ.get('AIRFLOW__KUBERNETES__CONFIG_FILE'),
+            'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__IN_CLUSTER', None),
             'cmds': task.cmds,
             'volume_mounts': [
                 VolumeMount(mount['volume'],
