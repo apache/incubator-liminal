@@ -25,16 +25,16 @@ class ModelStore:
         return self._latest_model, self._latest_version
 
     def save_model(self, model, version):
-        s3_key = 'model.p'
-        s3_dir = f'{MOUNT_PATH}/{self.env}/{version}'
+        key = 'model.p'
+        path = f'{MOUNT_PATH}/{self.env}/{version}'
 
-        os.makedirs(f'{s3_dir}', exist_ok=True)
-        pickle.dump(model, open(f'{s3_dir}/{s3_key}', "wb"))
+        os.makedirs(f'{path}', exist_ok=True)
+        pickle.dump(model, open(f'{path}/{key}', "wb"))
 
     def _download_latest_model(self):
-        s3_objects = (glob.glob(f'{MOUNT_PATH}/{self.env}/**/*'))
-        models = list(reversed(sorted([obj for obj in s3_objects if obj.endswith('.p')])))
-        latest_s3_key = models[0]
-        version = latest_s3_key.rsplit('/')[-2]
+        objects = (glob.glob(f'{MOUNT_PATH}/{self.env}/**/*'))
+        models = list(reversed(sorted([obj for obj in objects if obj.endswith('.p')])))
+        latest_key = models[0]
+        version = latest_key.rsplit('/')[-2]
         print(f'Loading model version {version}')
-        return pickle.load(open(latest_s3_key, 'rb')), version
+        return pickle.load(open(latest_key, 'rb')), version
