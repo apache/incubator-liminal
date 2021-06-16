@@ -19,7 +19,6 @@
 import json
 import logging
 import os
-import glob
 
 # Needs to be fixed in the following Jira:
 # https://issues.apache.org/jira/browse/LIMINAL-76
