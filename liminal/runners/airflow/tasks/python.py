@@ -34,9 +34,4 @@ class PythonTask(containerable.ContainerTask):
         return cmds, arguments
 
     def __cmd(self, output_path, output_destination_path):
-        destination_str = output_destination_path if output_destination_path is not None else ''
-
-        return f"sh container-setup.sh && " + \
-               "export PROJECT_VERSION_TAG=$(cat VERSION) && " + \
-               f"{self.task_config['cmd']} && " + \
-               f"sh container-teardown.sh $? {output_path} {destination_str}"
+        return self.task_config['cmd']
