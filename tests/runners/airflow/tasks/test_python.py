@@ -100,23 +100,17 @@ class TestPythonTask(TestCase):
         self.assertListEqual(sorted(os.listdir(os.path.join(inputs_dir, '2'))),
                              ['input2.json', 'input5.json', 'input8.json'])
 
-        outputs_dir_contents = names = [os.path.basename(x) for x in glob.glob(f'{outputs_dir}/**/*.txt')]
-
-        self.assertListEqual(sorted((outputs_dir_contents)),
+        self.assertListEqual(sorted(os.listdir(outputs_dir)),
                              ['output0.txt', 'output1.txt',
                               'output2.txt', 'output3.txt',
                               'output4.txt', 'output5.txt',
                               'output6.txt', 'output7.txt',
                               'output8.txt', 'output9.txt'])
 
-        # Needs to be fixed in the following Jira:
-        # https://issues.apache.org/jira/browse/LIMINAL-76
-        for directory in os.listdir(outputs_dir):
-            outputs_dir_file = os.path.join(outputs_dir, directory)
-            for filename in os.listdir(outputs_dir_file):
-                with open(os.path.join(outputs_dir_file, filename)) as f:
-                    expected_file_content = filename.replace('output', 'myval').replace('.txt', '')
-                    self.assertEqual(f.read(), expected_file_content)
+        for filename in os.listdir(outputs_dir):
+            with open(os.path.join(outputs_dir, filename)) as f:
+                expected_file_content = filename.replace('output', 'myval').replace('.txt', '')
+                self.assertEqual(f.read(), expected_file_content)
 
     def __create_python_task(self,
                              dag,

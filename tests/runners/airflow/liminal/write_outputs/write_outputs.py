@@ -21,24 +21,21 @@ import logging
 import os
 import glob
 
+# Needs to be fixed in the following Jira:
+# https://issues.apache.org/jira/browse/LIMINAL-76
 inputs_dir = f'/mnt/vol1/inputs/'
 outputs_dir = '/mnt/vol1/outputs/'
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 
-# Needs to be fixed in the following Jira:
-# https://issues.apache.org/jira/browse/LIMINAL-76
 for directory in os.listdir(inputs_dir):
     logging.info(f'Running write_outputs for split id {directory}')
     inputs_dir_file = os.path.join(inputs_dir, directory)
-    outputs_dir_file = os.path.join(outputs_dir, directory)
-    if not os.path.exists(outputs_dir_file):
-        os.makedirs(outputs_dir_file)
     for filename in os.listdir(inputs_dir_file):
         with open(os.path.join(inputs_dir_file, filename)) as infile, \
                 open(os.path.join(
-                    outputs_dir_file,
+                    outputs_dir,
                     filename.replace('input', 'output').replace('.json', '.txt')
                 ), 'w') as outfile:
             logging.info(f'Writing output file: {outfile.name}')
