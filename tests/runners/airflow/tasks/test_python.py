@@ -109,6 +109,8 @@ class TestPythonTask(TestCase):
                               'output6.txt', 'output7.txt',
                               'output8.txt', 'output9.txt'])
 
+        # Needs to be fixed in the following Jira:
+        # https://issues.apache.org/jira/browse/LIMINAL-76
         for directory in os.listdir(outputs_dir):
             outputs_dir_file = os.path.join(outputs_dir, directory)
             for filename in os.listdir(outputs_dir_file):

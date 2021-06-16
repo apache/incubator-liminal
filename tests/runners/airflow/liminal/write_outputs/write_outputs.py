@@ -27,6 +27,8 @@ outputs_dir = '/mnt/vol1/outputs/'
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 
+# Needs to be fixed in the following Jira:
+# https://issues.apache.org/jira/browse/LIMINAL-76
 for directory in os.listdir(inputs_dir):
     logging.info(f'Running write_outputs for split id {directory}')
     inputs_dir_file = os.path.join(inputs_dir, directory)
