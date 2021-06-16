@@ -1,14 +1,14 @@
 import pickle
 import time
+import glob
 
-import boto3
+import os
 
-BUCKET = 'ni-ml-ab-dev'
+MOUNT_PATH = os.environ.get('MOUNT_PATH', '/mnt/gettingstartedvol')
 PRODUCTION = 'production'
 CANDIDATE = 'candidate'
 
 _ONE_HOUR = 60 * 60
-
 
 class ModelStore:
 
@@ -17,7 +17,6 @@ class ModelStore:
         self._latest_model = None
         self._latest_version = None
         self._last_check = time.time()
-        self._s3 = boto3.client('s3')
 
     def load_latest_model(self, force=False):
         if not self._latest_model or time.time() - self._last_check > _ONE_HOUR or force:
@@ -26,20 +25,16 @@ class ModelStore:
         return self._latest_model, self._latest_version
 
     def save_model(self, model, version):
-        pickle.dump(model, open("/tmp/model.p", "wb"))
+        key = 'model.p'
+        path = f'{MOUNT_PATH}/{self.env}/{version}'
 
-        model_pkl = open("/tmp/model.p", "rb").read()
-        s3_key = f'{self.env}/{version}/model.p'
-        self._s3.put_object(Bucket=BUCKET, Key=s3_key, Body=model_pkl)
+        os.makedirs(f'{path}', exist_ok=True)
+        pickle.dump(model, open(f'{path}/{key}', "wb"))
 
     def _download_latest_model(self):
-        file_path = '/tmp/downloaded_model.p'
-        s3_objects = self._s3.list_objects(Bucket=BUCKET, Prefix=self.env)['Contents']
-        models = list(
-            reversed(sorted([obj['Key'] for obj in s3_objects if obj['Key'].endswith('.p')]))
-        )
-        latest_s3_key = models[0]
-        version = latest_s3_key.split('/')[1]
+        objects = (glob.glob(f'{MOUNT_PATH}/{self.env}/**/*'))
+        models = list(reversed(sorted([obj for obj in objects if obj.endswith('.p')])))
+        latest_key = models[0]
+        version = latest_key.rsplit('/')[-2]
         print(f'Loading model version {version}')
-        self._s3.download_file(BUCKET, latest_s3_key, file_path)
-        return pickle.load(open(file_path, 'rb')), version
+        return pickle.load(open(latest_key, 'rb')), version
