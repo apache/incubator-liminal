@@ -20,7 +20,6 @@ import logging
 import os
 import tempfile
 import unittest
-import glob
 from unittest import TestCase
 
 from liminal.build import liminal_apps_builder
