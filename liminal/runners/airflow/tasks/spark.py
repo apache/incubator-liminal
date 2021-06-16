@@ -15,19 +15,64 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from itertools import chain
+from liminal.runners.airflow.tasks import hadoop
+from flatdict import FlatDict
 
-from liminal.runners.airflow.model import task
 
-
-class SparkTask(task.Task):
+class SparkTask(hadoop.HadoopTask):
     """
     Executes a Spark application.
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                         task_config)
+    def get_runnable_command(self):
+        """
+        Return spark-submit runnable command
+        """
+        return self.__generate_spark_submit()
 
-    def apply_task_to_dag(self):
-        pass
+    def __generate_spark_submit(self):
+        spark_submit = ['spark-submit']
+
+        spark_arguments = self.__spark_args()
+        application_arguments = self.__additional_arguments()
+
+        spark_submit.extend(spark_arguments)
+        spark_submit.extend(application_arguments)
+
+        return [str(x) for x in spark_submit]
+
+    def __spark_args(self):
+        # reformat spark conf
+        flat_conf_args = list()
+
+        spark_arguments = {
+            'master': self.task_config.get('master', None),
+            'class': self.task_config.get('class', None)
+        }
+
+        source_code = self.task_config.get("application_source")
+
+        for conf_arg in ['{}={}'.format(k, v) for (k, v) in
+                         FlatDict(self.task_config.get('conf', {})).items()]:
+            flat_conf_args.append('--conf')
+            flat_conf_args.append(conf_arg)
+
+        spark_conf = self.__parse_spark_arguments(spark_arguments)
+        spark_conf.extend(flat_conf_args)
+        spark_conf.extend([source_code])
+        return spark_conf
+
+    def __additional_arguments(self):
+        application_arguments = self.task_config.get('application_arguments', {})
+        return self.__interleaving(application_arguments.keys(), application_arguments.values())
+
+    def __parse_spark_arguments(self, spark_arguments):
+        spark_arguments = {x[0]: x[1] for x in spark_arguments.items() if x[1]}
+
+        return self.__interleaving([f'--{k}' for k in spark_arguments.keys() if spark_arguments[k]],
+                                   spark_arguments.values())
+
+    @staticmethod
+    def __interleaving(keys, values):
+        return list(chain.from_iterable(zip(keys, values)))

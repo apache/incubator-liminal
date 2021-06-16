@@ -18,10 +18,15 @@
 ---
 name: base
 type: super
+executors:
+  - executor: default_k8s
+    type: kubernetes
 service_defaults:
   description: add defaults parameters for all services
 task_defaults:
   description: add defaults parameters for all tasks separate by task type
+  python:
+    executor: default_k8s
 pipeline_defaults:
   description: add defaults parameters for all pipelines
   before_tasks:

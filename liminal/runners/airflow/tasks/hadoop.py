@@ -16,28 +16,19 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""
-Base task.
-"""
 from abc import ABC, abstractmethod
 
+from liminal.runners.airflow.model import task
 
-class Task(ABC):
+
+class HadoopTask(task.Task, ABC):
     """
-    Task.
+    Hadoop task
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, executor=None):
-        self.liminal_config = liminal_config
-        self.dag = dag
-        self.pipeline_config = pipeline_config
-        self.task_id = task_id
-        self.parent = parent
-        self.trigger_rule = trigger_rule
-        self.task_config = task_config
-        self.executor = executor
+    def apply_task_to_dag(self):
+        return self.executor.apply_task_to_dag(task=self, parent=self.parent)
 
     @abstractmethod
-    def apply_task_to_dag(self, **kwargs):
+    def get_runnable_command(self):
         pass
