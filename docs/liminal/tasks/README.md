@@ -48,3 +48,5 @@ Different task types require their own additional configuration. For example, `p
 ## task types
 
 1. [python](python.md)
+2. [create_cloudformation_stack](create_cloudformation_stack.md)
+3. [delete_cloudformation_stack.md](delete_cloudformation_stack.md)
