@@ -48,3 +48,4 @@ Different task types require their own additional configuration. For example, `p
 ## task types
 
 1. [python](python.md)
+2. [spark](spark.md)
