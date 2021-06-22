@@ -15,17 +15,25 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-import liminal.runners.airflow.dag as liminal
+from liminal.core import environment as env
+from liminal.runners.airflow.dag import liminal_register_dags
 import logging
 import traceback
+import os
 
-pipelines = liminal.register_dags()
+BASE_PATH=os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR)
 
-for pipeline, dag in pipelines:
-    try:
-        globals()[pipeline] = dag
-        logging.info(f'registered DAG {dag.dag_id}: {dag.tasks}')
-    except Exception:
-        logging.error(f'Failed to register DAGs for {pipeline}')
-        traceback.print_exc()
+def register_dags(configs_path):
+    dags = []
+    pipelines = liminal_register_dags.register_dags(configs_path)
+
+    for pipeline, dag in pipelines:
+        try:
+            globals()[pipeline] = dag
+            dags.append(dag)
+        except Exception:
+            traceback.print_exc()
+
+    return dags
+
+register_dags(BASE_PATH)

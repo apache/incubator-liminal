@@ -171,6 +171,3 @@ def get_task_class(task_type):
 
 def get_executor_class(executor_type):
     return executors_by_liminal_name[executor_type]
-
-
-register_dags(os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR))
