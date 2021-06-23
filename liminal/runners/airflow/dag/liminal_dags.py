@@ -17,6 +17,9 @@
 # under the License.
 from liminal.core import environment as env
 from liminal.runners.airflow.dag import liminal_register_dags
+
+from airflow import DAG
+
 import logging
 import traceback
 import os
