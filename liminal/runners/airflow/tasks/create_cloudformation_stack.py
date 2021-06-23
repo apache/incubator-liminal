@@ -16,7 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import BranchPythonOperator
+from flatdict import FlatDict
+
 from liminal.runners.airflow.model import task
+from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
+    CloudFormationCreateStackSensor, CloudFormationHook
 
 
 class CreateCloudFormationStackTask(task.Task):
@@ -25,9 +31,75 @@ class CreateCloudFormationStackTask(task.Task):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                         task_config)
+                 task_config, executor=None):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
+                         pipeline_config, task_config, executor)
+        self.stack_name = task_config['stack_name']
 
     def apply_task_to_dag(self):
-        pass
+        check_cloudformation_stack_exists_task = BranchPythonOperator(
+            templates_dict={'stack_name': self.stack_name},
+            task_id=f'is-cloudformation-{self.task_id}-running',
+            python_callable=self.__cloudformation_stack_running_branch,
+            provide_context=True,
+            dag=self.dag
+        )
+
+        create_cloudformation_stack_task = CloudFormationCreateStackOperator(
+            task_id=f'create-cloudformation-{self.task_id}',
+            params={
+                **self.__reformatted_params()
+            },
+            dag=self.dag
+        )
+
+        create_stack_sensor_task = CloudFormationCreateStackSensor(
+            task_id=f'cloudformation-watch-{self.task_id}-create',
+            stack_name=self.stack_name,
+            dag=self.dag
+        )
+
+        stack_creation_end_task = DummyOperator(
+            task_id=f'creation-end-{self.task_id}',
+            dag=self.dag,
+            trigger_rule='all_done'
+        )
+
+        if self.parent:
+            self.parent.set_downstream(check_cloudformation_stack_exists_task)
+
+        create_stack_sensor_task.set_downstream(stack_creation_end_task)
+        create_cloudformation_stack_task.set_downstream(create_stack_sensor_task)
+        check_cloudformation_stack_exists_task.set_downstream(create_cloudformation_stack_task)
+        check_cloudformation_stack_exists_task.set_downstream(stack_creation_end_task)
+
+        return stack_creation_end_task
+
+    def __cloudformation_stack_running_branch(self, **kwargs):
+        cloudformation = CloudFormationHook().get_conn()
+        stack_name = kwargs['templates_dict']['stack_name']
+        try:
+            stack_status = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0][
+                'StackStatus']
+            if stack_status in ['CREATE_COMPLETE', 'DELETE_FAILED']:
+                print(f'Stack {stack_name} is running')
+                return f'creation-end-{self.task_id}'
+            else:
+                print(f'Stack {stack_name} is not running')
+        except Exception as e:
+            if 'does not exist' in str(e):
+                print(f'Stack {stack_name} does not exist')
+                return f'create-cloudformation-{self.task_id}'
+            else:
+                raise e
+
+        return f'create-cloudformation-{self.task_id}'
+
+    # noinspection PyUnusedLocal
+    def __reformatted_params(self, **kwargs):
+        return {
+            'StackName': self.stack_name,
+            **self.task_config['properties'],
+            'Parameters': [{'ParameterKey': x, 'ParameterValue': str(y)} for (x, y) in
+                           FlatDict(self.task_config['properties']['Parameters']).items()]
+        }
