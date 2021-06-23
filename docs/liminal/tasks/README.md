@@ -49,3 +49,5 @@ Different task types require their own additional configuration. For example, `p
 
 1. [python](python.md)
 2. [spark](spark.md)
+3. [create_cloudformation_stack](create_cloudformation_stack.md)
+4. [delete_cloudformation_stack](delete_cloudformation_stack.md)
