@@ -21,7 +21,7 @@ import unittest
 from unittest import TestCase, mock
 
 from liminal.core.config.config import ConfigUtil
-from liminal.runners.airflow.dag.liminal_dags import register_dags
+from liminal.runners.airflow.dag import liminal_register_dags
 from liminal.runners.airflow.operators.job_status_operator import JobEndOperator, JobStartOperator
 
 
@@ -31,28 +31,28 @@ class Test(TestCase):
 
         self.assertEqual(len(dags), 1)
 
-        test_pipeline = dags[0]
+        test_pipeline = dags[0][1]
 
         # TODO: elaborate tests to assert all dags have correct tasks
         self.assertEqual(test_pipeline.dag_id, 'my_pipeline')
 
     def test_default_start_task(self):
-        dags = self.get_register_dags()
+        dags = self.get_register_dags()[0]
 
-        task_dict = dags[0].task_dict
+        task_dict = dags[1].task_dict
 
         self.assertIsInstance(task_dict['start'], JobStartOperator)
 
     def test_default_end_task(self):
-        dags = self.get_register_dags()
+        dags = self.get_register_dags()[0]
 
-        task_dict = dags[0].task_dict
+        task_dict = dags[1].task_dict
 
         self.assertIsInstance(task_dict['end'], JobEndOperator)
 
     def test_default_args(self):
         dag = self.get_register_dags()[0]
-        default_args = dag.default_args
+        default_args = dag[1].default_args
 
         keys = default_args.keys()
         self.assertIn('default_arg_loaded', keys)
@@ -64,7 +64,7 @@ class Test(TestCase):
     def get_register_dags(mock_snapshot_final_liminal_configs):
         mock_snapshot_final_liminal_configs.side_effect = None
         base_path = os.path.join(os.path.dirname(__file__), '../../apps/test_app')
-        return register_dags(base_path)
+        return liminal_register_dags.register_dags(base_path)
 
 
 if __name__ == '__main__':
