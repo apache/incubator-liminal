@@ -15,3 +15,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
+from liminal.core import environment as env
+from liminal.runners.airflow.dag import liminal_register_dags
+
+BASE_PATH=os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR)
+
+def register_dags():
+    return liminal_register_dags.register_dags(BASE_PATH)

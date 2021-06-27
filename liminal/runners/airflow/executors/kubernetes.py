@@ -104,7 +104,7 @@ class KubernetesPodExecutor(executor.Executor):
             'image_pull_secrets': config.pop('image_pull_secrets', 'regcred'),
             'volumes': self.volumes,
             'config_file': os.environ.get('AIRFLOW__KUBERNETES__CONFIG_FILE'),
-            'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__IN_CLUSTER', None),
+            'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__CLUSTER_CONTEXT', None),
             'cmds': task.cmds,
             'volume_mounts': [
                 VolumeMount(mount['volume'],
