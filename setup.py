@@ -50,6 +50,7 @@ setuptools.setup(
     scripts=['scripts/liminal'],
     include_package_data=True,
     package_data={
-        'liminal': ['../DISCLAIMER', '../LICENSE', '../NOTICE', '../README.md']
+        'liminal': ['../DISCLAIMER', '../LICENSE', '../NOTICE', '../README.md',
+                    '../liminal/core/config/defaults/base/liminal.yml'],
     }
 )

@@ -66,7 +66,7 @@ def build(path):
         liminal_apps_builder.build_liminal_apps(path)
 
 
-def deploy_liminal_core_internal(clean):
+def deploy_liminal_core_internal(liminal_home, clean):
     # noinspection PyTypeChecker
     with pkg_resources.path(dag, 'liminal_dags.py') as p:
         dags_path = p
@@ -85,6 +85,7 @@ def deploy_liminal_core_internal(clean):
         logging.info(
             f'Liminal was installed locally, changing the LIMINAL_VERSION parameter to {full_path}')
         os.environ[environment.LIMINAL_VERSION_PARAM_NAME] = full_path
+        shutil.copyfile(liminal_version[7:], os.path.join(liminal_home, local_file_name))
     if clean:
         docker_compose_command('down', ['--remove-orphans', '--rmi', 'local'])
         docker_compose_command('build', ['--no-cache'])
@@ -124,7 +125,7 @@ def deploy_liminal_apps(path, clean):
     liminal_home = environment.get_liminal_home()
     os.makedirs(liminal_home, exist_ok=True)
     os.makedirs(environment.get_dags_dir(), exist_ok=True)
-    deploy_liminal_core_internal(clean)
+    deploy_liminal_core_internal(liminal_home, clean)
     config_files = files_util.find_config_files(path)
     for config_file in config_files:
         click.echo(f"deploying liminal file: {config_file}")
