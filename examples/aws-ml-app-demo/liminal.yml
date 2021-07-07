@@ -31,8 +31,6 @@ pipelines:
     tasks:
       - task: train
         type: python
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
         description: train model
         image: myorg/mydatascienceapp
         cmd: python -u training.py train
@@ -44,8 +42,6 @@ pipelines:
             path: /mnt/gettingstartedvol
       - task: validate
         type: python
-        input_type: static
-        input_path: '[ { "foo": "bar" }, { "foo": "baz" } ]'
         description: validate model and deploy
         image: myorg/mydatascienceapp
         cmd: python -u training.py validate
