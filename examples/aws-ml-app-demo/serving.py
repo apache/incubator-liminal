@@ -1,10 +1,7 @@
 import json
 
-import flask
-
 import model_store
 from model_store import ModelStore
-from flask import jsonify
 
 _MODEL_STORE = ModelStore(model_store.PRODUCTION)
 _PETAL_WIDTH = 'petal_width'
@@ -15,7 +12,7 @@ def predict(input_json):
         input_dict = json.loads(input_json)
         model, version = _MODEL_STORE.load_latest_model()
         result = str(model.predict_proba([[float(input_dict[_PETAL_WIDTH])]])[0][1])
-        return flask.jsonify({"result": result, "version": version})
+        return json.dumps({"result": result, "version": version})
 
     except IndexError:
         return 'Failure: the model is not ready yet'
