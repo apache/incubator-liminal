@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# Getting started
+# Getting started / ***Hello World***
 
 This guide will allow you to set up your first Apache Liminal environment and allow you to create
 some simple ML pipelines. These will be very similar to the ones you are going to build for real
@@ -32,11 +32,11 @@ Python 3 (3.6 and up)
 *Note: Make sure kubernetes cluster is running in docker desktop (or custom kubernetes installation
 on your machine).*
 
-## Hello World
+## Deploying the Example
 
 In this tutorial, we will go through setting up Liminal for the first time on your local machine.
 
-First, let’s build our examples project:
+### First, let’s build our example project:
 
 In the dev folder, just clone the example code from liminal:
 
@@ -68,8 +68,11 @@ Let's build the images you need for the example:
 ```
 liminal build
 ```
-The build will create docker images based on the liminal.yml file in the `images` section.
-
+##### The build will create docker images based on the liminal.yml file in the `images` section.
+Create a kubernetes local volume:
+```
+liminal create
+```
 ```
 liminal deploy --clean  
 ```
@@ -96,26 +99,29 @@ Once liminal server has completed starting up, you can navigate to admin UI in y
 By default liminal server starts Apache Airflow servers and admin UI will be that of Apache Airflow.
 
 
-![](nstatic/airflow_main.png)
+![](../nstatic/hello-world/airflow_main.png)
 
 ***Important:** Set off/on toggle to activate your pipeline (DAG), nothing will happen otherwise!*
 
-You can go to tree view to see all the tasks configured in the liminal.yml file: 
-[http://localhost:8080/admin/airflow/tree?dag_id=example_pipeline](
-http://localhost:8080/admin/airflow/tree?dag_id=example_pipeline
+You can go to graph view to see all the tasks configured in the liminal.yml file: 
+[http://localhost:8080/admin/airflow/graph?dag_id=example_pipeline](
+http://localhost:8080/admin/airflow/graph?dag_id=example_pipeline
 )
 
-Now lets see what actually happened to our task:
+#### Now lets see what actually happened to our task:
 
-![](nstatic/airflow_view_dag.png)
-
-Click on “hello_world_example” and you will get this popup: \
-
-![](nstatic/airflow_view_log.png) \
-Click on “view log” button and you can see the log of the current task run: \
+![](../nstatic/hello-world/airflow_view_dag.png)
 
 
-![](nstatic/airflow_task_log.png)
+#### Click on “hello_world_example” and you will get this popup:
+
+![](../nstatic/hello-world/airflow_view_log.png)
+
+
+#### Click on “view log” button and you can see the log of the current task run:
+
+![](../nstatic/hello-world/airflow_task_log.png)
+
 
 ## Mounted volumes
 All tasks use a mounted volume as defined in the pipeline YAML:
@@ -123,10 +129,11 @@ All tasks use a mounted volume as defined in the pipeline YAML:
 name: GettingStartedPipeline
 volumes:
   - volume: gettingstartedvol
+    claim_name: gettingstartedvol-pvc
     local:
-      path: ./
+      path: .
 ```
-In our case the mounted volume will point to the liminal hello world example.
+In our case the mounted volume will point to the liminal hello world example. \
 The hello world task will read the **hello_world.json** file from the mounted volume and will write
 the **hello_world_output.json** to it.
 
@@ -146,12 +153,13 @@ described under the task section in the yml:
 
 ```
 git clone https://github.com/apache/incubator-liminal
-cd examples
+cd examples/liminal-getting-started
 python3 -m venv env
 source env/bin/activate
 pip uninstall apache-liminal
 pip install apache-liminal
 Liminal build
+Liminal create
 liminal deploy --clean
 liminal start
 ```
