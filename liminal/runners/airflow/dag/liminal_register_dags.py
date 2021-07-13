@@ -22,10 +22,10 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 
-from liminal.core import environment as env
 from liminal.core.config.config import ConfigUtil
 from liminal.core.util import class_util
-from liminal.runners.airflow.model import executor
+from liminal.runners.airflow.executors import airflow
+from liminal.runners.airflow.model import executor as liminal_executor
 from liminal.runners.airflow.model.task import Task
 
 __DEPENDS_ON_PAST = 'depends_on_past'
@@ -62,6 +62,9 @@ def register_dags(configs_path):
 
             executors = __initialize_executors(config)
 
+            default_executor = airflow.AirflowExecutor("default_executor", liminal_config=config,
+                                                       executor_config={})
+
             for pipeline in config['pipelines']:
                 default_args = __default_args(pipeline)
                 dag = __initialize_dag(default_args, pipeline, owner)
@@ -77,11 +80,19 @@ def register_dags(configs_path):
                         trigger_rule=trigger_rule,
                         liminal_config=config,
                         pipeline_config=pipeline,
-                        task_config=task,
-                        executor=executors.get(task.get('executor'))
+                        task_config=task
                     )
 
-                    parent = task_instance.apply_task_to_dag()
+                    executor_id = task.get('executor')
+                    if executor_id:
+                        executor = executors[executor_id]
+                    else:
+                        logging.info(f"Did not find `executor` in ${task['task']} config."
+                                     f" Using the default executor (${type(default_executor)})"
+                                     f" instead.")
+                        executor = default_executor
+
+                    parent = executor.apply_task_to_dag(task=task_instance)
 
                 logging.info(f'registered DAG {dag.dag_id}: {dag.tasks}')
 
@@ -160,7 +171,7 @@ logging.info(f'Finished loading task implementations: {tasks_by_liminal_name.key
 
 executors_by_liminal_name = class_util.find_subclasses_in_packages(
     ['liminal.runners.airflow.executors'],
-    executor.Executor)
+    liminal_executor.Executor)
 
 logging.info(f'Finished loading executor implementations: {executors_by_liminal_name.keys()}')
 

@@ -58,3 +58,4 @@ of [allowed master URL's](https://spark.apache.org/docs/latest/submitting-applic
 
 ## supported executors
 - [emr](../executors/emr.md)
+- [kubernetes](../executors/kubernetes.md)

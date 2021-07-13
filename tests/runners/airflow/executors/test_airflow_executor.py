@@ -15,31 +15,24 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
----
-name: base
-type: super
-executors:
-  - executor: default_k8s
-    type: kubernetes
-  - executor: airflow_executor
-    type: airflow
-service_defaults:
-  description: add defaults parameters for all services
-task_defaults:
-  description: add defaults parameters for all tasks separate by task type
-  python:
-    executor: default_k8s
-  spark:
-    executor: default_k8s
-  job_end:
-    executor: airflow_executor
-  job_start:
-    executor: airflow_executor
-pipeline_defaults:
-  description: add defaults parameters for all pipelines
-  before_tasks:
-    - task: start
-      type: job_start
-  after_tasks:
-    - task: end
-      type: job_end
+
+from unittest import TestCase
+from unittest.mock import MagicMock
+
+from liminal.runners.airflow.executors import airflow
+from liminal.runners.airflow.tasks.airflow import AirflowTask
+
+
+class TestAirflowExecutorTask(TestCase):
+    """
+    Test AirflowExecutor task
+    """
+
+    def test_apply_task_to_dag(self):
+        task0 = MagicMock(spec=AirflowTask)
+
+        task0.apply_task_to_dag = MagicMock()
+
+        airflow.AirflowExecutor("executor-task", {}, {}).apply_task_to_dag(task=task0)
+
+        task0.apply_task_to_dag.assert_called_once()

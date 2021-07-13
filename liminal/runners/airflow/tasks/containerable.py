@@ -39,9 +39,9 @@ class ContainerTask(task.Task, ABC):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, executor=None):
+                 task_config):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, executor)
+                         pipeline_config, task_config)
         env = standalone_variable_backend.get_variable(ENV, DEFAULT)
         self.env_vars = self.__env_vars(env)
         self.image = self.task_config['image']
@@ -50,9 +50,6 @@ class ContainerTask(task.Task, ABC):
             self.env_vars.get(OUTPUT_PATH),
             self.env_vars.get(OUTPUT_DESTINATION_PATH)
         )
-
-    def apply_task_to_dag(self):
-        return self.executor.apply_task_to_dag(task=self, parent=self.parent)
 
     def _kubernetes_cmds_and_arguments(self, output_path, output_destination_path):
         cmds = ['/bin/sh', '-c']

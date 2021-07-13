@@ -17,33 +17,15 @@
 # under the License.
 
 from abc import ABC, abstractmethod
-from typing import final
+
+from liminal.runners.airflow.model import task
 
 
-class Executor(ABC):
+class AirflowTask(task.Task, ABC):
     """
-    Executor Task.
+    Airflow task
     """
-    # list of task types supported by the executor
-    supported_task_types = []
-
-    def __init__(self, executor_id, liminal_config, executor_config):
-        self.liminal_config = liminal_config
-        self.executor_id = executor_id
-        self.executor_config = executor_config
-
-    @final
-    def apply_task_to_dag(self, **kwargs):
-        task = kwargs['task']
-
-        self._validate_task_type(task)
-
-        return self._apply_executor_task_to_dag(task=task)
 
     @abstractmethod
-    def _apply_executor_task_to_dag(self, **kwargs):
+    def apply_task_to_dag(self):
         pass
-
-    def _validate_task_type(self, task):
-        assert any([isinstance(task, tYp) for tYp in self.supported_task_types]), \
-            f'supported task types: {self.supported_task_types}'

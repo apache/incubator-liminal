@@ -16,14 +16,23 @@
 # specific language governing permissions and limitations
 # under the License.
 from itertools import chain
-from liminal.runners.airflow.tasks import hadoop
+
 from flatdict import FlatDict
 
+from liminal.runners.airflow.tasks import hadoop, containerable
 
-class SparkTask(hadoop.HadoopTask):
+
+class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
     """
     Executes a Spark application.
     """
+
+    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
+                 task_config):
+        task_config['image'] = task_config.get('image', '')
+        task_config['cmd'] = task_config.get('cmd', [])
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
+                         pipeline_config, task_config)
 
     def get_runnable_command(self):
         """
@@ -65,6 +74,8 @@ class SparkTask(hadoop.HadoopTask):
 
     def __additional_arguments(self):
         application_arguments = self.task_config.get('application_arguments', {})
+        if type(application_arguments) == list:
+            return application_arguments
         return self.__interleaving(application_arguments.keys(), application_arguments.values())
 
     def __parse_spark_arguments(self, spark_arguments):
@@ -76,3 +87,6 @@ class SparkTask(hadoop.HadoopTask):
     @staticmethod
     def __interleaving(keys, values):
         return list(chain.from_iterable(zip(keys, values)))
+
+    def _kubernetes_cmds_and_arguments(self, output_path, output_destination_path):
+        return self.__generate_spark_submit(), []

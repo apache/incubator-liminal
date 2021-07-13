@@ -15,31 +15,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
----
-name: base
-type: super
-executors:
-  - executor: default_k8s
-    type: kubernetes
-  - executor: airflow_executor
-    type: airflow
-service_defaults:
-  description: add defaults parameters for all services
-task_defaults:
-  description: add defaults parameters for all tasks separate by task type
-  python:
-    executor: default_k8s
-  spark:
-    executor: default_k8s
-  job_end:
-    executor: airflow_executor
-  job_start:
-    executor: airflow_executor
-pipeline_defaults:
-  description: add defaults parameters for all pipelines
-  before_tasks:
-    - task: start
-      type: job_start
-  after_tasks:
-    - task: end
-      type: job_end

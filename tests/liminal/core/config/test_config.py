@@ -71,7 +71,8 @@ class TestHierarchicalConfig(TestCase):
             }
         }
 
-        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
+        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'},
+                                   {'executor': 'airflow_executor', 'type': 'airflow'}],
                      'name': 'my_subliminal_test',
                      'pipeline_defaults': {'param1': 'param1_value'},
                      'pipelines': [{'description': 'add defaults parameters for all pipelines',
@@ -81,12 +82,15 @@ class TestHierarchicalConfig(TestCase):
                                     'param2': 'param2super_value',
                                     'param3': 'param3super_value',
                                     'param4': 'param4hyper_value',
-                                    'tasks': [{'task': 'start',
+                                    'tasks': [{'executor': 'airflow_executor',
+                                               'task': 'start',
                                                'task_def1': 'task_def1_value',
                                                'task_def2': {'task_def2_1': 'task_def2_1_value'},
                                                'task_sub_def': 'task_sub_def_value',
                                                'type': 'job_start'},
-                                              {'task': 'end', 'type': 'job_end'}]},
+                                              {'executor': 'airflow_executor',
+                                               'task': 'end',
+                                               'type': 'job_end'}]},
                                    {'description': 'add defaults parameters for all pipelines',
                                     'name': 'mypipe2',
                                     'param': 'constant',
@@ -94,12 +98,15 @@ class TestHierarchicalConfig(TestCase):
                                     'param2': 'param2super_value',
                                     'param3': 'param3super_value',
                                     'param4': 'param4hyper_value',
-                                    'tasks': [{'task': 'start',
+                                    'tasks': [{'executor': 'airflow_executor',
+                                               'task': 'start',
                                                'task_def1': 'task_def1_value',
                                                'task_def2': {'task_def2_1': 'task_def2_1_value'},
                                                'task_sub_def': 'task_sub_def_value',
                                                'type': 'job_start'},
-                                              {'task': 'end', 'type': 'job_end'}]}],
+                                              {'executor': 'airflow_executor',
+                                               'task': 'end',
+                                               'type': 'job_end'}]}],
                      'service_defaults': {'description': 'add defaults parameters for all '
                                                          'services'},
                      'services': [],
@@ -141,7 +148,8 @@ class TestHierarchicalConfig(TestCase):
 
     @mock.patch("liminal.core.util.files_util.load")
     def test_get_superliminal(self, find_config_files_mock):
-        base = {'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
+        base = {'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'},
+                              {'executor': 'airflow_executor', 'type': 'airflow'}],
                 'name': 'base',
                 'pipeline_defaults': {'after_tasks': [{'task': 'end', 'type': 'job_end'}],
                                       'before_tasks': [{'task': 'start', 'type': 'job_start'}],
@@ -151,7 +159,10 @@ class TestHierarchicalConfig(TestCase):
                                                     'services'},
                 'task_defaults': {'description': 'add defaults parameters for all tasks '
                                                  'separate by task type',
-                                  'python': {'executor': 'default_k8s'}},
+                                  'job_end': {'executor': 'airflow_executor'},
+                                  'job_start': {'executor': 'airflow_executor'},
+                                  'python': {'executor': 'default_k8s'},
+                                  'spark': {'executor': 'default_k8s'}},
                 'type': 'super'}
         subliminal = {
             "name": "subliminal_test",
@@ -323,7 +334,8 @@ class TestHierarchicalConfig(TestCase):
             }
         }
 
-        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
+        expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'},
+                                   {'executor': 'airflow_executor', 'type': 'airflow'}],
                      'name': 'my_subliminal_test',
                      'pipeline_defaults': {'param1': '-case'},
                      'pipelines': [{'description': 'add defaults parameters for all pipelines',
@@ -334,13 +346,16 @@ class TestHierarchicalConfig(TestCase):
                                     'param2': '{{pipe-var}}',
                                     'param3': 'param3super_value',
                                     'param4': 'param4hyper_value',
-                                    'tasks': [{'task': 'start',
+                                    'tasks': [{'executor': 'airflow_executor',
+                                               'task': 'start',
                                                'task_def1:': 'task_sub_def_value',
                                                'type': 'job_start'},
                                               {'task': 'second_task', 'type': 'dummy'},
                                               {'task': 'sub_tasks', 'type': 'dummy'},
                                               {'task': 'before_last_task', 'type': 'dummy'},
-                                              {'task': 'end', 'type': 'job_end'}]},
+                                              {'executor': 'airflow_executor',
+                                               'task': 'end',
+                                               'type': 'job_end'}]},
                                    {'description': 'add defaults parameters for all pipelines',
                                     'global_conf': 'super_var',
                                     'name': 'mypipe2',
@@ -349,13 +364,16 @@ class TestHierarchicalConfig(TestCase):
                                     'param2': '{{pipe-var}}',
                                     'param3': 'param3super_value',
                                     'param4': 'param4hyper_value',
-                                    'tasks': [{'task': 'start',
+                                    'tasks': [{'executor': 'airflow_executor',
+                                               'task': 'start',
                                                'task_def1:': 'task_sub_def_value',
                                                'type': 'job_start'},
                                               {'task': 'second_task', 'type': 'dummy'},
                                               {'task': 'sub_tasks', 'type': 'dummy'},
                                               {'task': 'before_last_task', 'type': 'dummy'},
-                                              {'task': 'end', 'type': 'job_end'}]}],
+                                              {'executor': 'airflow_executor',
+                                               'task': 'end',
+                                               'type': 'job_end'}]}],
                      'service_defaults': {'description': 'add defaults parameters for all '
                                                          'services'},
                      'services': [{'description': 'add defaults parameters for all services',
@@ -410,23 +428,27 @@ class TestHierarchicalConfig(TestCase):
         }
 
         expected = {'name': 'my_subliminal_test', 'type': 'sub',
-                    'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'}],
+                    'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'},
+                                  {'executor': 'airflow_executor', 'type': 'airflow'}],
                     'service_defaults': {'description': 'add defaults parameters for all services'},
                     'task_defaults': {
                         'description': 'add defaults parameters for all tasks separate by task type',
-                        'python': {'executor': 'default_k8s'}}, 'pipeline_defaults': {
+                        'python': {'executor': 'default_k8s'}, 'spark': {'executor': 'default_k8s'},
+                        'job_end': {'executor': 'airflow_executor'},
+                        'job_start': {'executor': 'airflow_executor'}}, 'pipeline_defaults': {
                 'description': 'add defaults parameters for all pipelines',
                 'before_tasks': [{'task': 'start', 'type': 'job_start'}],
                 'after_tasks': [{'task': 'end', 'type': 'job_end'}]},
                     'variables': {'var': 1, 'var-2': True}, 'pipelines': [
                 {'name': 'mypipe1', 'param': '1',
                  'description': 'add defaults parameters for all pipelines',
-                 'tasks': [{'task': 'start', 'type': 'job_start'},
-                           {'task': 'end', 'type': 'job_end'}]},
+                 'tasks': [{'task': 'start', 'type': 'job_start', 'executor': 'airflow_executor'},
+                           {'task': 'end', 'type': 'job_end', 'executor': 'airflow_executor'}]},
                 {'name': 'mypipe2', 'param': 'True',
                  'description': 'add defaults parameters for all pipelines',
-                 'tasks': [{'task': 'start', 'type': 'job_start'},
-                           {'task': 'end', 'type': 'job_end'}]}], 'services': []}
+                 'tasks': [{'task': 'start', 'type': 'job_start', 'executor': 'airflow_executor'},
+                           {'task': 'end', 'type': 'job_end', 'executor': 'airflow_executor'}]}],
+                    'services': []}
 
         find_config_files_mock.return_value = {
             "my_subliminal_test": subliminal

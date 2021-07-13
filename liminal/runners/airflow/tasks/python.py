@@ -27,7 +27,6 @@ class PythonTask(containerable.ContainerTask):
     def _kubernetes_cmds_and_arguments(self, output_path, output_destination_path):
         cmds = ['/bin/bash', '-c']
         arguments = [
-
             self.__cmd(output_path, output_destination_path)
         ]
 
