@@ -17,7 +17,6 @@
 # under the License.
 
 from abc import ABC, abstractmethod
-from typing import final
 
 
 class Executor(ABC):
@@ -32,7 +31,6 @@ class Executor(ABC):
         self.executor_id = executor_id
         self.executor_config = executor_config
 
-    @final
     def apply_task_to_dag(self, **kwargs):
         task = kwargs['task']
 
