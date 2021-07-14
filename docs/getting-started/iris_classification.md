@@ -41,45 +41,45 @@ In this tutorial, we will go through setting up Liminal for the first time on yo
 In the dev folder, just clone the example code from liminal:
 
 
-```
+```BASH
 git clone https://github.com/apache/incubator-liminal
 ```
 ***Note:*** *You just cloned the entire Liminal Project, you actually only need examples folder.*
 
 Create a python virtual environment to isolate your runs:
 
-```
+```BASH
 cd incubator-liminal/examples/aws-ml-app-demo
 python3 -m venv env
 ```
 
 Activate your virtual environment:
 
-```
+```BASH
 source env/bin/activate
 ```
 
 Now we are ready to install liminal:
 
-```
+```BASH
 pip install apache-liminal
 ```
 Let's build the images you need for the example:
-```
+```BASH
 liminal build
 ```
 ##### The build will create docker images based on the liminal.yml file in the `images` section.
 
 
 Create a kubernetes local volume:
-```
+```BASH
 liminal create
 ```
 
 
 The deploy command deploys a liminal server and deploys any liminal.yml files in your working
 directory or any of its subdirectories to your liminal home directory.
-```
+```BASH
 liminal deploy --clean  
 ```
 
@@ -89,7 +89,7 @@ If the LIMINAL_HOME environemnet variable is not defined, home directory default
 ~/liminal_home directory.*
 
 Now lets runs liminal:
-```
+```BASH
 liminal start
 ```
 The start command spins up the liminal server containers which will run pipelines based on your
@@ -211,19 +211,34 @@ EOF
 ```
 
 Check that the service is running:
-```YAML
+```BASH
 kubectl get pods --namespace=default
 ```
 
 Check that the service is up:
-```YAML
+```BASH
 kubectl exec -it --namespace=default aws-ml-app-demo -- /bin/bash -c "curl localhost/healthcheck"
 ```
 
 Check the prediction:
-```YAML
+```BASH
 kubectl exec -it --namespace=default aws-ml-app-demo -- /bin/bash -c "curl -X POST -d '{\"petal_width\": \"2.1\"}' localhost/predict"
 ```
+
+## Debugging Kubernetes Deployments
+kubectl get pods will help you check your pod status:
+```BASH
+kubectl get pods --namespace=default
+```
+kubectl logs will help you check your pods log:
+```BASH
+kubectl logs --namespace=default aws-ml-app-demo
+```
+kubectl exec to get a shell to a running container:
+```BASH
+kubectl exec --namespace=default aws-ml-app-demo -- bash
+```
+Then you can check the mounted volume `df -h` and to verify the result of the model.
 
 
 ## Here are the entire list of commands, if you want to start from scratch:

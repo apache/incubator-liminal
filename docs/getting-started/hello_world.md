@@ -41,39 +41,39 @@ In this tutorial, we will go through setting up Liminal for the first time on yo
 In the dev folder, just clone the example code from liminal:
 
 
-```
+```BASH
 git clone https://github.com/apache/incubator-liminal
 ```
 ***Note:*** *You just cloned the entire Liminal Project, you actually only need examples folder.*
 
 Create a python virtual environment to isolate your runs:
 
-```
+```BASH
 cd incubator-liminal/examples/liminal-getting-started
 python3 -m venv env
 ```
 
 Activate your virtual environment:
 
-```
+```BASH
 source env/bin/activate
 ```
 
 Now we are ready to install liminal:
 
-```
+```BASH
 pip install apache-liminal
 ```
 Let's build the images you need for the example:
-```
+```BASH
 liminal build
 ```
 ##### The build will create docker images based on the liminal.yml file in the `images` section.
 Create a kubernetes local volume:
-```
+```BASH
 liminal create
 ```
-```
+```BASH
 liminal deploy --clean  
 ```
 The deploy command deploys a liminal server and deploys any liminal.yml files in your working
@@ -84,7 +84,7 @@ If the LIMINAL_HOME environemnet variable is not defined, home directory default
 ~/liminal_home directory.*
 
 Now lets runs liminal:
-```
+```BASH
 liminal start
 ```
 The start command spins up the liminal server containers which will run pipelines based on your
@@ -148,6 +148,7 @@ described under the task section in the yml:
        volume: gettingstartedvol
        path: /mnt/vol1
 ```
+
 
 ## Here are the entire list of commands, if you want to start from scratch:
 
