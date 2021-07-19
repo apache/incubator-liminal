@@ -165,10 +165,10 @@ class TestHierarchicalConfig(TestCase):
         config_util = ConfigUtil("")
 
         self.assertEqual(base,
-                         config_util._ConfigUtil__get_superliminal(subliminal))
+                         config_util._ConfigUtil__get_superliminal(subliminal, False))
 
         self.assertEqual({},
-                         config_util._ConfigUtil__get_superliminal(base))
+                         config_util._ConfigUtil__get_superliminal(base, False))
 
         liminal = {
             "name": "subliminal_test",
@@ -177,7 +177,7 @@ class TestHierarchicalConfig(TestCase):
         }
 
         with self.assertRaises(FileNotFoundError):
-            config_util._ConfigUtil__get_superliminal(liminal)
+            config_util._ConfigUtil__get_superliminal(liminal, False)
 
     @mock.patch("liminal.core.util.files_util.load")
     def test_merge_superliminals(self, find_config_files_mock):
@@ -444,3 +444,31 @@ class TestHierarchicalConfig(TestCase):
                 m.assert_called_once_with(
                     os.path.join('/tmp', '../liminal_config_files/my_subliminal_test.yml'), 'w')
                 ydm.assert_called_once_with(expected, m.return_value, default_flow_style=False)
+
+    @mock.patch("liminal.core.util.files_util.load")
+    def test_soft_merge_load(self, find_config_files_mock):
+        subliminal = {
+            "name": "my_name",
+            "type": "sub",
+            "super": "my_super"
+        }
+        find_config_files_mock.return_value = {"my_subliminal_test": subliminal}
+
+        config_util = ConfigUtil("")
+
+        self.assertEqual([subliminal],
+                         config_util.safe_load(is_render_variables=True, soft_merge=True))
+
+    def test_non_soft_merge_load(self):
+        subliminal = {
+            "name": "my_name",
+            "type": "sub",
+            "super": "my_super"
+        }
+
+        config_util = ConfigUtil("")
+
+        self.assertRaises(FileNotFoundError,
+                          config_util._ConfigUtil__get_superliminal,
+                          subliminal,
+                          False)

@@ -61,7 +61,7 @@ class TestSparkTask(TestCase):
             task_config=task_config
         ).get_runnable_command()
 
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual.sort(), expected.sort())
 
     def test_missing_spark_arguments(self):
         task_config = {
@@ -121,7 +121,7 @@ class TestSparkTask(TestCase):
                     'select * from dlk_visitor_funnel_dwh_staging.fact_events where '
                     "unified_Date_prt >= '{{yesterday_ds}}'",
                     '--output',
-                    'mytable']
+                    'mytable'].sort()
 
         actual = SparkTask(
             'my_spark_task',
@@ -133,4 +133,4 @@ class TestSparkTask(TestCase):
             task_config=task_config
         ).get_runnable_command()
 
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual.sort(), expected)
