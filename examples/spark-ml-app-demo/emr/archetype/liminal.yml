@@ -1,0 +1,66 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+# superliminal for local development
+name: InfraSpark
+type: super
+variables:
+  region: us-east-1
+  core_count: 2
+  emr_version: 'emr-6.2.0'
+  template_url: 'https://s3.amazonaws.com/liminal/fe-blog/emr-template.yml'
+  cluster_name: 'infra-sparj'
+executors:
+  - executor: emr-executor
+    cluster_name: '{{cluster_name}}'
+    type: emr
+  - executor: k8s-executor
+    type: kubernetes
+task_defaults:
+  spark:
+    executor: emr-executor
+    master: yarn
+    deploy_mode: cluster
+    application_source: 's3://liminal/{{application}}'
+    conf:
+      spark.sql.hive.verifyPartitionPath: true
+pipeline_defaults:
+  before_tasks:
+    - task: create_emr
+      type: create_cloudformation_stack
+      description: create emr
+      stack_name: '{{cluster_name}}'
+      properties:
+        TimeoutInMinutes: 25
+        Capabilities: [ 'CAPABILITY_NAMED_IAM' ]
+        TemplateURL: '{{template_url}}'
+        Parameters:
+          EMRClusterName: '{{cluster_name}}'
+          FileBeatLogTypeName: '{{cluster_name}}'
+          MasterServerCount: '1'
+          CoreServerCount: '{{core_count}}'
+          EmrApplicationRelease: '{{emr_version}}'
+          InstanceTypeMaster: m5.xlarge
+          InstanceTypeCore: m5.xlarge
+          EmrFleet: 'yes'
+  after_tasks:
+    - task: delete_emr
+      type: delete_cloudformation_stack
+      stack_name: '{{cluster_name}}'
+
+
