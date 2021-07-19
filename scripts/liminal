@@ -96,8 +96,8 @@ def deploy_liminal_core_internal(liminal_home, clean):
     if clean:
         docker_compose_command('down', ['--remove-orphans', '--rmi', 'local'])
         docker_compose_command('build', ['--no-cache'])
-        docker_compose_command('run', ['webserver', 'resetdb', '-y'])
-        docker_compose_command('run', ['webserver', 'initdb'])
+        docker_compose_command('run', ['webserver', 'db', 'reset', '-y'])
+        docker_compose_command('run', ['webserver', 'db', 'init'])
         docker_compose_command('down', ['--remove-orphans'])
 
 

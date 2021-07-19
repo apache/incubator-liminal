@@ -22,7 +22,7 @@ Can be removed when Airflow 2.0.0 is released.
 """
 from typing import List
 
-from airflow.contrib.hooks.aws_hook import AwsHook
+from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 from airflow.models import BaseOperator
 from airflow.sensors.base_sensor_operator import BaseSensorOperator
 from airflow.utils.decorators import apply_defaults
@@ -30,7 +30,7 @@ from botocore.exceptions import ClientError
 
 
 # noinspection PyAbstractClass
-class CloudFormationHook(AwsHook):
+class CloudFormationHook(AwsBaseHook):
     """
     Interact with AWS CloudFormation.
     """
