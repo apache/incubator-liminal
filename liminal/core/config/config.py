@@ -50,7 +50,7 @@ class ConfigUtil:
         self.snapshot_path = os.path.join(environment.get_airflow_home_dir(),
                                           '../liminal_config_files')
 
-    def safe_load(self, is_render_variables):
+    def safe_load(self, is_render_variables, soft_merge=False):
         """
         :returns list of config files after enrich with defaults and supers
         """
@@ -65,9 +65,9 @@ class ConfigUtil:
             logging.info(f'Loading yml {name}')
             # noinspection PyBroadException
             try:
-                superliminal = self.__get_superliminal(subliminal)
+                superliminal = self.__get_superliminal(subliminal, soft_merge)
                 enriched_config = self.__merge_configs(subliminal, superliminal,
-                                                       is_render_variables)
+                                                       is_render_variables, soft_merge)
                 enriched_configs.append(enriched_config)
             except Exception:
                 logging.error(f'Failed to load yml {name}')
@@ -77,15 +77,15 @@ class ConfigUtil:
 
         return self.loaded_subliminals
 
-    def __merge_configs(self, subliminal, superliminal, is_render_variables):
+    def __merge_configs(self, subliminal, superliminal, is_render_variables, soft_merge):
         if not superliminal:
             return subliminal
 
         sub = subliminal.copy()
         supr = superliminal.copy()
 
-        merged_superliminal = self.__merge_configs(supr, self.__get_superliminal(supr),
-                                                   is_render_variables)
+        merged_superliminal = self.__merge_configs(supr, self.__get_superliminal(supr, soft_merge),
+                                                   is_render_variables, soft_merge)
 
         sub[self.__EXECUTORS] = self.__merge_executors(sub, merged_superliminal)
 
@@ -94,7 +94,7 @@ class ConfigUtil:
         else:
             return self.__merge_superliminals(sub, merged_superliminal)
 
-    def __get_superliminal(self, liminal):
+    def __get_superliminal(self, liminal, soft_merge):
         superliminal = {}
         if not self.__is_base_config(liminal):
             superliminal_name = liminal.get(self.__SUPER, '')
@@ -102,10 +102,13 @@ class ConfigUtil:
                 superliminal = self.base
             else:
                 superliminal = self.__get_config(superliminal_name)
-
                 if not superliminal:
-                    raise FileNotFoundError(
-                        f"superliminal '{superliminal_name}' is missing from '{self.configs_path}'")
+                    supr_is_missing_msg = f"superliminal '{superliminal_name}' " + \
+                                          f"is missing from '{self.configs_path}'"
+                    if soft_merge:
+                        logging.warning(supr_is_missing_msg)
+                    else:
+                        raise FileNotFoundError(supr_is_missing_msg)
 
         return superliminal
 
