@@ -30,8 +30,3 @@ scripts/*.tar.gz
 scripts/*.whl
 dist
 build
-apache_liminal_test_spark.egg-info/top_level.txt
-apache_liminal_test_spark.egg-info/SOURCES.txt
-apache_liminal_test_spark.egg-info/requires.txt
-apache_liminal_test_spark.egg-info/PKG-INFO
-apache_liminal_test_spark.egg-info/dependency_links.txt
