@@ -1,3 +1,0 @@
-liminal
-scripts
-tests
