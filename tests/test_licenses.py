@@ -18,7 +18,7 @@
 
 import os
 import pathlib
-import sys
+from unittest import TestCase
 
 from termcolor import colored
 
@@ -131,46 +131,47 @@ JSON_LICENSE_HEADER = """
 """.strip().split("\n")
 
 
-def check_licenses():
-    files = []
-    base_dir = os.path.join(pathlib.Path(__file__).parent.absolute())
-    print(f'Checking licenses for files in {base_dir}')
-    for r, d, f in os.walk(base_dir):
-        if not any(os.path.relpath(r, base_dir).startswith(excluded) for excluded in EXCLUDED_DIRS):
-            for file in f:
-                if not any(os.path.basename(file).endswith(ext) for ext in EXCLUDED_EXTENSIONS):
-                    files.append(os.path.join(r, file))
+class TestLicenses(TestCase):
 
-    output = ''
-    success = True
-    for file in files:
-        print(f'Checking license for file {file}')
-        has_license = check_license(file)
-        if not has_license:
-            output += colored(f'Missing License: {file}\n', 'red')
-        success = success and has_license
+    def test_licenses(self):
+        files = []
+        base_dir = os.path.join(pathlib.Path(__file__).parent.parent.absolute())
+        print(f'Checking licenses for files in {base_dir}')
+        for r, d, f in os.walk(base_dir):
+            if not any(os.path.relpath(r, base_dir).startswith(excluded) for excluded in
+                       EXCLUDED_DIRS):
+                for file in f:
+                    if not any(os.path.basename(file).endswith(ext) for ext in EXCLUDED_EXTENSIONS):
+                        files.append(os.path.join(r, file))
 
-    print(output)
+        output = ''
+        files_missing_license = []
+        success = True
+        for file in files:
+            print(f'Checking license for file {file}')
+            has_license = self.check_license(file)
+            if not has_license:
+                output += colored(f'Missing License: {file}\n', 'red')
+                files_missing_license.append(file)
+            success = success and has_license
 
-    if not success:
-        sys.exit(1)
+        print(output)
 
+        if not success:
+            self.assertListEqual([], files_missing_license)
 
-def check_license(file):
-    header_lines = PYTHON_LICENSE_HEADER
-    if file.endswith('.md'):
-        header_lines = MD_LICENSE_HEADER
-    elif file.endswith('.rst'):
-        header_lines = RST_LICENSE_HEADER
-    elif file.endswith('.bat'):
-        header_lines = BAT_LICENSE_HEADER
-    elif file.endswith('.json'):
-        header_lines = JSON_LICENSE_HEADER
-        header_lines[0] = f'  {header_lines[0]}'
-    with open(file) as f:
-        file_lines = f.readlines()
-    return all(f'{line}\n' in file_lines for line in header_lines)
-
-
-if __name__ == '__main__':
-    check_licenses()
+    @staticmethod
+    def check_license(file):
+        header_lines = PYTHON_LICENSE_HEADER
+        if file.endswith('.md'):
+            header_lines = MD_LICENSE_HEADER
+        elif file.endswith('.rst'):
+            header_lines = RST_LICENSE_HEADER
+        elif file.endswith('.bat'):
+            header_lines = BAT_LICENSE_HEADER
+        elif file.endswith('.json'):
+            header_lines = JSON_LICENSE_HEADER
+            header_lines[0] = f'  {header_lines[0]}'
+        with open(file) as f:
+            file_lines = f.readlines()
+        return all(f'{line}\n' in file_lines for line in header_lines)
