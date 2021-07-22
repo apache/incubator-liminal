@@ -143,7 +143,7 @@ http://localhost:8080/admin/airflow/graph?dag_id=my_datascience_pipeline
 * [Pipeline flow](#Pipeline-flow)
 
 ### Mounted volumes
-Describe the mounted volume in your liminal YAML:
+Describe of the mounted volume in your liminal YAML:
 ```YAML
 name: MyDataScienceApp
 owner: Bosco Albert Baracus
@@ -264,6 +264,7 @@ git clone https://github.com/apache/incubator-liminal
 cd examples/aws-ml-app-demo
 python3 -m venv env
 source env/bin/activate
+rm -rf ~/liminal_home
 pip uninstall apache-liminal
 pip install apache-liminal
 Liminal build
