@@ -36,7 +36,7 @@ perform), application servers,  and more.
 
 ## Getting Started
 A simple hello world guide for Liminal can be found [here](getting-started/hello_world.md) \
-A simple Iris classification model guide for Liminal can be found [here](getting-started/iris_classification.md)
+A more advanced example which demonstrates a simple data-science workflow can be found [here](getting-started/iris_classification.md
 
 ## Apache Liminal Documentation
 Full documentation of Apache Liminal can be found [here](liminal)

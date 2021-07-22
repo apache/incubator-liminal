@@ -19,32 +19,43 @@ under the License.
 
 # Getting started / ***Iris Classification***
 
-This guide will allow you to set up your first Apache Liminal environment and allow you to create
-some simple ML pipelines. These will be very similar to the ones you are going to build for real
-production scenarios.
+In this tutorial, we will guide you through setting up Apache Liminal on your local machine and run the simple machine-learning workflow example.
 
-## Prerequisites
+* [Setup your local environment](#First-let’s-build-our-example-project)
+* [Setup liminal](#setup-liminal)
+    * [Liminal build](#Liminal-build)
+    * [Liminal create](#Liminal-create)
+    * [Liminal deploy](#Liminal-deploy)
+    * [Liminal start](#Liminal-start)
+* [Liminal YAML walkthrough](#Liminal-YAML-walkthrough)
+* [Evaluate the Iris Classification model](#Evaluate-the-iris-classification-model)
+* [Debugging Kubernetes Deployments](#Debugging-Kubernetes-Deployments)
+* [Closing up](#Closing-up)
 
-Python 3 (3.6 and up)
 
-[Docker Desktop](https://www.docker.com/products/docker-desktop)
+#### Prerequisites
 
-*Note: Make sure kubernetes cluster is running in docker desktop (or custom kubernetes installation
-on your machine).*
+* [Python 3 (3.6 and up)](https://www.python.org/downloads)
+* [Python Virtual Environments](https://pypi.org/project/virtualenv)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop)
 
-## Deploying the Example
+*Note: Make sure kubernetes cluster is running in docker desktop*
 
-In this tutorial, we will go through setting up Liminal for the first time on your local machine.
+We will define the following steps and services to implement the Iris classification example: \
+Train, Validate & Deploy - Training and validation execution is managed by Liminal Airflow extension. The training task trains a regression model using a public dataset. \
+We then validate the model and deploy it to a model-store in mounted volume. \
+Inference - online inference is done using a Python Flask service running on the local Kubernetes in docker desktop. The service exposes the `/predict` endpoint. It reads the model stored in the mounted drive and uses it to evaluate the request.
+## Setup your local env environment
 
-### First, let’s build our example project:
-
-In the dev folder, just clone the example code from liminal:
+In the dev folder, clone the example code from liminal:
 
 
 ```BASH
 git clone https://github.com/apache/incubator-liminal
 ```
 ***Note:*** *You just cloned the entire Liminal Project, you actually only need examples folder.*
+
+
 
 Create a python virtual environment to isolate your runs:
 
@@ -64,36 +75,40 @@ Now we are ready to install liminal:
 ```BASH
 pip install apache-liminal
 ```
-Let's build the images you need for the example:
+
+## Setup liminal
+### Liminal build
+The build will create docker images based on the liminal.yml file in the `images` section.
 ```BASH
 liminal build
 ```
-##### The build will create docker images based on the liminal.yml file in the `images` section.
 
+### Liminal create
+All tasks use a mounted volume as defined in the pipeline YAML. \
+In our case the mounted volume will point to the liminal Iris Classification example.
+The training task trains a regression model using a public dataset. We then validate the model and deploy it to a model-store in the mounted volume.
 
 Create a kubernetes local volume:
 ```BASH
 liminal create
 ```
 
-
-The deploy command deploys a liminal server and deploys any liminal.yml files in your working
-directory or any of its subdirectories to your liminal home directory.
+### Liminal deploy
+The deploy command deploys a liminal server and deploys any liminal.yml files in your working directory or any of its subdirectories to your liminal home directory.
 ```BASH
 liminal deploy --clean  
 ```
-
 
 *Note: liminal home directory is located in the path defined in LIMINAL_HOME env variable.
 If the LIMINAL_HOME environemnet variable is not defined, home directory defaults to
 ~/liminal_home directory.*
 
-Now lets runs liminal:
+### Liminal start
+The start command spins up 3 containers that load the Apache Airflow stack. Liminal's Airflow extension is responsible to execute the workflows defined in the liminal.yml file as standard Airflow DAGs.
 ```BASH
 liminal start
 ```
-The start command spins up the liminal server containers which will run pipelines based on your
-deployed liminal.yml files.
+
 It runs the following three containers: 
 * liminal-postgress
 * liminal-webserver
@@ -101,7 +116,6 @@ It runs the following three containers:
 
 Once liminal server has completed starting up, you can navigate to admin UI in your browser:
 [http://localhost:8080](http://localhost:8080)
-By default liminal server starts Apache Airflow servers and admin UI will be that of Apache Airflow.
 
 
 ![](../nstatic/iris-classification/airflow_main.png)
@@ -124,8 +138,12 @@ http://localhost:8080/admin/airflow/graph?dag_id=my_datascience_pipeline
 #### Click on “view log” button and you can see the log of the current task run:
 ![](../nstatic/iris-classification/airflow_task_log.png)
 
-## Mounted volumes
-All tasks use a mounted volume as defined in the pipeline YAML:
+## Liminal YAML walkthrough
+* [Mounted volumes](#Mounted-volumes)
+* [Pipeline flow](#Pipeline-flow)
+
+### Mounted volumes
+Describe the mounted volume in your liminal YAML:
 ```YAML
 name: MyDataScienceApp
 owner: Bosco Albert Baracus
@@ -135,10 +153,9 @@ volumes:
     local:
       path: .
 ```
-In our case the mounted volume will point to the liminal iris classification example. \
-The training task trains a regression model using a public dataset. We then validate the model and deploy it to a model-store in EFS.
 
-The liminal.yml snippet:
+### Pipeline flow
+Setting up the pipeline flow with the following tasks:
 ```YAML
 pipelines:
   - pipeline: my_datascience_pipeline
@@ -159,8 +176,7 @@ pipelines:
         ...
 ```
 
-*Note:* Each task will internally mount the volume defined above to an internal representation,
-described under the task section in the yml:
+##### Each task will internally mount the volume defined above to an internal representation, described under the task section in the yml:
 
 ```YAML
 pipelines:
@@ -175,7 +191,7 @@ pipelines:
             volume: gettingstartedvol
             path: /mnt/gettingstartedvol
 ```
-###### We specify the MOUNT_PATH in which we store the trained model.
+###### We specify the `MOUNT_PATH` in which we store the trained model.
 
 ## Evaluate the iris classification model
 
