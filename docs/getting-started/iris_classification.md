@@ -21,7 +21,7 @@ under the License.
 
 In this tutorial, we will guide you through setting up Apache Liminal on your local machine and run the simple machine-learning workflow example.
 
-* [Setup your local environment](#First-let’s-build-our-example-project)
+* [Setup your local environment](#Setup-your-local-environment)
 * [Setup liminal](#setup-liminal)
     * [Liminal build](#Liminal-build)
     * [Liminal create](#Liminal-create)
