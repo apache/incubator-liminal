@@ -28,9 +28,11 @@ images:
   - image: my_static_input_task_image
     type: python
     source: helloworld
+    no_cache: True
   - image: my_task_output_input_task_image
     type: python
     source: helloworld
+    no_cache: True
 pipeline_defaults:
   tasks:
     - task: my_static_input_task

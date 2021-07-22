@@ -20,11 +20,10 @@ import os
 
 import yaml
 
-from liminal.build.image_builder import ServiceImageBuilderMixin
 from liminal.build.python import BasePythonImageBuilder
 
 
-class PythonServerImageBuilder(BasePythonImageBuilder, ServiceImageBuilderMixin):
+class PythonServerImageBuilder(BasePythonImageBuilder):
 
     def __init__(self, config, base_path, relative_source_path, tag):
         super().__init__(config, base_path, relative_source_path, tag)

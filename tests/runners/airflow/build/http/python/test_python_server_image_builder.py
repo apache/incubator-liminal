@@ -28,7 +28,9 @@ from unittest import TestCase
 import docker
 
 from liminal.build.python import PythonImageVersions
-from liminal.build.service.python_server.python_server import PythonServerImageBuilder
+from liminal.build.image.python_server.python_server import PythonServerImageBuilder
+
+IMAGE_NAME = 'liminal_server_image'
 
 
 class TestPythonServer(TestCase):
@@ -36,8 +38,7 @@ class TestPythonServer(TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.docker_client = docker.from_env()
-        self.config = self.__create_conf('my_task')
-        self.image_name = self.config['image']
+        self.config = self.__create_conf()
         self.__remove_containers()
 
     def tearDown(self) -> None:
@@ -45,7 +46,7 @@ class TestPythonServer(TestCase):
         self.docker_client.close()
 
     def test_build_python_server(self):
-        versions = [None] + list(PythonImageVersions().supported_versions)
+        versions = list(PythonImageVersions().supported_versions)
         for version in versions:
             build_out = self.__test_build_python_server(python_version=version)
             self.assertTrue('RUN pip install -r requirements.txt' in build_out,
@@ -58,11 +59,10 @@ class TestPythonServer(TestCase):
             'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
             'Incorrect pip command')
 
-    def __test_build_python_server(self, use_pip_conf=False,
-                                   python_version=None):
+    def __test_build_python_server(self, use_pip_conf=False, python_version=None):
         base_path = os.path.join(os.path.dirname(__file__), '../../../liminal')
 
-        config = self.__create_conf('my_task')
+        config = self.__create_conf()
 
         if use_pip_conf:
             config['pip_conf'] = os.path.join(base_path, 'pip.conf')
@@ -73,12 +73,11 @@ class TestPythonServer(TestCase):
         builder = PythonServerImageBuilder(config=config,
                                            base_path=base_path,
                                            relative_source_path='myserver',
-                                           tag=self.image_name)
+                                           tag=IMAGE_NAME)
 
         build_out = str(builder.build())
 
-        thread = threading.Thread(target=self.__run_container, args=[self.image_name])
-        thread.daemon = True
+        thread = threading.Thread(target=self.__run_container)
         thread.start()
 
         time.sleep(5)
@@ -98,13 +97,14 @@ class TestPythonServer(TestCase):
 
         self.assertEqual(f'Input was: {json.loads(json_string)}', server_response)
 
+        self.__remove_containers()
+
         return build_out
 
     def __remove_containers(self):
-        logging.info(f'Stopping containers with image: {self.image_name}')
+        logging.info(f'Stopping containers with image: {IMAGE_NAME}')
 
-        all_containers = self.docker_client.containers
-        matching_containers = all_containers.list(filters={'ancestor': self.image_name})
+        matching_containers = self.__get_docker_containers()
 
         for container in matching_containers:
             container_id = container.id
@@ -113,22 +113,28 @@ class TestPythonServer(TestCase):
             logging.info(f'Removing container {container_id}')
             self.docker_client.api.remove_container(container_id)
 
-        self.docker_client.containers.prune()
+        while len(matching_containers) > 0:
+            matching_containers = self.__get_docker_containers()
 
-    def __run_container(self, image_name):
+    def __get_docker_containers(self):
+        return self.docker_client.containers.list(
+            filters={'ancestor': IMAGE_NAME}
+        )
+
+    def __run_container(self):
         try:
-            logging.info(f'Running container for image: {image_name}')
-            self.docker_client.containers.run(image_name, ports={'80/tcp': 9294})
+            logging.info(f'Running container for image: {IMAGE_NAME}')
+            self.docker_client.containers.run(IMAGE_NAME, ports={'80/tcp': 9294},
+                                              detach=True)
         except Exception as err:
             logging.exception(err)
             pass
 
     @staticmethod
-    def __create_conf(task_id):
+    def __create_conf():
         return {
-            'task': task_id,
+            'image': IMAGE_NAME,
             'cmd': 'foo bar',
-            'image': 'liminal_server_image',
             'source': 'baz',
             'input_type': 'my_input_type',
             'input_path': 'my_input',

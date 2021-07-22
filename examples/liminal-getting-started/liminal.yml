@@ -22,6 +22,17 @@ volumes:
     claim_name: gettingstartedvol-pvc
     local:
       path: .
+images:
+  - image: python_hello_world_example_image
+    type: python
+    source: helloworld
+  - image: liminal_getting_started_server_image
+    type: python_server
+    source: myserver
+    endpoints:
+      - endpoint: /myendpoint1
+        module: my_server
+        function: myendpoint1func
 pipelines:
   - pipeline: getting_started_pipeline
     owner: Bosco Albert Baracus
@@ -41,7 +52,6 @@ pipelines:
         type: python
         description: static input task
         image: python_hello_world_example_image
-        source: helloworld
         env_vars:
           env1: "a"
           env2: "b"
@@ -77,13 +87,6 @@ pipelines:
             path: /mnt/gettingstartedvol
         cmd: python -u hello_world.py
 services:
-  - service:
-    name: liminal_getting_started_python_server
-    type: python_server
+  - service: liminal_getting_started_python_server
     description: my python server
     image: liminal_getting_started_server_image
-    source: myserver
-    endpoints:
-      - endpoint: /myendpoint1
-        module: my_server
-        function: myendpoint1func

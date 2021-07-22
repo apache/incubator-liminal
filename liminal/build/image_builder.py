@@ -150,7 +150,3 @@ class ImageBuilder:
         overwrite with True to use docker buildkit
         """
         return False
-
-
-class ServiceImageBuilderMixin(object):
-    pass

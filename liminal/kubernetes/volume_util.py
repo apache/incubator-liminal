@@ -75,9 +75,7 @@ def create_local_volume(conf, namespace='default') -> None:
 
 
 def delete_local_volume(name, namespace='default'):
-    matching_volumes = _kubernetes.list_persistent_volume(
-        field_selector=f'metadata.name={name}'
-    ).to_dict()['items']
+    matching_volumes = _list_persistent_volumes(name)
 
     if len(matching_volumes) > 0:
         _LOG.info(f'Deleting persistent volume {name}')
@@ -85,16 +83,32 @@ def delete_local_volume(name, namespace='default'):
 
     pvc_name = f'{name}-pvc'
 
-    matching_claims = _kubernetes.list_persistent_volume_claim_for_all_namespaces(
-        field_selector=f'metadata.name={pvc_name}'
-    ).to_dict()['items']
+    while len(matching_volumes) > 0:
+        matching_volumes = _list_persistent_volumes(name)
+
+    matching_claims = _list_persistent_volume_claims(pvc_name)
 
     if len(matching_claims) > 0:
         _LOG.info(f'Deleting persistent volume claim {pvc_name}')
         _kubernetes.delete_namespaced_persistent_volume_claim(pvc_name, namespace)
 
+    while len(matching_claims) > 0:
+        matching_claims = _list_persistent_volume_claims(pvc_name)
+
     if name in _LOCAL_VOLUMES:
         _LOCAL_VOLUMES.remove(name)
+
+
+def _list_persistent_volume_claims(name):
+    return _kubernetes.list_persistent_volume_claim_for_all_namespaces(
+        field_selector=f'metadata.name={name}'
+    ).to_dict()['items']
+
+
+def _list_persistent_volumes(name):
+    return _kubernetes.list_persistent_volume(
+        field_selector=f'metadata.name={name}'
+    ).to_dict()['items']
 
 
 def _create_persistent_volume_claim(pvc_name, volume_name, namespace):
