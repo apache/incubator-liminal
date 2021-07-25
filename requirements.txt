@@ -17,7 +17,7 @@
 # under the License.
 
 docker==4.2.0
-apache-airflow==2.1.0
+apache-airflow==2.1.2
 click==7.1.1
 Flask==1.1.1
 pyyaml==5.3.1
