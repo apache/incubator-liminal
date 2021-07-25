@@ -144,7 +144,7 @@ http://localhost:8080/admin/airflow/graph?dag_id=my_datascience_pipeline
 * [Pipeline flow](#Pipeline-flow)
 
 ### Mounted volumes
-Describe of the mounted volume in your liminal YAML:
+Declaration of the mounted volume in your liminal YAML:
 ```YAML
 name: MyDataScienceApp
 owner: Bosco Albert Baracus
@@ -156,7 +156,7 @@ volumes:
 ```
 
 ### Pipeline flow
-Setting up the pipeline flow with the following tasks:
+Declaration of the pipeline tasks flow in your liminal YAML:
 ```YAML
 pipelines:
   - pipeline: my_datascience_pipeline
