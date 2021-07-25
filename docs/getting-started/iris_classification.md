@@ -19,9 +19,6 @@ under the License.
 
 # Getting started / ***Iris Classification***
 
-In this tutorial, we will guide you through setting up Apache Liminal on your local machine and run a simple machine-learning workflow, based on the classic Iris dataset classification example. \
-More details in this [link](https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html).
-
 * [Setup your local environment](#Setup-your-local-environment)
 * [Setup liminal](#setup-liminal)
     * [Liminal build](#Liminal-build)
@@ -33,12 +30,15 @@ More details in this [link](https://scikit-learn.org/stable/auto_examples/datase
 * [Debugging Kubernetes Deployments](#Debugging-Kubernetes-Deployments)
 * [Closing up](#Closing-up)
 
+In this tutorial, we will guide you through setting up Apache Liminal on your local machine and run a simple machine-learning workflow, based on the classic Iris dataset classification example. \
+More details in this [link](https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html).
 
 #### Prerequisites
 
 * [Python 3 (3.6 and up)](https://www.python.org/downloads)
 * [Python Virtual Environments](https://pypi.org/project/virtualenv)
 * [Docker Desktop](https://www.docker.com/products/docker-desktop)
+* [Kubernetes CLI (kubectl)](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos)
 
 *Note: Make sure kubernetes cluster is running in docker desktop*
 
@@ -196,8 +196,12 @@ pipelines:
 
 ## Evaluate the iris classification model
 
-Once the iris classification model is complete, you can launch a pod of the pre-built image which contains a flask server:
+Once the Iris Classification model trainging is completed and model is deployed (to the mounted volume), you can launch a pod of the pre-built image which contains a flask server, by applying the following Kubernetes manifest configuration:
+```BASH
+kubectl apply -f manifest/aws-ml-app-demo.yaml
+```
 
+Alternatively, create a Kubernetes pod from stdin:
 ```YAML
 cat <<EOF | kubectl apply -f -
 ---
