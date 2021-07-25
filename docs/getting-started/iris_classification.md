@@ -19,7 +19,8 @@ under the License.
 
 # Getting started / ***Iris Classification***
 
-In this tutorial, we will guide you through setting up Apache Liminal on your local machine and run the simple machine-learning workflow example.
+In this tutorial, we will guide you through setting up Apache Liminal on your local machine and run a simple machine-learning workflow, based on the classic Iris dataset classification example. \
+More details in this [link](https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html).
 
 * [Setup your local environment](#Setup-your-local-environment)
 * [Setup liminal](#setup-liminal)
