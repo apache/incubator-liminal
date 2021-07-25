@@ -198,7 +198,7 @@ pipelines:
 
 Once the Iris Classification model trainging is completed and model is deployed (to the mounted volume), you can launch a pod of the pre-built image which contains a flask server, by applying the following Kubernetes manifest configuration:
 ```BASH
-kubectl apply -f manifest/aws-ml-app-demo.yaml
+kubectl apply -f manifests/aws-ml-app-demo.yaml
 ```
 
 Alternatively, create a Kubernetes pod from stdin:
