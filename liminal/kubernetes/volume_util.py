@@ -19,13 +19,15 @@
 import logging
 import os
 import sys
+from time import sleep
 
 from kubernetes import client, config
 from kubernetes.client import V1PersistentVolume, V1PersistentVolumeClaim
 
+# noinspection PyBroadException
 try:
     config.load_kube_config()
-except:
+except Exception:
     msg = "Kubernetes is not running\n"
     sys.stdout.write(f"INFO: {msg}")
 
@@ -59,8 +61,12 @@ def create_local_volume(conf, namespace='default') -> None:
             field_selector=f'metadata.name={name}'
         ).to_dict()['items']
 
-        if not len(matching_volumes) > 0:
+        while len(matching_volumes) == 0:
             _create_local_volume(conf, name)
+            sleep(5)
+            matching_volumes = _kubernetes.list_persistent_volume(
+                field_selector=f'metadata.name={name}'
+            ).to_dict()['items']
 
         pvc_name = conf.get('claim_name', f'{name}-pvc')
 
@@ -68,23 +74,18 @@ def create_local_volume(conf, namespace='default') -> None:
             field_selector=f'metadata.name={pvc_name}'
         ).to_dict()['items']
 
-        if not len(matching_claims) > 0:
+        while len(matching_claims) == 0:
             _create_persistent_volume_claim(pvc_name, name, namespace)
+            sleep(5)
+            matching_claims = _kubernetes.list_persistent_volume_claim_for_all_namespaces(
+                field_selector=f'metadata.name={pvc_name}'
+            ).to_dict()['items']
 
         _LOCAL_VOLUMES.add(name)
 
 
 def delete_local_volume(name, namespace='default'):
-    matching_volumes = _list_persistent_volumes(name)
-
-    if len(matching_volumes) > 0:
-        _LOG.info(f'Deleting persistent volume {name}')
-        _kubernetes.delete_persistent_volume(name)
-
     pvc_name = f'{name}-pvc'
-
-    while len(matching_volumes) > 0:
-        matching_volumes = _list_persistent_volumes(name)
 
     matching_claims = _list_persistent_volume_claims(pvc_name)
 
@@ -94,6 +95,15 @@ def delete_local_volume(name, namespace='default'):
 
     while len(matching_claims) > 0:
         matching_claims = _list_persistent_volume_claims(pvc_name)
+
+    matching_volumes = _list_persistent_volumes(name)
+
+    if len(matching_volumes) > 0:
+        _LOG.info(f'Deleting persistent volume {name}')
+        _kubernetes.delete_persistent_volume(name)
+
+    while len(matching_volumes) > 0:
+        matching_volumes = _list_persistent_volumes(name)
 
     if name in _LOCAL_VOLUMES:
         _LOCAL_VOLUMES.remove(name)
