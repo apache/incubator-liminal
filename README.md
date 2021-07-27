@@ -52,6 +52,19 @@ volumes:
   - volume: myvol1
     local:
       path: /Users/me/myvol1
+images:
+  - image: my_python_task_img
+    type: python
+    source: write_inputs
+  - image: my_parallelized_python_task_img
+    source: write_outputs
+  - image: my_server_image
+    type: python_server
+    source: myserver
+    endpoints:
+      - endpoint: /myendpoint1
+        module: my_server
+        function: myendpoint1func
 pipelines:
   - pipeline: my_pipeline
     start_date: 1970-01-01
@@ -65,7 +78,6 @@ pipelines:
         type: python
         description: static input task
         image: my_python_task_img
-        source: write_inputs
         env_vars:
           NUM_FILES: 10
           NUM_SPLITS: 3
@@ -78,7 +90,6 @@ pipelines:
         type: python
         description: parallelized python task
         image: my_parallelized_python_task_img
-        source: write_outputs
         env_vars:
           FOO: BAR
         executors: 3
@@ -88,16 +99,9 @@ pipelines:
             path: /mnt/vol1
         cmd: python -u write_inputs.py
 services:
-  - service:
-    name: my_python_server
-    type: python_server
+  - service: my_python_server
     description: my python server
     image: my_server_image
-    source: myserver
-    endpoints:
-      - endpoint: /myendpoint1
-        module: my_server
-        function: myendpoint1func
 ```
 
 

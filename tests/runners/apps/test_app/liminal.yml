@@ -22,9 +22,11 @@ images:
   - image: my_static_input_task_image
     type: python
     source: helloworld
+    no_cache: True
   - image: my_server_image
-    type: python
+    type: python_server
     source: myserver
+    no_cache: True
 pipelines:
   - pipeline: my_pipeline
     owner: Bosco Albert Baracus
@@ -44,8 +46,6 @@ pipelines:
         executors: 2
         cmd: python -u hello_world.py
 services:
-  - service:
-    name: my_python_server
-    type: python_server
+  - service: my_python_server
     description: my python server
     image: my_server_image

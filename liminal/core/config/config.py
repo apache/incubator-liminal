@@ -30,17 +30,19 @@ class ConfigUtil:
     """
     Load and enrich config files under configs_path.
     """
-    __BASE = "base"
-    __PIPELINES = "pipelines"
-    __SUPER = "super"
-    __TYPE = "type"
-    __SUB = "sub"
-    __SERVICES = "services"
-    __TASKS = "tasks"
-    __PIPELINE_DEFAULTS = "pipeline_defaults"
-    __BEFORE_TASKS = "before_tasks"
-    __AFTER_TASKS = "after_tasks"
-    __EXECUTORS = "executors"
+    __BASE = 'base'
+    __PIPELINES = 'pipelines'
+    __SUPER = 'super'
+    __TYPE = 'type'
+    __SUB = 'sub'
+    __SERVICES = 'services'
+    __TASKS = 'tasks'
+    __PIPELINE_DEFAULTS = 'pipeline_defaults'
+    __TASK_DEFAULTS = 'task_defaults'
+    __BEFORE_TASKS = 'before_tasks'
+    __AFTER_TASKS = 'after_tasks'
+    __EXECUTORS = 'executors'
+    __IMAGES = 'images'
 
     def __init__(self, configs_path):
         self.configs_path = configs_path
@@ -87,7 +89,8 @@ class ConfigUtil:
         merged_superliminal = self.__merge_configs(supr, self.__get_superliminal(supr, soft_merge),
                                                    is_render_variables, soft_merge)
 
-        sub[self.__EXECUTORS] = self.__merge_executors(sub, merged_superliminal)
+        sub[self.__EXECUTORS] = self.__merge_section(sub, merged_superliminal, self.__EXECUTORS)
+        sub[self.__IMAGES] = self.__merge_section(sub, merged_superliminal, self.__IMAGES)
 
         if self.__is_subliminal(sub):
             return self.__merge_sub_and_super(sub, merged_superliminal, is_render_variables)
@@ -160,9 +163,9 @@ class ConfigUtil:
         files_util.dump_liminal_configs(liminal_configs=self.loaded_subliminals,
                                         path=self.snapshot_path)
 
-    def __merge_executors(self, subliminal, superliminal):
-        return self.__deep_list_keyword_merge('executor', subliminal.get(self.__EXECUTORS, []),
-                                              superliminal.get(self.__EXECUTORS, []))
+    def __merge_section(self, subliminal, superliminal, section):
+        return self.__deep_list_keyword_merge(section[:-1], subliminal.get(section, []),
+                                              superliminal.get(section, []))
 
     @staticmethod
     def __apply_pipeline_defaults(subliminal, superliminal, pipeline):
