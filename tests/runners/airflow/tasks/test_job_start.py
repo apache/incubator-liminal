@@ -19,6 +19,7 @@
 import unittest
 from unittest import TestCase
 
+from liminal.runners.airflow.executors import airflow
 from liminal.runners.airflow.tasks import job_start
 from tests.util import dag_test_utils
 
@@ -32,7 +33,8 @@ class TestJobStartTask(TestCase):
         task0 = job_start.JobStartTask(
             task_id="start_task",
             dag=dag,
-            liminal_config={'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']}},
+            liminal_config={
+                'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']}},
             pipeline_config={'pipeline': 'my_start_pipeline'},
             task_config={},
             parent=None,
@@ -61,7 +63,7 @@ class TestJobStartTask(TestCase):
             pipeline_config={'pipeline': 'my_end_pipeline'},
             parent=None,
             trigger_rule='all_success')
-        task0.apply_task_to_dag()
+        airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
         self.assertEqual(len(dag.tasks), 1)
         dag_task0 = dag.tasks[0]
@@ -75,12 +77,13 @@ class TestJobStartTask(TestCase):
 
         task0 = job_start.JobStartTask(task_id="start_task",
                                        dag=dag,
-                                       liminal_config={'metrics': {'namespace': 'StartJobNameSpace'}},
+                                       liminal_config={
+                                           'metrics': {'namespace': 'StartJobNameSpace'}},
                                        pipeline_config={'pipeline': 'my_start_pipeline'},
                                        task_config={},
                                        parent=None,
                                        trigger_rule='all_success', )
-        task0.apply_task_to_dag()
+        airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
         self.assertEqual(len(dag.tasks), 1)
         dag_task0 = dag.tasks[0]

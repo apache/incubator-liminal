@@ -21,12 +21,20 @@ type: super
 executors:
   - executor: default_k8s
     type: kubernetes
+  - executor: airflow_executor
+    type: airflow
 service_defaults:
   description: add defaults parameters for all services
 task_defaults:
   description: add defaults parameters for all tasks separate by task type
   python:
     executor: default_k8s
+  spark:
+    executor: default_k8s
+  job_end:
+    executor: airflow_executor
+  job_start:
+    executor: airflow_executor
 pipeline_defaults:
   description: add defaults parameters for all pipelines
   before_tasks:

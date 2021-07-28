@@ -26,9 +26,6 @@ class HadoopTask(task.Task, ABC):
     Hadoop task
     """
 
-    def apply_task_to_dag(self):
-        return self.executor.apply_task_to_dag(task=self, parent=self.parent)
-
     @abstractmethod
     def get_runnable_command(self):
         pass

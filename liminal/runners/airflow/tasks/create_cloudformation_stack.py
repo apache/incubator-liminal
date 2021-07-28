@@ -20,20 +20,20 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from flatdict import FlatDict
 
-from liminal.runners.airflow.model import task
 from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
     CloudFormationCreateStackSensor, CloudFormationHook
+from liminal.runners.airflow.tasks import airflow
 
 
-class CreateCloudFormationStackTask(task.Task):
+class CreateCloudFormationStackTask(airflow.AirflowTask):
     """
     Creates cloud_formation stack.
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, executor=None):
+                 task_config):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, executor)
+                         pipeline_config, task_config)
         self.stack_name = task_config['stack_name']
 
     def apply_task_to_dag(self):

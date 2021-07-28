@@ -31,8 +31,15 @@ class Executor(ABC):
         self.executor_id = executor_id
         self.executor_config = executor_config
 
-    @abstractmethod
     def apply_task_to_dag(self, **kwargs):
+        task = kwargs['task']
+
+        self._validate_task_type(task)
+
+        return self._apply_executor_task_to_dag(task=task)
+
+    @abstractmethod
+    def _apply_executor_task_to_dag(self, **kwargs):
         pass
 
     def _validate_task_type(self, task):

@@ -15,28 +15,15 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
----
+import os
 
-apiVersion: v1
-kind: Pod
-metadata:
-  name: aws-ml-app-demo
-spec:
-  volumes:
-    - name: task-pv-storage
-      persistentVolumeClaim:
-        claimName: gettingstartedvol-pvc
-  containers:
-    - name: task-pv-container
-      imagePullPolicy: Never
-      image: myorg/mydatascienceapp
-      lifecycle:
-        postStart:
-          exec:
-            command: [ "/bin/bash", "-c", "apt update && apt install curl -y" ]
-      ports:
-        - containerPort: 80
-          name: "http-server"
-      volumeMounts:
-        - mountPath: "/mnt/gettingstartedvol"
-          name: task-pv-storage
+from liminal.build.python import BasePythonImageBuilder
+
+
+class SparkImageBuilder(BasePythonImageBuilder):
+    def __init__(self, config, base_path, relative_source_path, tag):
+        super().__init__(config, base_path, relative_source_path, tag)
+
+    @staticmethod
+    def _dockerfile_path():
+        return os.path.join(os.path.dirname(__file__), 'Dockerfile')

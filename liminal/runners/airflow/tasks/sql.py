@@ -19,15 +19,7 @@
 from liminal.runners.airflow.model import task
 
 
-class SparkTask(task.Task):
+class SqlTask(task.Task):
     """
     Executes an SQL application.
     """
-
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, executor):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                         task_config, executor)
-
-    def apply_task_to_dag(self):
-        pass

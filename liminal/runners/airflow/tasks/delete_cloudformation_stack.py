@@ -19,20 +19,20 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 
-from liminal.runners.airflow.model import task
 from liminal.runners.airflow.operators.cloudformation import CloudFormationDeleteStackOperator, \
     CloudFormationDeleteStackSensor
+from liminal.runners.airflow.tasks import airflow
 
 
-class DeleteCloudFormationStackTask(task.Task):
+class DeleteCloudFormationStackTask(airflow.AirflowTask):
     """
     Deletes cloud_formation stack.
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, executor=None):
+                 task_config):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, executor)
+                         pipeline_config, task_config)
         self.stack_name = task_config['stack_name']
 
     def apply_task_to_dag(self):

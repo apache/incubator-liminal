@@ -19,6 +19,7 @@
 import unittest
 from unittest import TestCase
 
+from liminal.runners.airflow.executors import airflow
 from liminal.runners.airflow.tasks import job_end
 from tests.util import dag_test_utils
 
@@ -38,7 +39,7 @@ class TestJobEndTask(TestCase):
             trigger_rule='all_done',
             liminal_config={'metrics': {'namespace': 'EndJobNameSpace', 'backends': ['cloudwatch']}}
         )
-        task0.apply_task_to_dag()
+        airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
         self.assertEqual(len(dag.tasks), 1)
         dag_task0 = dag.tasks[0]
@@ -53,9 +54,11 @@ class TestJobEndTask(TestCase):
         dag = dag_test_utils.create_dag()
 
         task0 = job_end.JobEndTask(task_id="job_end", dag=dag,
-                                   pipeline_config={'pipeline': 'my_end_pipeline'}, liminal_config=conf, parent=None,
+                                   pipeline_config={'pipeline': 'my_end_pipeline'},
+                                   liminal_config=conf, parent=None,
                                    trigger_rule='all_done', task_config={})
-        task0.apply_task_to_dag()
+
+        airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
         self.assertEqual(len(dag.tasks), 1)
         dag_task0 = dag.tasks[0]

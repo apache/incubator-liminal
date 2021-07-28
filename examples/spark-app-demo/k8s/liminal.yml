@@ -1,0 +1,89 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+name: MyFirstLiminalSparkApp
+super: InfraSpark
+owner: Bosco Albert Baracus
+variables:
+  output_path: '{{output_root_dir}}/my_first_liminal_spark_app_outputs/'
+  application: data_cleanup.py
+images:
+  - image: myorg/mydatascienceapp
+    type: python_server
+    source: .
+    endpoints:
+      - endpoint: /predict
+        module: serving
+        function: predict
+      - endpoint: /healthcheck
+        module: serving
+        function: healthcheck
+      - endpoint: /version
+        module: serving
+        function: version
+task_defaults:
+  python:
+    mounts:
+      - mount: mymount
+        volume: gettingstartedvol
+        path: /mnt/gettingstartedvol
+pipelines:
+  - pipeline: my_first_spark_pipeline
+    start_date: 1970-01-01
+    timeout_minutes: 45
+    schedule: 0 * 1 * *
+    tasks:
+      - task: data_preprocessing
+        type: spark
+        description: prepare the data for training
+        application_arguments:
+          - '{{input_root_dir}}data/iris.csv'
+          - '{{output_path}}'
+      - task: train
+        type: python
+        description: train model
+        image: myorg/mydatascienceapp
+        cmd: python -u training.py train '{{output_path}}'
+        env:
+          MOUNT_PATH: /mnt/gettingstartedvol
+      - task: validate
+        type: python
+        description: validate model and deploy
+        image: myorg/mydatascienceapp
+        cmd: python -u training.py validate
+        env:
+          MOUNT_PATH: /mnt/gettingstartedvol
+volumes:
+  - volume: gettingstartedvol
+    claim_name: gettingstartedvol-pvc
+    local:
+      path: .
+services:
+  - service:
+    name: my_datascience_server
+    type: python_server
+    description: my ds server
+    image: myorg/mydatascienceapp
+    source: .
+    endpoints:
+      - endpoint: /predict
+        module: serving
+        function: predict
+      - endpoint: /healthcheck
+        module: serving
+        function: healthcheck

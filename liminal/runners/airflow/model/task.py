@@ -28,7 +28,7 @@ class Task(ABC):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, executor=None):
+                 task_config):
         self.liminal_config = liminal_config
         self.dag = dag
         self.pipeline_config = pipeline_config
@@ -36,8 +36,3 @@ class Task(ABC):
         self.parent = parent
         self.trigger_rule = trigger_rule
         self.task_config = task_config
-        self.executor = executor
-
-    @abstractmethod
-    def apply_task_to_dag(self, **kwargs):
-        pass

@@ -16,7 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import logging
 import os
 import tempfile
 import unittest
@@ -67,7 +66,16 @@ class TestPythonTask(TestCase):
                                               'NUM_FILES': 10,
                                               'NUM_SPLITS': 3
                                           })
-        task0.apply_task_to_dag()
+        executor = KubernetesPodExecutor(
+            task_id='k8s',
+            liminal_config=self.liminal_config,
+            executor_config={
+                'executor': 'k8s',
+                'name': 'mypod'
+            }
+        )
+
+        executor.apply_task_to_dag(task=task0)
 
         task1 = self.__create_python_task(dag,
                                           'my_output_task',
@@ -75,7 +83,7 @@ class TestPythonTask(TestCase):
                                           'my_parallelized_python_task_img',
                                           'python -u write_outputs.py',
                                           executors=3)
-        task1.apply_task_to_dag()
+        executor.apply_task_to_dag(task=task1)
 
         for task in dag.tasks:
             print(f'Executing task {task.task_id}')
@@ -119,7 +127,7 @@ class TestPythonTask(TestCase):
                              cmd,
                              env_vars=None,
                              executors=None):
-    
+
         self.liminal_config['volumes'] = [
             {
                 'volume': self._VOLUME_NAME,
@@ -164,15 +172,7 @@ class TestPythonTask(TestCase):
             },
             task_config=task_config,
             parent=parent,
-            trigger_rule='all_success',
-            executor=KubernetesPodExecutor(
-                task_id='k8s',
-                liminal_config=self.liminal_config,
-                executor_config={
-                    'executor': 'k8s',
-                    'name': 'mypod'
-                }
-            ))
+            trigger_rule='all_success')
 
 
 if __name__ == '__main__':

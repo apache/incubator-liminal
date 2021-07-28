@@ -37,9 +37,9 @@ class EMRExecutor(executor.Executor):
         self.job_flow_id = self.executor_config.get('cluster_id', None)
         self.job_flow_name = self.executor_config.get('cluster_name', None)
 
-    def apply_task_to_dag(self, **kwargs):
+    def _apply_executor_task_to_dag(self, **kwargs):
         task = kwargs['task']
-        parent = kwargs.get('parent', task.parent)
+        parent = task.parent
 
         self._validate_task_type(task)
 

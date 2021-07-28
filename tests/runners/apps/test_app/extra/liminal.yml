@@ -47,6 +47,7 @@ pipeline_defaults:
       description: optional sub tasks
     - task: my_task_output_input_task
       type: python
+      no_cache: True
       description: task with input from other task's output
       image: my_task_output_input_task_image
       env_vars:
