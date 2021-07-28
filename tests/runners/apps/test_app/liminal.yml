@@ -43,6 +43,7 @@ pipelines:
         type: python
         description: parallelized static input task
         image: my_static_input_task_image
+        no_cache: True
         executors: 2
         cmd: python -u hello_world.py
 services:

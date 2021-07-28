@@ -15,28 +15,26 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
----
 
-apiVersion: v1
-kind: Pod
-metadata:
-  name: aws-ml-app-demo
-spec:
-  volumes:
-    - name: task-pv-storage
-      persistentVolumeClaim:
-        claimName: gettingstartedvol-pvc
-  containers:
-    - name: task-pv-container
-      imagePullPolicy: Never
-      image: myorg/mydatascienceapp
-      lifecycle:
-        postStart:
-          exec:
-            command: [ "/bin/bash", "-c", "apt update && apt install curl -y" ]
-      ports:
-        - containerPort: 80
-          name: "http-server"
-      volumeMounts:
-        - mountPath: "/mnt/gettingstartedvol"
-          name: task-pv-storage
+import sys
+
+from pyspark.sql import SparkSession
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: source <file> destination <dest>", file=sys.stderr)
+        sys.exit(-1)
+
+    spark = SparkSession \
+        .builder \
+        .appName("CleanData") \
+        .getOrCreate()
+
+    spark.read.text(sys.argv[1]).rdd.filter(lambda x: not x[0].startswith('#')) \
+        .filter(lambda r: not r[0].startswith('ignore')) \
+        .map(lambda r: r[0]).map(
+        lambda r: (
+            r.split(',')[0], r.split(',')[1], r.split(',')[2], r.split(',')[3], r.split(',')[4])) \
+        .toDF().coalesce(1).write.mode("overwrite").option("header", "false").csv(sys.argv[2])
+
+    spark.stop()

@@ -49,12 +49,11 @@ class KubernetesPodExecutor(executor.Executor):
         self.task_name = self.executor_config['executor']
         self.volumes = self._volumes()
 
-    def apply_task_to_dag(self, **kwargs):
+    def _apply_executor_task_to_dag(self, **kwargs):
         task = kwargs['task']
+        parent = task.parent
 
         self._validate_task_type(task)
-
-        parent = kwargs.get('parent', task.parent)
 
         pod_task = KubernetesPodOperator(
             dag=task.dag,

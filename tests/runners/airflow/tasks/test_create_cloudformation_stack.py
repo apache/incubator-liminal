@@ -23,6 +23,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from moto import mock_cloudformation
 
+from liminal.runners.airflow.executors import airflow
 from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
     CloudFormationCreateStackSensor, CloudFormationHook
 from liminal.runners.airflow.tasks.create_cloudformation_stack import CreateCloudFormationStackTask
@@ -80,7 +81,8 @@ class TestCreateCloudFormationStackTask(TestCase):
                 task_config=self.config
             )
 
-        self.create_cloudformation_task.apply_task_to_dag()
+        airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(
+            task=self.create_cloudformation_task)
 
     def test_apply_task_to_dag(self):
         self.assertEqual(len(self.dag.tasks), 4)

@@ -22,8 +22,8 @@ from unittest import TestCase
 
 from termcolor import colored
 
-EXCLUDED_EXTENSIONS = ['.gif', '.png', '.pyc', 'LICENSE', 'DISCLAIMER', 'NOTICE']
-EXCLUDED_DIRS = ['docs/build', '.git', '.idea']
+EXCLUDED_EXTENSIONS = ['.gif', '.png', '.pyc', 'LICENSE', 'DISCLAIMER', 'NOTICE', '.whl']
+EXCLUDED_DIRS = ['docs/build', '.git', '.idea', 'venv', 'apache_liminal.egg-info']
 
 PYTHON_LICENSE_HEADER = """
 #

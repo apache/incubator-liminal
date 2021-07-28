@@ -15,28 +15,17 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
----
 
-apiVersion: v1
-kind: Pod
-metadata:
-  name: aws-ml-app-demo
-spec:
-  volumes:
-    - name: task-pv-storage
-      persistentVolumeClaim:
-        claimName: gettingstartedvol-pvc
-  containers:
-    - name: task-pv-container
-      imagePullPolicy: Never
-      image: myorg/mydatascienceapp
-      lifecycle:
-        postStart:
-          exec:
-            command: [ "/bin/bash", "-c", "apt update && apt install curl -y" ]
-      ports:
-        - containerPort: 80
-          name: "http-server"
-      volumeMounts:
-        - mountPath: "/mnt/gettingstartedvol"
-          name: task-pv-storage
+from liminal.runners.airflow.model import executor
+from liminal.runners.airflow.tasks import airflow
+
+
+class AirflowExecutor(executor.Executor):
+    """
+    Execute the task steps
+    """
+
+    supported_task_types = [airflow.AirflowTask]
+
+    def _apply_executor_task_to_dag(self, **kwargs):
+        return kwargs['task'].apply_task_to_dag()

@@ -15,28 +15,24 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
----
 
-apiVersion: v1
-kind: Pod
-metadata:
-  name: aws-ml-app-demo
-spec:
-  volumes:
-    - name: task-pv-storage
-      persistentVolumeClaim:
-        claimName: gettingstartedvol-pvc
-  containers:
-    - name: task-pv-container
-      imagePullPolicy: Never
-      image: myorg/mydatascienceapp
-      lifecycle:
-        postStart:
-          exec:
-            command: [ "/bin/bash", "-c", "apt update && apt install curl -y" ]
-      ports:
-        - containerPort: 80
-          name: "http-server"
-      volumeMounts:
-        - mountPath: "/mnt/gettingstartedvol"
-          name: task-pv-storage
+from unittest import TestCase
+from unittest.mock import MagicMock
+
+from liminal.runners.airflow.executors import airflow
+from liminal.runners.airflow.tasks.airflow import AirflowTask
+
+
+class TestAirflowExecutorTask(TestCase):
+    """
+    Test AirflowExecutor task
+    """
+
+    def test_apply_task_to_dag(self):
+        task0 = MagicMock(spec=AirflowTask)
+
+        task0.apply_task_to_dag = MagicMock()
+
+        airflow.AirflowExecutor("executor-task", {}, {}).apply_task_to_dag(task=task0)
+
+        task0.apply_task_to_dag.assert_called_once()

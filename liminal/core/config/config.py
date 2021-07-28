@@ -43,6 +43,18 @@ class ConfigUtil:
     __AFTER_TASKS = 'after_tasks'
     __EXECUTORS = 'executors'
     __IMAGES = 'images'
+    __BASE = "base"
+    __PIPELINES = "pipelines"
+    __SUPER = "super"
+    __TYPE = "type"
+    __SUB = "sub"
+    __SERVICES = "services"
+    __TASKS = "tasks"
+    __PIPELINE_DEFAULTS = "pipeline_defaults"
+    __TASK_DEFAULTS = "task_defaults"
+    __BEFORE_TASKS = "before_tasks"
+    __AFTER_TASKS = "after_tasks"
+    __EXECUTORS = "executors"
 
     def __init__(self, configs_path):
         self.configs_path = configs_path
@@ -148,10 +160,12 @@ class ConfigUtil:
         super1_pipeline_defaults = super1.get(self.__PIPELINE_DEFAULTS, {}).copy()
         super2_pipeline_defaults = super2.get(self.__PIPELINE_DEFAULTS, {}).copy()
 
+        super1[self.__PIPELINE_DEFAULTS] = super1_pipeline_defaults
         super1[self.__PIPELINE_DEFAULTS][self.__BEFORE_TASKS] = \
             super2_pipeline_defaults.pop(self.__BEFORE_TASKS, []) + super1_pipeline_defaults.pop(
                 self.__BEFORE_TASKS, [])
 
+        super2[self.__PIPELINE_DEFAULTS] = super2_pipeline_defaults
         super1[self.__PIPELINE_DEFAULTS][self.__AFTER_TASKS] = \
             super1_pipeline_defaults.pop(self.__AFTER_TASKS, []) + super2_pipeline_defaults.pop(
                 self.__AFTER_TASKS, [])
