@@ -23,4 +23,4 @@ WORKDIR /app
 
 COPY . /app/
 
-{{INSTALL_COMMANDS}}
+RUN {{mount}} pip install -r requirements.txt

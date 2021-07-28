@@ -27,19 +27,3 @@ class SparkImageBuilder(BasePythonImageBuilder):
     @staticmethod
     def _dockerfile_path():
         return os.path.join(os.path.dirname(__file__), 'Dockerfile')
-
-    def _additional_files_from_filename_content_pairs(self):
-        with open(self._dockerfile_path()) as original:
-            data = original.read()
-
-        data = self.__add_pip_install(data)
-        data = self._mount_pip_conf(data)
-
-        return [('Dockerfile', data)]
-
-    @staticmethod
-    def __add_pip_install(data):
-        new_data = data
-        new_data = new_data.replace('{{INSTALL_COMMANDS}}',
-                                    'RUN {{mount}} pip install -r requirements.txt\n')
-        return new_data

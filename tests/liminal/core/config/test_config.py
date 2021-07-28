@@ -119,6 +119,7 @@ class TestConfigUtil(TestCase):
 
         expected = [{'executors': [{'executor': 'default_k8s', 'type': 'kubernetes'},
                                    {'executor': 'airflow_executor', 'type': 'airflow'}],
+                     'images': [{'image': 'my_image', 'source': '.'}],
                      'name': 'my_subliminal_test',
                      'pipeline_defaults': {'param1': 'param1_value'},
                      'pipelines': [{'description': 'add defaults parameters for all pipelines',
@@ -424,7 +425,7 @@ class TestConfigUtil(TestCase):
                                                'type': 'job_end'}]}],
                      'service_defaults': {'description': 'add defaults parameters for all '
                                                          'services'},
-                                                         'images': [],
+                     'images': [],
                      'services': [{'description': 'add defaults parameters for all services',
                                    'image': 'prod image',
                                    'name': 'my_python_server',
@@ -488,7 +489,7 @@ class TestConfigUtil(TestCase):
                 'description': 'add defaults parameters for all pipelines',
                 'before_tasks': [{'task': 'start', 'type': 'job_start'}],
                 'after_tasks': [{'task': 'end', 'type': 'job_end'}]},
-            'variables': {'var': 1, 'var-2': True}, 'pipelines': [
+                    'variables': {'var': 1, 'var-2': True}, 'pipelines': [
                 {'name': 'mypipe1', 'param': '1',
                  'description': 'add defaults parameters for all pipelines',
                  'tasks': [{'task': 'start', 'type': 'job_start', 'executor': 'airflow_executor'},
@@ -497,7 +498,7 @@ class TestConfigUtil(TestCase):
                  'description': 'add defaults parameters for all pipelines',
                  'tasks': [{'task': 'start', 'type': 'job_start', 'executor': 'airflow_executor'},
                            {'task': 'end', 'type': 'job_end', 'executor': 'airflow_executor'}]}],
-                           'images': [],
+                    'images': [],
                     'services': []}
 
         find_config_files_mock.return_value = {

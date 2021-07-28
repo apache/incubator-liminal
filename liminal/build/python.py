@@ -82,12 +82,12 @@ class BasePythonImageBuilder(ImageBuilder):
         with open(self._dockerfile_path()) as original:
             data = original.read()
 
-        data = self._mount_pip_conf(data)
+        data = self.__mount_pip_conf(data)
         data = self.__add_python_base_version(data)
 
         return [('Dockerfile', data)]
 
-    def _mount_pip_conf(self, data):
+    def __mount_pip_conf(self, data):
         new_data = data
 
         if self.__PIP_CONF in self.config:
