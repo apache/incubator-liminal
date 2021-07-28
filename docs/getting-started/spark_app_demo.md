@@ -162,12 +162,13 @@ executors:
 variables:
   output_root_dir: /mnt/gettingstartedvol
   input_root_dir: ''
+images:
+  - image: my_spark_image
+    source: .
+    no_cache: True
 task_defaults:
   spark:
     executor: k8s
-    image: my_spark_image
-    source: .
-    no_cache: True
     executors: 2
     application_source: '{{application}}'
     mounts:
