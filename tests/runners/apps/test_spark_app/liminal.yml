@@ -21,6 +21,7 @@ images:
   - image: my_spark_image
     type: spark
     source: wordcount
+    no_cache: True
 pipelines:
   - pipeline: my_pipeline
     owner: Bosco Albert Baracus
@@ -32,9 +33,7 @@ pipelines:
         type: spark
         description: spark task on k8s
         image: my_spark_image
-        no_cache: True
         executors: 2
-        source: wordcount
         application_source: wordcount.py
         application_arguments:
           - "words.txt"

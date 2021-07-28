@@ -22,6 +22,20 @@ owner: Bosco Albert Baracus
 variables:
   output_path: '{{output_root_dir}}/my_first_liminal_spark_app_outputs/'
   application: data_cleanup.py
+images:
+  - image: myorg/mydatascienceapp
+    type: python_server
+    source: .
+    endpoints:
+      - endpoint: /predict
+        module: serving
+        function: predict
+      - endpoint: /healthcheck
+        module: serving
+        function: healthcheck
+      - endpoint: /version
+        module: serving
+        function: version
 task_defaults:
   python:
     mounts:
