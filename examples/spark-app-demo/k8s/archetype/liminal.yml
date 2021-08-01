@@ -29,6 +29,7 @@ variables:
 images:
   - image: my_spark_image
     source: .
+    type: spark
     no_cache: True
 task_defaults:
   spark:
