@@ -164,6 +164,7 @@ variables:
   input_root_dir: ''
 images:
   - image: my_spark_image
+    type: spark
     source: .
     no_cache: True
 task_defaults:
