@@ -74,7 +74,7 @@ class ImageBuilder:
         try:
             docker_build_out = subprocess.check_output(docker_build_command,
                                                        shell=True, stderr=subprocess.STDOUT,
-                                                       timeout=240)
+                                                       timeout=960)
         except subprocess.CalledProcessError as e:
             docker_build_out = e.output
             raise e
