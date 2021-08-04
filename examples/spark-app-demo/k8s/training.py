@@ -19,10 +19,13 @@ import sys
 import time
 
 import model_store
+import pandas as pd
 import numpy as np
 from model_store import ModelStore
 from sklearn import datasets
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn import model_selection
 import os
 
 _CANDIDATE_MODEL_STORE = ModelStore(model_store.CANDIDATE)
@@ -30,26 +33,14 @@ _PRODUCTION_MODEL_STORE = ModelStore(model_store.PRODUCTION)
 
 import numpy as np
 import csv
-from sklearn.datasets.base import Bunch
-
+import argparse
 
 def load_iris_from_csv_file(f):
-    with open(f) as csv_file:
-        data_file = csv.reader(csv_file)
-        temp = next(data_file)
-        n_samples = 150  # number of data rows, don't count header
-        n_features = 4  # number of columns for features, don't count target column
-        feature_names = ['setosa', 'versicolor', 'virginica']
-        target_names = ['f4']  # adjust accordingly
-        data = np.empty((n_samples, n_features))
-        target = np.empty((n_samples,), dtype=np.int)
-
-        for i, sample in enumerate(data_file):
-            data[i] = np.asarray(sample[:-1], dtype=np.float64)
-            target[i] = np.asarray(sample[-1], dtype=np.int)
-
-    return Bunch(data=data, target=target, feature_names=feature_names, target_names=target_names)
-
+    df = pd.read_csv(f, header=0).reset_index(drop=True)
+    types = {col:np.float64 for col in df.columns[:-1]}
+    types['label'] = np.int32
+    df = df.astype(types)
+    return df
 
 def get_dataset(d):
     print("searching for csv files in {}".format(d))
@@ -60,40 +51,53 @@ def get_dataset(d):
                 return os.path.join(d, file)
     return None
 
-
-def train_model(f):
-    csv_file = get_dataset(f)
+def load_and_split(input_uri):
+    csv_file = get_dataset(input_uri)
     if csv_file:
         print("found {} dataset".format(csv_file))
 
     iris = load_iris_from_csv_file(csv_file)
+    return train_test_split(iris, test_size=0.2, random_state=8)
 
-    X = iris["data"][:, 3:]  # petal width
-    y = (iris["target"] == 2).astype(np.int)
+def train_model(input_uri):
+    train, test = load_and_split(input_uri)
+    y = train.pop("label")
+    X = train.loc[:, train.columns]
 
-    model = LogisticRegression()
+    model = LogisticRegression(max_iter=500)
     model.fit(X, y)
 
+    scoring = 'accuracy'
+    results = model_selection.cross_val_score(model, X, y, cv=5, scoring=scoring)
+    print(f'Accuracy in cross validation: {results.mean()*100} % ({results.std()} std)')
     version = round(time.time())
 
     print(f'Saving model with version {version} to candidate model store.')
     _CANDIDATE_MODEL_STORE.save_model(model, version)
 
 
-def validate_model():
+def validate_model(input_uri):
     model, version = _CANDIDATE_MODEL_STORE.load_latest_model()
     print(f'Validating model with version {version} to candidate model store.')
-    if not isinstance(model.predict([[1]]), np.ndarray):
+    if not isinstance(model.predict([[1,1,1,1]]), np.ndarray):
         raise ValueError('Invalid model')
+    train, test = load_and_split(input_uri)
+    y = test.pop("label")
+    X = test.loc[:, test.columns]
+    result = model.score(X, y)
+    print(f'model accuracy {result*100}')
+    if result < 0.85:
+        raise ValueError('model accuracy under threshold (0.85  ). Model is not promoted to production')
     print(f'Deploying model with version {version} to production model store.')
     _PRODUCTION_MODEL_STORE.save_model(model, version)
 
 
 if __name__ == '__main__':
-    cmd = sys.argv[1]
-    if cmd == 'train':
-        train_model(sys.argv[2])
-    elif cmd == 'validate':
-        validate_model()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--action", choices=['train', 'validate'])
+    parser.add_argument("--input_uri")
+    args = parser.parse_args()
+    if args.action == 'train':
+        train_model(args.input_uri)
     else:
-        raise ValueError(f"Unknown command {cmd}")
+        validate_model(args.input_uri)

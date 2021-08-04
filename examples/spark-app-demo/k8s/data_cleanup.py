@@ -16,25 +16,56 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import sys
+import argparse
 
+import pyspark.sql.functions as F
+from pyspark.ml import Pipeline
+from pyspark.ml.feature import StringIndexer, VectorAssembler, StandardScaler
+from pyspark.ml.functions import vector_to_array
 from pyspark.sql import SparkSession
 
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: source <file> destination <dest>", file=sys.stderr)
-        sys.exit(-1)
 
+def transform(data):
+    columns_to_scale = data.columns[:-1]
+    vectorizer = VectorAssembler(inputCols=columns_to_scale, outputCol="features")
+    scaler = StandardScaler(inputCol="features", outputCol="scaled_features",
+                            withStd=True, withMean=True)
+    labeler = StringIndexer(inputCol=data.columns[-1], outputCol='label')
+    pipeline = Pipeline(stages=[vectorizer, scaler, labeler])
+    fitted = pipeline.fit(data)
+    transformed = fitted.transform(data)
+
+    result = (
+        transformed.withColumn("feature_arr", vector_to_array("scaled_features"))
+        .select([F.col("feature_arr")[i].alias(columns_to_scale[i]) for i in range(len(columns_to_scale))] + ['label'])
+    )
+
+    return result
+
+
+def extract(spark, input_uri):
+    return spark.read.csv(input_uri, header=True, inferSchema=True, comment="#")
+
+
+def load(data, output_uri):
+    data.coalesce(1).write.mode("overwrite").csv(output_uri, header=True)
+
+
+def data_pipeline(input_uri, output_uri):
     spark = SparkSession \
         .builder \
-        .appName("CleanData") \
+        .appName("Prepare Iris Data") \
         .getOrCreate()
 
-    spark.read.text(sys.argv[1]).rdd.filter(lambda x: not x[0].startswith('#')) \
-        .filter(lambda r: not r[0].startswith('ignore')) \
-        .map(lambda r: r[0]).map(
-        lambda r: (
-            r.split(',')[0], r.split(',')[1], r.split(',')[2], r.split(',')[3], r.split(',')[4])) \
-        .toDF().coalesce(1).write.mode("overwrite").option("header", "false").csv(sys.argv[2])
-
+    input = extract(spark, input_uri)
+    data = transform(input)
+    load(data, output_uri)
     spark.stop()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_uri")
+    parser.add_argument("--output_uri")
+    args = parser.parse_args()
+    data_pipeline(args.input_uri, args.output_uri)

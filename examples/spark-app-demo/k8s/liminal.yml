@@ -20,7 +20,7 @@ name: MyFirstLiminalSparkApp
 super: InfraSpark
 owner: Bosco Albert Baracus
 variables:
-  output_path: '{{output_root_dir}}/my_first_liminal_spark_app_outputs/'
+  training_data_path: '{{output_root_dir}}/iris/'
   application: data_cleanup.py
 images:
   - image: myorg/mydatascienceapp
@@ -52,20 +52,22 @@ pipelines:
         type: spark
         description: prepare the data for training
         application_arguments:
+          - '--input_uri'
           - '{{input_root_dir}}data/iris.csv'
-          - '{{output_path}}'
+          - '--output_uri'
+          - '{{training_data_path}}'
       - task: train
         type: python
         description: train model
         image: myorg/mydatascienceapp
-        cmd: python -u training.py train '{{output_path}}'
+        cmd: python -u training.py --action train --input_uri '{{training_data_path}}'
         env:
           MOUNT_PATH: /mnt/gettingstartedvol
       - task: validate
         type: python
         description: validate model and deploy
         image: myorg/mydatascienceapp
-        cmd: python -u training.py validate
+        cmd: python -u training.py --action validate --input_uri '{{training_data_path}}'
         env:
           MOUNT_PATH: /mnt/gettingstartedvol
 volumes:
