@@ -24,6 +24,7 @@ from termcolor import colored
 
 EXCLUDED_EXTENSIONS = ['.gif', '.png', '.pyc', 'LICENSE', 'DISCLAIMER', 'NOTICE', '.whl']
 EXCLUDED_DIRS = ['docs/build', '.git', '.idea', 'venv', 'apache_liminal.egg-info']
+EXCLUDED_FILES = ['DISCLAIMER-WIP']
 
 PYTHON_LICENSE_HEADER = """
 #
@@ -141,7 +142,8 @@ class TestLicenses(TestCase):
             if not any(os.path.relpath(r, base_dir).startswith(excluded) for excluded in
                        EXCLUDED_DIRS):
                 for file in f:
-                    if not any(os.path.basename(file).endswith(ext) for ext in EXCLUDED_EXTENSIONS):
+                    if not any(os.path.basename(file).endswith(ext) for ext in EXCLUDED_EXTENSIONS) \
+                            and not os.path.basename(file) in EXCLUDED_FILES:
                         files.append(os.path.join(r, file))
 
         output = ''
