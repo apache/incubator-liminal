@@ -17,8 +17,11 @@
 # under the License.
 
 import json
+import os
 
 print('Hello world!\n')
+print('Environment:')
+print(os.environ)
 
 with open('/mnt/gettingstartedvol/hello_world_output.json', 'w') as file:
     file.write(json.dumps({'hello': 1, 'world': 2}))

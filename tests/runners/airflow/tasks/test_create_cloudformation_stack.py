@@ -26,6 +26,7 @@ from moto import mock_cloudformation
 from liminal.runners.airflow.executors import airflow
 from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
     CloudFormationCreateStackSensor, CloudFormationHook
+from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
 from liminal.runners.airflow.tasks.create_cloudformation_stack import CreateCloudFormationStackTask
 from tests.util import dag_test_utils
 
@@ -87,9 +88,12 @@ class TestCreateCloudFormationStackTask(TestCase):
     def test_apply_task_to_dag(self):
         self.assertEqual(len(self.dag.tasks), 4)
 
-        self.assertIsInstance(self.dag.tasks[0], BranchPythonOperator)
-        self.assertIsInstance(self.dag.tasks[1], CloudFormationCreateStackOperator)
-        self.assertIsInstance(self.dag.tasks[2], CloudFormationCreateStackSensor)
+        self.assertIsInstance(self.dag.tasks[0], OperatorWithVariableResolving)
+        self.assertIsInstance(self.dag.tasks[0].operator_delegate, BranchPythonOperator)
+        self.assertIsInstance(self.dag.tasks[1], OperatorWithVariableResolving)
+        self.assertIsInstance(self.dag.tasks[1].operator_delegate, CloudFormationCreateStackOperator)
+        self.assertIsInstance(self.dag.tasks[2], OperatorWithVariableResolving)
+        self.assertIsInstance(self.dag.tasks[2].operator_delegate, CloudFormationCreateStackSensor)
         self.assertIsInstance(self.dag.tasks[3], DummyOperator)
 
     def test_cloudformation_does_not_exist(self):
@@ -98,7 +102,7 @@ class TestCreateCloudFormationStackTask(TestCase):
             mock_cf_conn.describe_stacks.return_value.raiseError.side_effect = Exception()
 
             mock_conn.return_value = mock_cf_conn
-            is_cloudformation_exists = self.dag.tasks[0]
+            is_cloudformation_exists = self.dag.tasks[0].operator_delegate
 
             print(is_cloudformation_exists)
             self.assertEqual(
@@ -106,7 +110,7 @@ class TestCreateCloudFormationStackTask(TestCase):
                 'create-cloudformation-create_emr')
 
     def test_cloudformation_exist_and_running(self):
-        is_cloudformation_exists = self.dag.tasks[0]
+        is_cloudformation_exists = self.dag.tasks[0].operator_delegate
 
         for status in ['CREATE_COMPLETE', 'DELETE_FAILED']:
             with mock.patch.object(CloudFormationHook, 'get_conn') as mock_conn:
@@ -126,7 +130,7 @@ class TestCreateCloudFormationStackTask(TestCase):
                     'creation-end-create_emr')
 
     def test_cloudformation_exists_and_not_running(self):
-        is_cloudformation_exists = self.dag.tasks[0]
+        is_cloudformation_exists = self.dag.tasks[0].operator_delegate
 
         for status in ['DELETED']:
             with mock.patch.object(CloudFormationHook, 'get_conn') as mock_conn:

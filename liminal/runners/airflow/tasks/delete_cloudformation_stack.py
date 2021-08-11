@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from airflow.utils.trigger_rule import TriggerRule
@@ -30,9 +31,9 @@ class DeleteCloudFormationStackTask(airflow.AirflowTask):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
+                 task_config, variables=None):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config)
+                         pipeline_config, task_config, variables)
         self.stack_name = task_config['stack_name']
 
     def apply_task_to_dag(self):
@@ -44,16 +45,18 @@ class DeleteCloudFormationStackTask(airflow.AirflowTask):
             dag=self.dag
         )
 
-        delete_stack_task = CloudFormationDeleteStackOperator(
-            task_id=f'delete-cloudformation-{self.task_id}',
-            params={'StackName': self.stack_name},
-            dag=self.dag
+        delete_stack_task = self._add_variables_to_operator(
+            CloudFormationDeleteStackOperator(
+                task_id=f'delete-cloudformation-{self.task_id}',
+                params={'StackName': self.stack_name},
+            )
         )
 
-        delete_stack_sensor = CloudFormationDeleteStackSensor(
-            task_id=f'cloudformation-watch-{self.task_id}-delete',
-            stack_name=self.stack_name,
-            dag=self.dag
+        delete_stack_sensor = self._add_variables_to_operator(
+            CloudFormationDeleteStackSensor(
+                task_id=f'cloudformation-watch-{self.task_id}-delete',
+                stack_name=self.stack_name,
+            )
         )
 
         stack_delete_end_task = DummyOperator(

@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import json
 import logging
 import os
@@ -29,8 +30,6 @@ from liminal.runners.airflow.model import task
 _LOG = logging.getLogger(__name__)
 ENV = 'env'
 DEFAULT = 'default'
-OUTPUT_PATH = 'OUTPUT_PATH'
-OUTPUT_DESTINATION_PATH = 'OUTPUT_DESTINATION_PATH'
 
 
 class ContainerTask(task.Task, ABC):
@@ -39,19 +38,16 @@ class ContainerTask(task.Task, ABC):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
+                 task_config, variables=None):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config)
+                         pipeline_config, task_config, variables)
         env = standalone_variable_backend.get_variable(ENV, DEFAULT)
         self.env_vars = self.__env_vars(env)
         self.image = self.task_config['image']
         self.mounts = self.task_config.get('mounts', [])
-        self.cmds, self.arguments = self._kubernetes_cmds_and_arguments(
-            self.env_vars.get(OUTPUT_PATH),
-            self.env_vars.get(OUTPUT_DESTINATION_PATH)
-        )
+        self.cmds, self.arguments = self._kubernetes_cmds_and_arguments()
 
-    def _kubernetes_cmds_and_arguments(self, output_path, output_destination_path):
+    def _kubernetes_cmds_and_arguments(self):
         cmds = ['/bin/sh', '-c']
 
         arguments = [
@@ -94,12 +90,4 @@ class ContainerTask(task.Task, ABC):
         if ENV not in env_vars:
             env_vars[ENV] = env
 
-        env_vars[OUTPUT_PATH] = self.task_config[
-            OUTPUT_PATH
-        ] if OUTPUT_PATH in self.task_config else '/tmp/s3_mount'
-
-        if 'output_destination_path' in self.task_config:
-            env_vars[OUTPUT_DESTINATION_PATH] = self.task_config[
-                'output_destination_path'
-            ]
         return dict([(k, str(v)) for k, v in env_vars.items()])

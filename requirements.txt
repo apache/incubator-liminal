@@ -20,7 +20,7 @@ docker==4.2.0
 apache-airflow==2.1.2
 click==7.1.1
 Flask==1.1.1
-pyyaml==5.3.1
+pyyaml==5.4.1
 boto3==1.17.112
 botocore==1.20.112
 wheel==0.36.2
@@ -44,3 +44,4 @@ apache-airflow-providers-amazon==1.4.0
 apache-airflow-providers-cncf-kubernetes==1.0.2
 #apache-airflow-providers-google==4.0.0
 #apache-airflow[google,amazon,apache.spark]==2.0.0
+cfn-lint==0.53.0

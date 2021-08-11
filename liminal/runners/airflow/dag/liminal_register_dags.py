@@ -38,8 +38,7 @@ def register_dags(configs_path):
     """
     logging.info(f'Registering DAGs from path: {configs_path}')
     config_util = ConfigUtil(configs_path)
-    # TODO - change is_render_variable to False when runtime resolving is available
-    configs = config_util.safe_load(is_render_variables=True)
+    configs = config_util.safe_load(is_render_variables=False)
 
     if os.getenv('POD_NAMESPACE') != "jenkins":
         config_util.snapshot_final_liminal_configs()
@@ -80,7 +79,8 @@ def register_dags(configs_path):
                         trigger_rule=trigger_rule,
                         liminal_config=config,
                         pipeline_config=pipeline,
-                        task_config=task
+                        task_config=task,
+                        variables=config.get('variables', {})
                     )
 
                     executor_id = task.get('executor')

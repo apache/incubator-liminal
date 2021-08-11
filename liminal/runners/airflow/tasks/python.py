@@ -24,14 +24,14 @@ class PythonTask(containerable.ContainerTask):
     Python task.
     """
 
-    def _kubernetes_cmds_and_arguments(self, output_path, output_destination_path):
+    def _kubernetes_cmds_and_arguments(self):
         cmds = ['/bin/bash', '-c']
         arguments = [
 
-            self.__cmd(output_path, output_destination_path)
+            self.__cmd()
         ]
 
         return cmds, arguments
 
-    def __cmd(self, output_path, output_destination_path):
+    def __cmd(self):
         return self.task_config['cmd']

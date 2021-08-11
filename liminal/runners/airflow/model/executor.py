@@ -18,6 +18,27 @@
 
 from abc import ABC, abstractmethod
 
+from airflow.models import BaseOperator
+
+from liminal.runners.airflow.operators.operator_with_variable_resolving import \
+    OperatorWithVariableResolving
+
+
+def add_variables_to_operator(operator, task) -> BaseOperator:
+    """
+    :param operator: Airflow operator
+    :type operator: BaseOperator
+    :param task: Task instance
+    :returns: OperatorWithVariableResolving wrapping given operator
+    """
+    return OperatorWithVariableResolving(
+        dag=task.dag,
+        task_config=task.task_config,
+        variables=task.variables,
+        liminal_task_instance=task,
+        operator=operator
+    )
+
 
 class Executor(ABC):
     """

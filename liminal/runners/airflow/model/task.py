@@ -19,7 +19,12 @@
 """
 Base task.
 """
-from abc import ABC, abstractmethod
+import json
+from abc import ABC
+
+from airflow.models import BaseOperator
+
+from liminal.runners.airflow.model import executor
 
 
 class Task(ABC):
@@ -28,7 +33,7 @@ class Task(ABC):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
+                 task_config, variables=None):
         self.liminal_config = liminal_config
         self.dag = dag
         self.pipeline_config = pipeline_config
@@ -36,3 +41,29 @@ class Task(ABC):
         self.parent = parent
         self.trigger_rule = trigger_rule
         self.task_config = task_config
+        self.variables = variables
+
+    def serialize(self) -> str:
+        """
+        :returns: JSON string representation of this task
+        """
+        data = {
+            'task_id': self.task_id,
+            'dag': None,
+            'parent': self.parent,
+            'trigger_rule': self.trigger_rule,
+            'liminal_config': self.liminal_config,
+            'pipeline_config': self.pipeline_config,
+            'task_config': self.task_config,
+            'variables': self.variables,
+        }
+
+        return json.dumps(data, default=str)
+
+    def _add_variables_to_operator(self, operator) -> BaseOperator:
+        """
+        :param operator: Airflow operator
+        :type operator: BaseOperator
+        :returns: OperatorWithVariableResolving wrapping given operator
+        """
+        return executor.add_variables_to_operator(operator, self)
