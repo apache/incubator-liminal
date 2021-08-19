@@ -21,6 +21,7 @@ FROM apache/airflow:1.10.12-python3.6
 ARG LIMINAL_VERSION='apache-liminal'
 ARG DAG_FOLDER='/opt/airflow/dags/'
 ADD scripts/* ${DAG_FOLDER}
+ADD *.whl ${DAG_FOLDER}
 
 RUN ls -ls ${DAG_FOLDER}
 ADD liminal/runners/airflow/dag/liminal_dags.py ${DAG_FOLDER}

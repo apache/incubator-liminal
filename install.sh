@@ -19,27 +19,18 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if ! command -v liminal &> /dev/null
-then
-  liminal stop
-fi
-
 yes | pip uninstall apache-liminal
 
 cd "$DIR" || exit
 
 rm -rf build
 rm -rf dist
+rm "${LIMINAL_HOME:-${HOME}/liminal_home}"/*.whl
 
 python setup.py sdist bdist_wheel
 
-rm scripts/*.whl
+pip install dist/*.whl
 
-cp dist/*.whl scripts
-
-ver=$(ls scripts/*.whl)
-export LIMINAL_VERSION="apache-liminal @ file://$ver"
-
-pip install scripts/*.whl
+cp dist/*.whl "${LIMINAL_HOME:-${HOME}/liminal_home}"
 
 cd - || exit
