@@ -72,6 +72,7 @@ def build(path):
             volume_util.create_local_volumes(config, os.path.dirname(
                 files_util.resolve_pipeline_source_file(config['name'])))
 
+
 def deploy_liminal_core_internal(liminal_home, clean):
     # noinspection PyTypeChecker
     with pkg_resources.path(dag, 'liminal_dags.py') as p:
@@ -185,6 +186,23 @@ def start(detached_mode):
         else:
             docker_compose_command('up', [])
 
+@cli.command("delete", short_help="delete liminal resource registration")
+@click.option('--path', default=os.getcwd(), help='Delete within this path.')
+@click.option('--clean', is_flag=True, default=False,
+              help="Delete all resource: DAGs, Volumes")
+def delete(path, clean):
+    configs = ConfigUtil(path).safe_load(is_render_variables=True,
+                                                    soft_merge=True)
+    for config in configs:
+        if config.get('volumes'):
+            logging.info(f'local volume is being deleted')
+            volume_util.delete_local_volumes(config, os.path.dirname(
+                files_util.resolve_pipeline_source_file(config['name'])))
+
+    if clean:
+        dir_path = os.path.abspath(environment.get_liminal_home())
+        shutil.rmtree(dir_path)
+        docker_compose_command('down', ['--remove-orphans', '--rmi', 'local'])
 
 def get_docker_compose_paths():
     # noinspection PyTypeChecker
