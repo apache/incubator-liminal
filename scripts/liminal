@@ -25,13 +25,12 @@ import subprocess
 import sys
 
 import click
-import yaml
 
 import scripts
 from liminal.build import liminal_apps_builder
 from liminal.core import environment
-from liminal.core.util import files_util
 from liminal.core.config.config import ConfigUtil
+from liminal.core.util import files_util
 from liminal.kubernetes import volume_util
 from liminal.logging.logging_setup import logging_initialization
 from liminal.runners.airflow import dag
@@ -89,10 +88,11 @@ def deploy_liminal_core_internal(liminal_home, clean):
     if liminal_version.find("file://") > -1:
         local_file_name = os.path.basename(liminal_version)
         full_path = os.path.join('/opt/airflow/dags', local_file_name)
-        logging.info(
-            f'Liminal was installed locally, changing the LIMINAL_VERSION parameter to {full_path}')
+        logging.info(f'Liminal was installed locally, setting LIMINAL_VERSION to {full_path}')
         os.environ[environment.LIMINAL_VERSION_PARAM_NAME] = full_path
-        shutil.copyfile(liminal_version[7:], os.path.join(liminal_home, local_file_name))
+        _, project_dir = get_docker_compose_paths()
+        shutil.copyfile(os.path.join(liminal_home, local_file_name),
+                        os.path.join(project_dir, local_file_name))
     if clean:
         docker_compose_command('down', ['--remove-orphans', '--rmi', 'local'])
         docker_compose_command('build', ['--no-cache'])
@@ -112,7 +112,7 @@ def docker_compose_command(command_name, args):
         f'{project_dir} {command_name} {concated_args}'
     ]
     logging.info(run_command[0])
-    if ('tail' in str(args) or '-d' in str(args) or command_name in ['ps', 'down']):
+    if 'tail' in str(args) or '-d' in str(args) or command_name in ['ps', 'down']:
         detached_mode = True
 
     if detached_mode:
