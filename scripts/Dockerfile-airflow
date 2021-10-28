@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-FROM apache/airflow:2.0.2-python3.8
+FROM apache/airflow:2.1.2-python3.8
 
 ARG LIMINAL_VERSION='apache-liminal'
 ARG DAG_FOLDER='/opt/airflow/dags/'
