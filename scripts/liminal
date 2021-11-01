@@ -95,9 +95,16 @@ def deploy_liminal_core_internal(liminal_home, clean):
                         os.path.join(project_dir, local_file_name))
     if clean:
         docker_compose_command('down', ['--remove-orphans', '--rmi', 'local'])
-        docker_compose_command('build', ['--no-cache'])
-        docker_compose_command('run', ['webserver', 'db', 'reset', '-y'])
-        docker_compose_command('run', ['webserver', 'db', 'init'])
+        docker_compose_command('build', [])
+        docker_compose_command('run', ['webserver', 'db reset', '-y'])
+        docker_compose_command('run', ['webserver', 'db init'])
+        docker_compose_command('run', ['webserver', 'users create '
+                                                    '--role Admin '
+                                                    '--username admin '
+                                                    '--email admin '
+                                                    '--firstname admin '
+                                                    '--lastname admin '
+                                                    '--password admin'])
         docker_compose_command('down', ['--remove-orphans'])
 
 

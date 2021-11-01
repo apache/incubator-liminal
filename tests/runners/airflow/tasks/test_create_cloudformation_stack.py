@@ -19,8 +19,8 @@ from datetime import datetime
 from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.python_operator import BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
+from airflow.operators.python import BranchPythonOperator
 from moto import mock_cloudformation
 
 from liminal.runners.airflow.executors import airflow
@@ -101,9 +101,8 @@ class TestCreateCloudFormationStackTask(TestCase):
             is_cloudformation_exists = self.dag.tasks[0]
 
             print(is_cloudformation_exists)
-            self.assertEqual(is_cloudformation_exists.python_callable(
-                templates_dict={'stack_name': self.cluster_name}),
-                'create-cloudformation-create_emr')
+            self.assertEqual(is_cloudformation_exists.python_callable(stack_name=self.cluster_name),
+                             'create-cloudformation-create_emr')
 
     def test_cloudformation_exist_and_running(self):
         is_cloudformation_exists = self.dag.tasks[0]
@@ -123,7 +122,7 @@ class TestCreateCloudFormationStackTask(TestCase):
 
                 self.assertEqual(
                     is_cloudformation_exists.python_callable(
-                        templates_dict={'stack_name': self.cluster_name}),
+                        is_cloudformation_exists.python_callable(stack_name=self.cluster_name),
                     'creation-end-create_emr')
 
     def test_cloudformation_exists_and_not_running(self):
@@ -144,7 +143,7 @@ class TestCreateCloudFormationStackTask(TestCase):
 
                 self.assertEqual(
                     is_cloudformation_exists.python_callable(
-                        templates_dict={'stack_name': self.cluster_name}),
+                        is_cloudformation_exists.python_callable(stack_name=self.cluster_name),
                     'create-cloudformation-create_emr')
 
     def test_cloudformation_create_stack_operator_task(self):

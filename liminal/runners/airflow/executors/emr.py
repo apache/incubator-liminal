@@ -16,8 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from airflow.contrib.operators.emr_add_steps_operator import EmrAddStepsOperator
-from airflow.contrib.sensors.emr_step_sensor import EmrStepSensor
+from airflow.providers.amazon.aws.operators.emr_add_steps import EmrAddStepsOperator
+from airflow.providers.amazon.aws.sensors.emr_step import EmrStepSensor
 
 from liminal.runners.airflow.model import executor
 from liminal.runners.airflow.tasks import hadoop

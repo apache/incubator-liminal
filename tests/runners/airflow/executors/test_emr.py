@@ -109,6 +109,8 @@ class TestEMRExecutorTask(TestCase):
 
         self.assertIsInstance(emr_add_step_task, EmrAddStepsOperator)
 
+        emr_add_step_task.render_template_fields({})
+
         step_id = emr_add_step_task.execute(self.dag.context)[0]
 
         desc_step = self.client.describe_step(
