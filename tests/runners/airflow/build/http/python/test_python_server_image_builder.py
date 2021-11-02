@@ -80,7 +80,7 @@ class TestPythonServer(TestCase):
         thread = threading.Thread(target=self.__run_container)
         thread.start()
 
-        time.sleep(5)
+        time.sleep(20)
 
         logging.info('Sending request to server')
 
