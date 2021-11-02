@@ -25,6 +25,7 @@ ADD *.whl ${DAG_FOLDER}
 
 RUN ls -ls ${DAG_FOLDER}
 ADD liminal/runners/airflow/dag/liminal_dags.py ${DAG_FOLDER}
+ADD scripts/webserver_config.py /opt/airflow/
 
 USER airflow
 

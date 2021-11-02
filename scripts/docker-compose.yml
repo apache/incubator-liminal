@@ -34,9 +34,6 @@ x-airflow-common:
     AIRFLOW__WEBSERVER__WORKERS: '1'
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'True'
     _AIRFLOW_DB_UPGRADE: 'true'
-    _AIRFLOW_WWW_USER_CREATE: 'true'
-    _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-    _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
     LIMINAL_HOME: /opt/airflow/dags
     AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: 'False'
     AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
