@@ -260,7 +260,7 @@ spec:
       volumeMounts:
         - mountPath: "/mnt/gettingstartedvol"
           name: task-pv-storage
-  EOF
+EOF
 ```
 
 Check that the service is running:
@@ -272,13 +272,13 @@ kubectl get pods --namespace=default
 Check that the service is up:
 
 ```BASH
-kubectl exec -it --namespace=default spark-app-demo-- /bin/bash -c "curl localhost/healthcheck"
+kubectl exec -it --namespace=default spark-app-demo -- /bin/bash -c "curl localhost/healthcheck"
 ```
 
 Check the prediction:
 
 ```BASH
-kubectl exec -it --namespace=default spark-app-demo-- /bin/bash -c "curl -X POST -d '{\"petal_width\": \"2.1\"}' localhost/predict"
+kubectl exec -it --namespace=default spark-app-demo -- /bin/bash -c "curl -X POST -d '{\"petal_width\": [1.1,1.1,1.1,1.1]}' localhost/predict"
 ```
 
 ## Debugging Kubernetes Deployments

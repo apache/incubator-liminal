@@ -29,7 +29,7 @@ def predict(input_json):
     try:
         input_dict = json.loads(input_json)
         model, version = _MODEL_STORE.load_latest_model()
-        result = str(model.predict_proba([[float(input_dict[_PETAL_WIDTH])]])[0][1])
+        result = str(model.predict_proba([list(input_dict[_PETAL_WIDTH])])[0][1])
         return json.dumps({"result": result, "version": version})
 
     except IndexError:
