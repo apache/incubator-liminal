@@ -15,98 +15,85 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+---
+version: '3'
+x-airflow-common:
+  &airflow-common
+  image: liminal-airflow
+  build:
+    context: .
+    dockerfile: scripts/Dockerfile-airflow
+    args:
+        LIMINAL_VERSION: ${LIMINAL_VERSION}
+  environment:
+    &airflow-common-env
+    LOAD_EX: 'n'
+    AIRFLOW__CORE__EXECUTOR: 'LocalExecutor'
+    KUBECONFIG: /home/airflow/kube/config
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+    AIRFLOW__WEBSERVER__WORKERS: '1'
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'True'
+    _AIRFLOW_DB_UPGRADE: 'true'
+    LIMINAL_HOME: /opt/airflow/dags
+    AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: 'False'
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    AIRFLOW_CONN_METADATA_DB: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    AIRFLOW_VAR__METADATA_DB_SCHEMA: airflow
+  volumes:
+    - ${LIMINAL_HOME}:/opt/airflow/dags
+    - ${LIMINAL_HOME}/logs:/opt/airflow/logs
+    - ${HOME}/.kube:/home/airflow/kube
+  depends_on:
+    postgres:
+      condition: service_healthy
+  healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  logging:
+      options:
+          max-size: 10m
+          max-file: "3"
+  restart: always
 
-    version: '3.7'
-    services:
-        postgres:
-            image: postgres:9.6
-            container_name: liminal-postgress
-            environment:
-                - POSTGRES_USER=airflow
-                - POSTGRES_PASSWORD=airflow
-                - POSTGRES_DB=
-            ports:
-                - "5432:5432"
-            volumes:
-                - ${LIMINAL_HOME}/db:/var/lib/postgresql/data
-            logging:
-                options:
-                    max-size: 10m
-                    max-file: "3"
+services:
+    postgres:
+        image: postgres:13
+        container_name: liminal-postgress
+        environment:
+          POSTGRES_USER: airflow
+          POSTGRES_PASSWORD: airflow
+          POSTGRES_DB: ""
+        ports:
+            - "5432:5432"
+        volumes:
+            - ${LIMINAL_HOME}/db:/var/lib/postgresql/data
+        logging:
+            options:
+                max-size: 10m
+                max-file: "3"
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "airflow"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
+        restart: always
 
-        webserver:
-            build:
-                context: .
-                dockerfile: scripts/Dockerfile-airflow
-                args:
-                    LIMINAL_VERSION: ${LIMINAL_VERSION}
-            image: liminal-airflow
-            container_name: liminal-webserver
-            depends_on:
-                - postgres
-            environment:
-                - LOAD_EX=n
-                - EXECUTOR=Local
-                - KUBECONFIG=/home/airflow/kube/config
-                - AIRFLOW__WEBSERVER__WORKERS=1
-                - LIMINAL_HOME=/opt/airflow/dags
-                - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
-                - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
-                - AIRFLOW_CONN_METADATA_DB=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
-                - AIRFLOW_VAR__METADATA_DB_SCHEMA=airflow
-            logging:
-                options:
-                    max-size: 10m
-                    max-file: "3"
-            volumes:
-                - ${LIMINAL_HOME}:/opt/airflow/dags
-                - ${LIMINAL_HOME}/logs:/opt/airflow/logs
-                - ${HOME}/.kube:/home/airflow/kube
-            ports:
-                - "8080:8080"
-            command: "webserver"
-            healthcheck:
-                test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-                interval: 30s
-                timeout: 30s
-                retries: 3
+    webserver:
+        <<: *airflow-common
+        container_name: liminal-webserver
+        environment:
+          <<: *airflow-common-env
+        ports:
+            - "8080:8080"
+        command: "webserver"
 
-
-        scheduler:
-            build:
-                context: .
-                dockerfile: scripts/Dockerfile-airflow
-                args:
-                    LIMINAL_VERSION: ${LIMINAL_VERSION}
-            image: liminal-airflow
-            container_name: liminal-scheduler
-            depends_on:
-                - postgres
-                - webserver
-            environment:
-                - LOAD_EX=n
-                - EXECUTOR=Local
-                - AIRFLOW__WEBSERVER__WORKERS=1
-                - KUBECONFIG=/home/airflow/kube/config
-                - LIMINAL_HOME=/opt/airflow/dags
-                - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
-                - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
-                - AIRFLOW_CONN_METADATA_DB=postgres+psycopg2://airflow:airflow@postgres:5432/airflow
-                - AIRFLOW_VAR__METADATA_DB_SCHEMA=airflow
-                - AIRFLOW__SCHEDULER__SCHEDULER_HEARTBEAT_SEC=10
-            logging:
-                options:
-                    max-size: 10m
-                    max-file: "3"
-            volumes:
-                - ${LIMINAL_HOME}:/opt/airflow/dags
-                - ${LIMINAL_HOME}/logs:/opt/airflow/logs
-                - ${HOME}/.kube:/home/airflow/kube
-            ports:
-                - "8793:8793"
-            command: "scheduler"
-            healthcheck:
-                test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-                interval: 30s
-                timeout: 30s
-                retries: 3
+    scheduler:
+        <<: *airflow-common
+        container_name: liminal-scheduler
+        environment:
+          <<: *airflow-common-env
+        ports:
+            - "8793:8793"
+        command: "scheduler"

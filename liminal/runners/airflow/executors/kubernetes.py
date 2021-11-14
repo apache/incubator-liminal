@@ -21,9 +21,8 @@ import datetime
 import logging
 import os
 
-from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
-from airflow.kubernetes.volume import Volume
-from airflow.kubernetes.volume_mount import VolumeMount
+from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
+from kubernetes.client import models as k8s, V1Volume, V1VolumeMount
 
 from liminal.core.util import env_util
 from liminal.runners.airflow.config.standalone_variable_backend import get_variable
@@ -74,12 +73,10 @@ class KubernetesPodExecutor(executor.Executor):
             claim_name = volume_config.get('claim_name')
             if not claim_name and 'local' in volume_config:
                 claim_name = f'{name}-pvc'
-            volume = Volume(
+            volume = V1Volume(
                 name=name,
-                configs={
-                    'persistentVolumeClaim': {
-                        'claimName': claim_name
-                    }
+                persistent_volume_claim={
+                    'claimName': claim_name
                 }
             )
             volumes.append(volume)
@@ -98,7 +95,7 @@ class KubernetesPodExecutor(executor.Executor):
             'get_logs': config.pop('get_logs', True),
             'is_delete_operator_pod': config.pop('is_delete_operator_pod', True),
             'startup_timeout_seconds': config.pop('startup_timeout_seconds', 1200),
-            'env_vars': task.env_vars,
+            'env_vars': [k8s.V1EnvVar(name=x, value=v) for x, v in task.env_vars.items()],
             'do_xcom_push': task.task_config.get('do_xcom_push', False),
             'image_pull_secrets': config.pop('image_pull_secrets', 'regcred'),
             'volumes': self.volumes,
@@ -106,10 +103,10 @@ class KubernetesPodExecutor(executor.Executor):
             'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__CLUSTER_CONTEXT', None),
             'cmds': task.cmds,
             'volume_mounts': [
-                VolumeMount(mount['volume'],
-                            mount['path'],
-                            mount.get('sub_path'),
-                            mount.get('read_only', False))
+                V1VolumeMount(name=mount['volume'],
+                              mount_path=mount['path'],
+                              sub_path=mount.get('sub_path'),
+                              read_only=mount.get('read_only', False))
                 for mount
                 in task.mounts
             ]

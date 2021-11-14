@@ -22,15 +22,14 @@ Can be removed when Airflow 2.0.0 is released.
 """
 from typing import List
 
-from airflow.contrib.hooks.aws_hook import AwsHook
+from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 from airflow.models import BaseOperator
-from airflow.sensors.base_sensor_operator import BaseSensorOperator
-from airflow.utils.decorators import apply_defaults
+from airflow.sensors.base import BaseSensorOperator
 from botocore.exceptions import ClientError
 
 
 # noinspection PyAbstractClass
-class CloudFormationHook(AwsHook):
+class CloudFormationHook(AwsBaseHook):
     """
     Interact with AWS CloudFormation.
     """
@@ -38,7 +37,7 @@ class CloudFormationHook(AwsHook):
     def __init__(self, region_name=None, *args, **kwargs):
         self.region_name = region_name
         self.conn = None
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, client_type='cloudformation', **kwargs)
 
     def get_conn(self):
         self.conn = self.get_client_type('cloudformation', self.region_name)
@@ -59,7 +58,6 @@ class BaseCloudFormationOperator(BaseOperator):
     ui_color = '#1d472b'
     ui_fgcolor = '#FFF'
 
-    @apply_defaults
     def __init__(
             self,
             params,
@@ -95,7 +93,6 @@ class CloudFormationCreateStackOperator(BaseCloudFormationOperator):
     template_ext = ()
     ui_color = '#6b9659'
 
-    @apply_defaults
     def __init__(
             self,
             params,
@@ -122,7 +119,6 @@ class CloudFormationDeleteStackOperator(BaseCloudFormationOperator):
     ui_color = '#1d472b'
     ui_fgcolor = '#FFF'
 
-    @apply_defaults
     def __init__(
             self,
             params,
@@ -147,7 +143,6 @@ class BaseCloudFormationSensor(BaseSensorOperator):
     :type poke_interval: int
     """
 
-    @apply_defaults
     def __init__(self,
                  stack_name,
                  complete_status,
@@ -221,7 +216,6 @@ class CloudFormationCreateStackSensor(BaseCloudFormationSensor):
     template_fields = ['stack_name']
     ui_color = '#C5CAE9'
 
-    @apply_defaults
     def __init__(self,
                  stack_name,
                  aws_conn_id='aws_default',
@@ -253,7 +247,6 @@ class CloudFormationDeleteStackSensor(BaseCloudFormationSensor):
     template_fields = ['stack_name']
     ui_color = '#C5CAE9'
 
-    @apply_defaults
     def __init__(self,
                  stack_name,
                  aws_conn_id='aws_default',

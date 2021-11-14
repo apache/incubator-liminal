@@ -16,8 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.python_operator import BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
+from airflow.operators.python import BranchPythonOperator
 from flatdict import FlatDict
 
 from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
@@ -38,10 +38,9 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
 
     def apply_task_to_dag(self):
         check_cloudformation_stack_exists_task = BranchPythonOperator(
-            templates_dict={'stack_name': self.stack_name},
+            op_kwargs={'stack_name': self.stack_name},
             task_id=f'is-cloudformation-{self.task_id}-running',
             python_callable=self.__cloudformation_stack_running_branch,
-            provide_context=True,
             dag=self.dag
         )
 
@@ -75,9 +74,8 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
 
         return stack_creation_end_task
 
-    def __cloudformation_stack_running_branch(self, **kwargs):
+    def __cloudformation_stack_running_branch(self, stack_name):
         cloudformation = CloudFormationHook().get_conn()
-        stack_name = kwargs['templates_dict']['stack_name']
         try:
             stack_status = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0][
                 'StackStatus']
