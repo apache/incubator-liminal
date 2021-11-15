@@ -32,8 +32,9 @@ class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
                  task_config, variables=None):
         task_config['image'] = task_config.get('image', '')
         task_config['cmd'] = task_config.get('cmd', [])
+        task_config['env_vars'] = {'SPARK_LOCAL_HOSTNAME': 'localhost'}
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, variables=None)
+                         pipeline_config, task_config, variables)
 
     def get_runnable_command(self):
         """
