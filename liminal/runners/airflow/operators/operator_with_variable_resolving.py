@@ -19,8 +19,12 @@
 import inspect
 import logging
 import re
+from datetime import datetime
+from typing import Any, Dict, Optional, Set
 
+import jinja2
 from airflow.models import BaseOperator
+from airflow.settings import Session
 from jinja2 import Environment
 
 from liminal.runners.airflow.config import standalone_variable_backend
@@ -57,6 +61,8 @@ class OperatorWithVariableResolving(BaseOperator):
 
     def execute(self, context):
         attributes = self._get_operator_delegate_attributes()
+        self._LOG.info(f'task_config: {self.task_config}')
+        self._LOG.info(f'variables: {self.variables}')
         self.operator_delegate.template_fields = set(list(self.operator_delegate.template_fields) +
                                                      attributes)
         self.operator_delegate.render_template_fields(context,
@@ -77,8 +83,46 @@ class OperatorWithVariableResolving(BaseOperator):
             attr for attr in dir(self.operator_delegate) if
             attr not in _BASE_OPERATOR_ATTRIBUTES and attr not in dir(BaseOperator)
             and not attr.startswith('_')
-            and attr not in ('args', 'kwargs', 'lineage_data', 'subdag')
+            and attr not in ('args', 'kwargs', 'lineage_data', 'subdag', 'template_fields')
         ]
+
+    def pre_execute(self, context: Any):
+        return self.operator_delegate.pre_execute(context)
+
+    def on_kill(self) -> None:
+        self.operator_delegate.on_kill()
+
+    def render_template_fields(self, context: Dict,
+                               jinja_env: Optional[jinja2.Environment] = None) -> None:
+        pass
+
+    def render_template(self, content: Any, context: Dict,
+                        jinja_env: Optional[jinja2.Environment] = None,
+                        seen_oids: Optional[Set] = None) -> Any:
+        value = self.operator_delegate.render_template(content, context,
+                                                       LiminalEnvironment(self.variables,
+                                                                          self.task_config))
+        return self.operator_delegate.render_template(value, context, jinja_env, seen_oids)
+
+    def get_template_env(self) -> jinja2.Environment:
+        return self.operator_delegate.get_template_env()
+
+    def prepare_template(self) -> None:
+        self.operator_delegate.prepare_template()
+
+    def resolve_template_files(self) -> None:
+        self.operator_delegate.resolve_template_files()
+
+    def clear(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None,
+              upstream: bool = False, downstream: bool = False, session: Session = None):
+        return self.operator_delegate.clear(start_date, end_date, upstream, downstream, session)
+
+    def run(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None,
+            ignore_first_depends_on_past: bool = True, ignore_ti_state: bool = False,
+            mark_success: bool = False) -> None:
+        self.operator_delegate.run(start_date, end_date, ignore_first_depends_on_past,
+                                   ignore_ti_state,
+                                   mark_success)
 
 
 class LiminalEnvironment(Environment):
