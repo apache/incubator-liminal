@@ -22,6 +22,8 @@ volumes:
     claim_name: gettingstartedvol-pvc
     local:
       path: .
+variables:
+  myvar: myval
 images:
   - image: python_hello_world_example_image
     type: python
@@ -50,28 +52,15 @@ pipelines:
     tasks:
       - task: python_hello_world_example
         type: python
-        description: static input task
         image: python_hello_world_example_image
         env_vars:
-          env1: "a"
-          env2: "b"
+          env1: "{{myvar}}"
+          env2: "foo"
         mounts:
           - mount: mymount
             volume: gettingstartedvol
             path: /mnt/gettingstartedvol
         cmd: python -u hello_world.py
-      - task: parallelized_hello_world_example_task
-        type: python
-        description: parallelized parallelized hello world example
-        image: python_hello_world_example_image
-        env_vars:
-          env1: "a"
-          env2: "b"
-        mounts:
-          - mount: mymount
-            volume: gettingstartedvol
-            path: /mnt/gettingstartedvol
-        split_input: True
         executors: 2
         cmd: python -u hello_world.py
       - task: python_hello_world_output_task

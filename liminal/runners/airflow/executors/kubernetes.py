@@ -54,10 +54,12 @@ class KubernetesPodExecutor(executor.Executor):
 
         self._validate_task_type(task)
 
-        pod_task = KubernetesPodOperator(
-            dag=task.dag,
-            trigger_rule=task.trigger_rule,
-            **self.__kubernetes_kwargs(task)
+        pod_task = executor.add_variables_to_operator(
+            KubernetesPodOperator(
+                trigger_rule=task.trigger_rule,
+                **self.__kubernetes_kwargs(task)
+            ),
+            task
         )
 
         if parent:

@@ -22,6 +22,8 @@ from flatdict import FlatDict
 
 from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
     CloudFormationCreateStackSensor, CloudFormationHook
+from liminal.runners.airflow.operators.operator_with_variable_resolving import \
+    OperatorWithVariableResolving
 from liminal.runners.airflow.tasks import airflow
 
 
@@ -31,37 +33,41 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
+                 task_config, variables=None):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config)
+                         pipeline_config, task_config, variables)
         self.stack_name = task_config['stack_name']
 
     def apply_task_to_dag(self):
-        check_cloudformation_stack_exists_task = BranchPythonOperator(
-            op_kwargs={'stack_name': self.stack_name},
-            task_id=f'is-cloudformation-{self.task_id}-running',
-            python_callable=self.__cloudformation_stack_running_branch,
-            dag=self.dag
+        check_cloudformation_stack_exists_task = self._add_variables_to_operator(
+            BranchPythonOperator(
+                templates_dict={'stack_name': self.stack_name},
+                task_id=f'is-cloudformation-{self.task_id}-running',
+                python_callable=self.__cloudformation_stack_running_branch,
+                provide_context=True,
+            )
         )
 
-        create_cloudformation_stack_task = CloudFormationCreateStackOperator(
-            task_id=f'create-cloudformation-{self.task_id}',
-            params={
-                **self.__reformatted_params()
-            },
-            dag=self.dag
+        create_cloudformation_stack_task = self._add_variables_to_operator(
+            CloudFormationCreateStackOperator(
+                task_id=f'create-cloudformation-{self.task_id}',
+                params={
+                    **self.__reformatted_params()
+                }
+            )
         )
 
-        create_stack_sensor_task = CloudFormationCreateStackSensor(
-            task_id=f'cloudformation-watch-{self.task_id}-create',
-            stack_name=self.stack_name,
-            dag=self.dag
+        create_stack_sensor_task = self._add_variables_to_operator(
+            CloudFormationCreateStackSensor(
+                task_id=f'cloudformation-watch-{self.task_id}-create',
+                stack_name=self.stack_name,
+            )
         )
 
         stack_creation_end_task = DummyOperator(
             task_id=f'creation-end-{self.task_id}',
-            dag=self.dag,
-            trigger_rule='all_done'
+            trigger_rule='all_done',
+            dag=self.dag
         )
 
         if self.parent:

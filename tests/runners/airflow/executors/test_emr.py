@@ -28,6 +28,8 @@ from moto import mock_emr
 
 from liminal.runners.airflow import DummyDag
 from liminal.runners.airflow.executors.emr import EMRExecutor
+from liminal.runners.airflow.operators.operator_with_variable_resolving import \
+    OperatorWithVariableResolving
 from liminal.runners.airflow.tasks import hadoop
 from tests.util import dag_test_utils
 
@@ -80,6 +82,8 @@ class TestEMRExecutorTask(TestCase):
         self.hadoop_task.dag = self.dag
         self.hadoop_task.trigger_rule = 'all_done'
         self.hadoop_task.parent = None
+        self.hadoop_task.task_config = {}
+        self.hadoop_task.variables = {}
 
         self.emr = EMRExecutor(
             self.executor_name,
@@ -92,8 +96,10 @@ class TestEMRExecutorTask(TestCase):
 
         self.assertEqual(len(self.dag.tasks), 2)
 
-        self.assertIsInstance(self.dag.tasks[0], EmrAddStepsOperator)
-        self.assertIsInstance(self.dag.tasks[1], EmrStepSensor)
+        self.assertIsInstance(self.dag.tasks[0], OperatorWithVariableResolving)
+        self.assertIsInstance(self.dag.tasks[0].operator_delegate, EmrAddStepsOperator)
+        self.assertIsInstance(self.dag.tasks[1], OperatorWithVariableResolving)
+        self.assertIsInstance(self.dag.tasks[1].operator_delegate, EmrStepSensor)
 
     @mock.patch.object(EmrHook, 'get_conn')
     def test_add_step(self, mock_emr_hook_get_conn):
@@ -107,7 +113,8 @@ class TestEMRExecutorTask(TestCase):
 
         emr_add_step_task = self.dag.tasks[0]
 
-        self.assertIsInstance(emr_add_step_task, EmrAddStepsOperator)
+        self.assertIsInstance(emr_add_step_task, OperatorWithVariableResolving)
+        self.assertIsInstance(emr_add_step_task.operator_delegate, EmrAddStepsOperator)
 
         emr_add_step_task.render_template_fields({})
 
@@ -133,6 +140,7 @@ class TestEMRExecutorTask(TestCase):
 
         emr_watch_step_task = self.dag.tasks[1]
 
-        self.assertIsInstance(emr_watch_step_task, EmrStepSensor)
+        self.assertIsInstance(emr_watch_step_task, OperatorWithVariableResolving)
+        self.assertIsInstance(emr_watch_step_task.operator_delegate, EmrStepSensor)
 
         # todo - elaborate tests

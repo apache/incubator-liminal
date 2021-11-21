@@ -15,6 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 from itertools import chain
 
 from flatdict import FlatDict
@@ -28,11 +29,12 @@ class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
     """
 
     def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config):
+                 task_config, variables=None):
         task_config['image'] = task_config.get('image', '')
         task_config['cmd'] = task_config.get('cmd', [])
+        task_config['env_vars'] = {'SPARK_LOCAL_HOSTNAME': 'localhost'}
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config)
+                         pipeline_config, task_config, variables)
 
     def get_runnable_command(self):
         """
@@ -88,5 +90,5 @@ class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
     def __interleaving(keys, values):
         return list(chain.from_iterable(zip(keys, values)))
 
-    def _kubernetes_cmds_and_arguments(self, output_path, output_destination_path):
+    def _kubernetes_cmds_and_arguments(self):
         return self.__generate_spark_submit(), []

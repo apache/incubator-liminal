@@ -27,6 +27,7 @@ from moto import mock_cloudformation
 
 from liminal.runners.airflow.operators.cloudformation import CloudFormationDeleteStackOperator, \
     CloudFormationDeleteStackSensor
+from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
 from liminal.runners.airflow.tasks.delete_cloudformation_stack import DeleteCloudFormationStackTask
 from tests.util import dag_test_utils
 
@@ -68,8 +69,10 @@ class TestDeleteCloudFormationStackTask(TestCase):
         self.assertEqual(len(self.dag.tasks), 4)
 
         self.assertIsInstance(self.dag.tasks[0], BranchPythonOperator)
-        self.assertIsInstance(self.dag.tasks[1], CloudFormationDeleteStackOperator)
-        self.assertIsInstance(self.dag.tasks[2], CloudFormationDeleteStackSensor)
+        self.assertIsInstance(self.dag.tasks[1], OperatorWithVariableResolving)
+        self.assertIsInstance(self.dag.tasks[1].operator_delegate, CloudFormationDeleteStackOperator)
+        self.assertIsInstance(self.dag.tasks[2], OperatorWithVariableResolving)
+        self.assertIsInstance(self.dag.tasks[2].operator_delegate, CloudFormationDeleteStackSensor)
         self.assertIsInstance(self.dag.tasks[3], DummyOperator)
 
     def test_check_dags_queued_task(self):
