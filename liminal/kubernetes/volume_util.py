@@ -36,19 +36,26 @@ _LOCAL_VOLUMES = set([])
 _kubernetes = client.CoreV1Api()
 
 
-def create_local_volumes(liminal_config, base_dir):
+def get_volume_configs(liminal_config, base_dir):
     volumes_config = liminal_config.get('volumes', [])
 
     for volume_config in volumes_config:
         if 'local' in volume_config:
-            logging.info(f'Creating local kubernetes volume if needed: {volume_config}')
             path = volume_config['local']['path']
             if path.startswith(".."):
                 path = os.path.join(base_dir, path)
             if path.startswith("."):
                 path = os.path.join(base_dir, path[1:])
             volume_config['local']['path'] = path
-            create_local_volume(volume_config)
+    return volumes_config
+
+
+def create_local_volumes(liminal_config, base_dir):
+    volumes_config = get_volume_configs(liminal_config, base_dir)
+
+    for volume_config in volumes_config:
+        logging.info(f'Creating local kubernetes volume if needed: {volume_config}')
+        create_local_volume(volume_config)
 
 
 def create_local_volume(conf, namespace='default') -> None:
@@ -82,6 +89,14 @@ def create_local_volume(conf, namespace='default') -> None:
             ).to_dict()['items']
 
         _LOCAL_VOLUMES.add(name)
+
+
+def delete_local_volumes(liminal_config, base_dir):
+    volumes_config = get_volume_configs(liminal_config, base_dir)
+
+    for volume_config in volumes_config:
+        logging.info(f'Delete local kubernetes volume if needed: {volume_config}')
+        delete_local_volume(volume_config['volume'])
 
 
 def delete_local_volume(name, namespace='default'):
