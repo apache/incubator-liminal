@@ -49,12 +49,14 @@ class TestKubernetesVolume(unittest.TestCase):
             str(volumes_config[0]))
 
     def test_create_volume(self):
+        self._delete_volumes()
         self._create_volumes()
         matching_volumes = volume_util._list_persistent_volumes(self.config['volumes'][0]['volume'])
         self.assertTrue(self.config['volumes'][0]['volume'] in matching_volumes[0]['metadata']['name'],
                         self.config['volumes'][0]['claim_name'] in matching_volumes[0]['spec']['claim_ref']['name'])
                         
     def test_delete_volume(self):
+        self._create_volumes()
         self._delete_volumes()
         matching_volumes = volume_util._list_persistent_volumes(self.config['volumes'][0]['volume'])
         self.assertEqual([],matching_volumes)
