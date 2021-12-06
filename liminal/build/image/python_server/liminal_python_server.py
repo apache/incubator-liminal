@@ -45,6 +45,9 @@ if __name__ == '__main__':
 
     blueprint = Blueprint('liminal_python_server_blueprint', __name__)
 
+    @blueprint.route('/favicon.ico', methods=('GET', 'POST'))
+    def no_content():
+        return '', 204
 
     @blueprint.route('/', defaults={'endpoint': ''}, methods=('GET', 'POST'))
     @blueprint.route('/<endpoint>', methods=('GET', 'POST'))
