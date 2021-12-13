@@ -23,16 +23,7 @@ from liminal.core.config.defaults import default_configs
 
 class TestDefaultsPipelineConfig(TestCase):
     def test_apply(self):
-        pipeline = {
-            "name": "mypipe",
-            "param": "constant",
-            "tasks": [
-                {
-                    "task": "middle_task",
-                    "type": "python"
-                }
-            ]
-        }
+        pipeline = {"name": "mypipe", "param": "constant", "tasks": [{"task": "middle_task", "type": "python"}]}
 
         subliminal = {
             "name": "my_subliminal_test",
@@ -40,46 +31,24 @@ class TestDefaultsPipelineConfig(TestCase):
                 {
                     "name": "mypipe",
                     "param": "constant",
-                    "tasks": [
-                        {
-                            "task": "middle_task",
-                            "type": "python",
-                            "env_vars": {
-                                "env1": "env1"
-                            }
-                        }
-                    ]
+                    "tasks": [{"task": "middle_task", "type": "python", "env_vars": {"env1": "env1"}}],
                 }
             ],
-            "pipeline_defaults": {
-                "param1": "param1_value"
-            }
+            "pipeline_defaults": {"param1": "param1_value"},
         }
         superliminal = {
             "pipeline_defaults": {
                 "param2": "param2super_value",
                 "param3": "param3super_value",
-                "before_tasks": [
-                    {
-                        "task": "first_task",
-                        "type": "python"
-                    }],
-                "after_tasks": [
-                    {
-                        "task": "end_task",
-                        "type": "python"
-                    }
-                ]
+                "before_tasks": [{"task": "first_task", "type": "python"}],
+                "after_tasks": [{"task": "end_task", "type": "python"}],
             },
             "task_defaults": {
                 "python": {
                     "default_task_super": "default_task_super_value",
-                    "env_vars": {
-                        "env1": "env1super",
-                        "env2": "env2super"
-                    }
+                    "env_vars": {"env1": "env1super", "env2": "env2super"},
                 }
-            }
+            },
         }
         expected = {
             "param": "constant",
@@ -88,35 +57,25 @@ class TestDefaultsPipelineConfig(TestCase):
             "tasks": [
                 {
                     "type": "python",
-                    "env_vars": {
-                        "env1": "env1super",
-                        "env2": "env2super"
-                    },
+                    "env_vars": {"env1": "env1super", "env2": "env2super"},
                     "task": "first_task",
-                    "default_task_super": "default_task_super_value"
+                    "default_task_super": "default_task_super_value",
                 },
                 {
                     "type": "python",
-                    "env_vars": {
-                        "env1": "env1super",
-                        "env2": "env2super"
-                    },
+                    "env_vars": {"env1": "env1super", "env2": "env2super"},
                     "task": "middle_task",
-                    "default_task_super": "default_task_super_value"
+                    "default_task_super": "default_task_super_value",
                 },
                 {
                     "type": "python",
-                    "env_vars": {
-                        "env1": "env1super",
-                        "env2": "env2super"
-                    },
+                    "env_vars": {"env1": "env1super", "env2": "env2super"},
                     "task": "end_task",
-                    "default_task_super": "default_task_super_value"
-                }
+                    "default_task_super": "default_task_super_value",
+                },
             ],
             "name": "mypipe",
-            "param1": "param1_value"
+            "param1": "param1_value",
         }
 
-        self.assertEqual(expected, default_configs.apply_pipeline_defaults(subliminal, superliminal,
-                                                                           pipeline))
+        self.assertEqual(expected, default_configs.apply_pipeline_defaults(subliminal, superliminal, pipeline))

@@ -16,15 +16,22 @@
 # specific language governing permissions and limitations
 # under the License.
 
-
-from datetime import datetime
-
-from airflow import DAG
-
-
-def create_dag():
-    """
-    Test util to create a basic DAG for testing.
-    """
-
-    return DAG(dag_id='test_dag', default_args={'start_date': datetime(1970, 1, 1)})
+[tool.black]
+line-length = 119  # TODO: Decide if 119 or 110?
+target-version = ['py36', 'py37', 'py38', 'py39']
+skip-string-normalization = true
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | \.mypy_cache
+    | \.tox
+    | _build
+    | build
+    | dist
+  )/
+  | src/buildstream/_protos
+)
+'''

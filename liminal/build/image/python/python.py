@@ -22,7 +22,6 @@ from liminal.build.python import BasePythonImageBuilder
 
 
 class PythonImageBuilder(BasePythonImageBuilder):
-
     def __init__(self, config, base_path, relative_source_path, tag):
         super().__init__(config, base_path, relative_source_path, tag)
 

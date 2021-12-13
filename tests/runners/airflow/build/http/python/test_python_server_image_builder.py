@@ -34,7 +34,6 @@ IMAGE_NAME = 'liminal_server_image'
 
 
 class TestPythonServer(TestCase):
-
     def setUp(self) -> None:
         super().setUp()
         self.docker_client = docker.from_env()
@@ -49,15 +48,15 @@ class TestPythonServer(TestCase):
         versions = list(PythonImageVersions().supported_versions)
         for version in versions:
             build_out = self.__test_build_python_server(python_version=version)
-            self.assertTrue('RUN pip install -r requirements.txt' in build_out,
-                            'Incorrect pip command')
+            self.assertTrue('RUN pip install -r requirements.txt' in build_out, 'Incorrect pip command')
 
     def test_build_python_server_with_pip_conf(self):
         build_out = self.__test_build_python_server(use_pip_conf=True)
 
         self.assertTrue(
             'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
-            'Incorrect pip command')
+            'Incorrect pip command',
+        )
 
     def __test_build_python_server(self, use_pip_conf=False, python_version=None):
         base_path = os.path.join(os.path.dirname(__file__), '../../../liminal')
@@ -70,10 +69,9 @@ class TestPythonServer(TestCase):
         if python_version:
             config['python_version'] = python_version
 
-        builder = PythonServerImageBuilder(config=config,
-                                           base_path=base_path,
-                                           relative_source_path='myserver',
-                                           tag=IMAGE_NAME)
+        builder = PythonServerImageBuilder(
+            config=config, base_path=base_path, relative_source_path='myserver', tag=IMAGE_NAME
+        )
 
         build_out = str(builder.build())
 
@@ -88,10 +86,11 @@ class TestPythonServer(TestCase):
 
         encoding = 'ascii'
 
-        server_response = str(urllib.request.urlopen(
-            'http://localhost:9294/myendpoint1',
-            data=json_string.encode(encoding)
-        ).read().decode(encoding))
+        server_response = str(
+            urllib.request.urlopen('http://localhost:9294/myendpoint1', data=json_string.encode(encoding))
+            .read()
+            .decode(encoding)
+        )
 
         logging.info(f'Response from server: {server_response}')
 
@@ -117,15 +116,12 @@ class TestPythonServer(TestCase):
             matching_containers = self.__get_docker_containers()
 
     def __get_docker_containers(self):
-        return self.docker_client.containers.list(
-            filters={'ancestor': IMAGE_NAME}
-        )
+        return self.docker_client.containers.list(filters={'ancestor': IMAGE_NAME})
 
     def __run_container(self):
         try:
             logging.info(f'Running container for image: {IMAGE_NAME}')
-            self.docker_client.containers.run(IMAGE_NAME, ports={'80/tcp': 9294},
-                                              detach=True)
+            self.docker_client.containers.run(IMAGE_NAME, ports={'80/tcp': 9294}, detach=True)
         except Exception as err:
             logging.exception(err)
             pass
@@ -140,13 +136,7 @@ class TestPythonServer(TestCase):
             'input_path': 'my_input',
             'output_path': '/my_output.json',
             'no_cache': True,
-            'endpoints': [
-                {
-                    'endpoint': '/myendpoint1',
-                    'module': 'my_server',
-                    'function': 'myendpoint1func'
-                }
-            ]
+            'endpoints': [{'endpoint': '/myendpoint1', 'module': 'my_server', 'function': 'myendpoint1func'}],
         }
 
 

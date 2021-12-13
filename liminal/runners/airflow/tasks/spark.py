@@ -28,13 +28,13 @@ class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
     Executes a Spark application.
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, variables=None):
+    def __init__(
+        self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
+    ):
         task_config['image'] = task_config.get('image', '')
         task_config['cmd'] = task_config.get('cmd', [])
         task_config['env_vars'] = {'SPARK_LOCAL_HOSTNAME': 'localhost'}
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, variables)
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables)
 
     def get_runnable_command(self):
         """
@@ -59,13 +59,12 @@ class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
 
         spark_arguments = {
             'master': self.task_config.get('master', None),
-            'class': self.task_config.get('class', None)
+            'class': self.task_config.get('class', None),
         }
 
         source_code = self.task_config.get("application_source")
 
-        for conf_arg in ['{}={}'.format(k, v) for (k, v) in
-                         FlatDict(self.task_config.get('conf', {})).items()]:
+        for conf_arg in ['{}={}'.format(k, v) for (k, v) in FlatDict(self.task_config.get('conf', {})).items()]:
             flat_conf_args.append('--conf')
             flat_conf_args.append(conf_arg)
 
@@ -83,8 +82,9 @@ class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
     def __parse_spark_arguments(self, spark_arguments):
         spark_arguments = {x[0]: x[1] for x in spark_arguments.items() if x[1]}
 
-        return self.__interleaving([f'--{k}' for k in spark_arguments.keys() if spark_arguments[k]],
-                                   spark_arguments.values())
+        return self.__interleaving(
+            [f'--{k}' for k in spark_arguments.keys() if spark_arguments[k]], spark_arguments.values()
+        )
 
     @staticmethod
     def __interleaving(keys, values):

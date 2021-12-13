@@ -38,13 +38,14 @@ if __name__ == '__main__':
     with open('service.yml') as stream:
         config = yaml.safe_load(stream)
 
-    endpoints = dict([
-        (endpoint_config['endpoint'][1:], __get_endpoint_function(endpoint_config))
-        for endpoint_config in config['endpoints']
-    ])
+    endpoints = dict(
+        [
+            (endpoint_config['endpoint'][1:], __get_endpoint_function(endpoint_config))
+            for endpoint_config in config['endpoints']
+        ]
+    )
 
     blueprint = Blueprint('liminal_python_server_blueprint', __name__)
-
 
     @blueprint.route('/', defaults={'endpoint': ''}, methods=('GET', 'POST'))
     @blueprint.route('/<endpoint>', methods=('GET', 'POST'))
@@ -53,7 +54,6 @@ if __name__ == '__main__':
             return endpoints[endpoint](request.get_data())
         else:
             return 'Page not found.', 404
-
 
     app = Flask(__name__)
     app.register_blueprint(blueprint)

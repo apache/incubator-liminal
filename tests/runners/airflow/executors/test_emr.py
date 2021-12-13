@@ -28,8 +28,7 @@ from moto import mock_emr
 
 from liminal.runners.airflow import DummyDag
 from liminal.runners.airflow.executors.emr import EMRExecutor
-from liminal.runners.airflow.operators.operator_with_variable_resolving import \
-    OperatorWithVariableResolving
+from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
 from liminal.runners.airflow.tasks import hadoop
 from tests.util import dag_test_utils
 
@@ -53,7 +52,7 @@ class TestEMRExecutorTask(TestCase):
             LogUri="s3://liminal/log",
             Name="test-emr-cluster",
             ServiceRole="EMR_DefaultRole",
-            VisibleToAllUsers=True
+            VisibleToAllUsers=True,
         )
 
         self.client = boto3.client("emr", region_name="us-east-1")
@@ -70,14 +69,10 @@ class TestEMRExecutorTask(TestCase):
             'cluster_name': self.executor_name,
             'aws_conn_id': 'us-east-1',
             'type': 'emr',
-            'properties': {
-                'ActionOnFailure': 'CONTINUE'
-            }
-
+            'properties': {'ActionOnFailure': 'CONTINUE'},
         }
         self.hadoop_task = MagicMock(spec=hadoop.HadoopTask)
-        self.hadoop_task.get_runnable_command.return_value = ['spark-submit', 'test', 'params',
-                                                              '--param']
+        self.hadoop_task.get_runnable_command.return_value = ['spark-submit', 'test', 'params', '--param']
         self.hadoop_task.task_id = 'spark-task'
         self.hadoop_task.dag = self.dag
         self.hadoop_task.trigger_rule = 'all_done'
@@ -85,11 +80,7 @@ class TestEMRExecutorTask(TestCase):
         self.hadoop_task.task_config = {}
         self.hadoop_task.variables = {}
 
-        self.emr = EMRExecutor(
-            self.executor_name,
-            liminal_config={},
-            executor_config=executor_config
-        )
+        self.emr = EMRExecutor(self.executor_name, liminal_config={}, executor_config=executor_config)
 
     def test_apply_task_to_dag(self):
         self.emr.apply_task_to_dag(task=self.hadoop_task)
@@ -104,10 +95,7 @@ class TestEMRExecutorTask(TestCase):
     @mock.patch.object(EmrHook, 'get_conn')
     def test_add_step(self, mock_emr_hook_get_conn):
         aws_region = 'us-east-1'
-        mock_emr_hook_get_conn.return_value = boto3.client(
-            'emr',
-            region_name=aws_region
-        )
+        mock_emr_hook_get_conn.return_value = boto3.client('emr', region_name=aws_region)
 
         self.emr.apply_task_to_dag(task=self.hadoop_task)
 
@@ -120,16 +108,12 @@ class TestEMRExecutorTask(TestCase):
 
         step_id = emr_add_step_task.execute(self.dag.context)[0]
 
-        desc_step = self.client.describe_step(
-            ClusterId=self.cluster_id,
-            StepId=step_id
-        )['Step']
+        desc_step = self.client.describe_step(ClusterId=self.cluster_id, StepId=step_id)['Step']
 
-        self.assertEqual(desc_step['Config'],
-                         {'Jar': 'command-runner.jar',
-                          'Properties': {},
-                          'Args': ['spark-submit', 'test', 'params', '--param']
-                          })
+        self.assertEqual(
+            desc_step['Config'],
+            {'Jar': 'command-runner.jar', 'Properties': {}, 'Args': ['spark-submit', 'test', 'params', '--param']},
+        )
 
         self.assertEqual(desc_step['Name'], 'spark-task')
 

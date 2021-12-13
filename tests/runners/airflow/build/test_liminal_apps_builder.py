@@ -24,11 +24,9 @@ import docker
 
 from liminal.build import liminal_apps_builder
 
+
 class TestLiminalAppsBuilder(TestCase):
-    __image_names = [
-        'my_python_task_img',
-        'my_parallelized_python_task_img'
-    ]
+    __image_names = ['my_python_task_img', 'my_parallelized_python_task_img']
 
     def setUp(self) -> None:
         self.docker_client = docker.client.from_env()
@@ -44,8 +42,7 @@ class TestLiminalAppsBuilder(TestCase):
                 self.docker_client.images.remove(image=image_name, force=True)
 
     def test_build_liminal(self):
-        liminal_apps_builder.build_liminal_apps(
-            os.path.join(os.path.dirname(__file__), '../liminal'))
+        liminal_apps_builder.build_liminal_apps(os.path.join(os.path.dirname(__file__), '../liminal'))
 
         for image in self.__image_names:
             self.docker_client.images.get(image)

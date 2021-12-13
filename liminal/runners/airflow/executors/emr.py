@@ -50,11 +50,10 @@ class EMRExecutor(executor.Executor):
                 job_flow_id=self.job_flow_id,
                 job_flow_name=self.job_flow_name,
                 aws_conn_id=self.aws_conn_id,
-                steps=self.__generate_emr_step(task.task_id,
-                                               [str(x) for x in task.get_runnable_command()]),
+                steps=self.__generate_emr_step(task.task_id, [str(x) for x in task.get_runnable_command()]),
                 cluster_states=self.cluster_states,
             ),
-            task
+            task,
         )
 
         if task.parent:
@@ -63,13 +62,11 @@ class EMRExecutor(executor.Executor):
         emr_sensor_step = executor.add_variables_to_operator(
             EmrStepSensor(
                 task_id=f'{task.task_id}_watch_step',
-                job_flow_id="{{ task_instance.xcom_pull('" + add_step.task_id +
-                            "', key='job_flow_id') }}",
-                step_id="{{ task_instance.xcom_pull('" + add_step.task_id +
-                        "', key='return_value')[0] }}",
-                aws_conn_id=self.aws_conn_id
+                job_flow_id="{{ task_instance.xcom_pull('" + add_step.task_id + "', key='job_flow_id') }}",
+                step_id="{{ task_instance.xcom_pull('" + add_step.task_id + "', key='return_value')[0] }}",
+                aws_conn_id=self.aws_conn_id,
             ),
-            task
+            task,
         )
 
         add_step.set_downstream(emr_sensor_step)
@@ -81,9 +78,6 @@ class EMRExecutor(executor.Executor):
             {
                 'Name': task_id,
                 **self.executor_config.get('properties', {}),
-                'HadoopJarStep': {
-                    'Jar': 'command-runner.jar',
-                    'Args': args
-                }
+                'HadoopJarStep': {'Jar': 'command-runner.jar', 'Args': args},
             }
         ]

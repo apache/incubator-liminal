@@ -23,47 +23,25 @@ from liminal.core.config.defaults import default_configs
 
 class TestApplyVariablesSubstitution(TestCase):
     def test_apply(self):
-        subliminal = {'variables': {
-            'one': 'one_value',
-            'two': 'two_value'
-        }}
+        subliminal = {'variables': {'one': 'one_value', 'two': 'two_value'}}
 
-        superliminal = {'variables': {
-            'three': 'three_value',
-            'two': 'two_super_value'
-        }}
+        superliminal = {'variables': {'three': 'three_value', 'two': 'two_super_value'}}
 
-        expected = {'variables': {
-            'one': 'one_value',
-            'two': 'two_value',
-            'three': 'three_value'
-        }}
+        expected = {'variables': {'one': 'one_value', 'two': 'two_value', 'three': 'three_value'}}
         self.assertEqual(expected, default_configs.apply_variable_substitution(subliminal, superliminal))
 
     def test_apply_superliminal_is_missing_variables(self):
-        subliminal = {'variables': {
-            'one': 'one_value',
-            'two': 'two_value'
-        }}
+        subliminal = {'variables': {'one': 'one_value', 'two': 'two_value'}}
 
         superliminal = {}
 
-        expected = {'variables': {
-            'one': 'one_value',
-            'two': 'two_value'
-        }}
+        expected = {'variables': {'one': 'one_value', 'two': 'two_value'}}
         self.assertEqual(expected, default_configs.apply_variable_substitution(subliminal, superliminal))
 
     def test_apply_subliminal_is_missing_variables(self):
         subliminal = {}
 
-        superliminal = {'variables': {
-            'one': 'one_value',
-            'two': 'two_value'
-        }}
+        superliminal = {'variables': {'one': 'one_value', 'two': 'two_value'}}
 
-        expected = {'variables': {
-            'one': 'one_value',
-            'two': 'two_value'
-        }}
+        expected = {'variables': {'one': 'one_value', 'two': 'two_value'}}
         self.assertEqual(expected, default_configs.apply_variable_substitution(subliminal, superliminal))

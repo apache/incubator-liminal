@@ -35,12 +35,14 @@ import numpy as np
 import csv
 import argparse
 
+
 def load_iris_from_csv_file(f):
     df = pd.read_csv(f, header=0).reset_index(drop=True)
-    types = {col:np.float64 for col in df.columns[:-1]}
+    types = {col: np.float64 for col in df.columns[:-1]}
     types['label'] = np.int32
     df = df.astype(types)
     return df
+
 
 def get_dataset(d):
     print("searching for csv files in {}".format(d))
@@ -51,6 +53,7 @@ def get_dataset(d):
                 return os.path.join(d, file)
     return None
 
+
 def load_and_split(input_uri):
     csv_file = get_dataset(input_uri)
     if csv_file:
@@ -58,6 +61,7 @@ def load_and_split(input_uri):
 
     iris = load_iris_from_csv_file(csv_file)
     return train_test_split(iris, test_size=0.2, random_state=8)
+
 
 def train_model(input_uri):
     train, test = load_and_split(input_uri)
@@ -79,7 +83,7 @@ def train_model(input_uri):
 def validate_model(input_uri):
     model, version = _CANDIDATE_MODEL_STORE.load_latest_model()
     print(f'Validating model with version {version} to candidate model store.')
-    if not isinstance(model.predict([[1,1,1,1]]), np.ndarray):
+    if not isinstance(model.predict([[1, 1, 1, 1]]), np.ndarray):
         raise ValueError('Invalid model')
     train, test = load_and_split(input_uri)
     y = test.pop("label")

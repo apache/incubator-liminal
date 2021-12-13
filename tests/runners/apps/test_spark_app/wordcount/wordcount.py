@@ -27,16 +27,10 @@ if __name__ == "__main__":
         print("Usage: wordcount <file> output <outputlocation>", file=sys.stderr)
         sys.exit(-1)
 
-    spark = SparkSession \
-        .builder \
-        .appName("PythonWordCount") \
-        .getOrCreate()
+    spark = SparkSession.builder.appName("PythonWordCount").getOrCreate()
 
-    lines = spark.read.text(sys.argv[1]).rdd.filter(lambda x: not x[0].startswith('#')).map(
-        lambda r: r[0])
-    counts = lines.flatMap(lambda x: x.split(' ')) \
-        .map(lambda x: (x, 1)) \
-        .reduceByKey(add)
+    lines = spark.read.text(sys.argv[1]).rdd.filter(lambda x: not x[0].startswith('#')).map(lambda r: r[0])
+    counts = lines.flatMap(lambda x: x.split(' ')).map(lambda x: (x, 1)).reduceByKey(add)
     output = counts.collect()
     for (word, count) in output:
         print("%s: %i" % (word, count))
