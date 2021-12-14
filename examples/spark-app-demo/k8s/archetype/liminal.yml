@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 ---
 # superliminal for local development
 name: InfraSpark
@@ -30,7 +30,7 @@ images:
   - image: my_spark_image
     source: .
     type: spark
-    no_cache: True
+    no_cache: true
 task_defaults:
   spark:
     executor: k8s
@@ -41,4 +41,3 @@ task_defaults:
       - mount: mymount
         volume: gettingstartedvol
         path: /mnt/gettingstartedvol
-

@@ -45,7 +45,7 @@ def load(path):
     config_entities = {}
 
     for file_data in find_config_files(path):
-        with open(file_data, 'r') as data:
+        with open(file_data) as data:
             config_file = yaml.safe_load(data)
             config_entities[config_file['name']] = config_file
             cached_source_files[config_file['name']] = file_data

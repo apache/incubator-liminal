@@ -20,7 +20,9 @@ from abc import ABC, abstractmethod
 
 from airflow.models import BaseOperator
 
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
 
 
 def add_variables_to_operator(operator, task) -> BaseOperator:

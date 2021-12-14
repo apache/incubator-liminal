@@ -87,4 +87,4 @@ class ContainerTask(task.Task, ABC):
         if ENV not in env_vars:
             env_vars[ENV] = env
 
-        return dict([(k, str(v)) for k, v in env_vars.items()])
+        return {k: str(v) for k, v in env_vars.items()}

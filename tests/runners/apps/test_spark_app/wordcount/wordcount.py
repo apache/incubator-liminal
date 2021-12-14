@@ -19,8 +19,8 @@
 import sys
 from operator import add
 
-from pyspark.sql import SparkSession
 import yaml
+from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     for (word, count) in output:
         print("%s: %i" % (word, count))
 
-    print("writing the results to {}".format(sys.argv[2]))
+    print(f"writing the results to {sys.argv[2]}")
     counts.toDF(["word", "count"]).coalesce(1).write.mode("overwrite").json(sys.argv[2])
 
     spark.stop()

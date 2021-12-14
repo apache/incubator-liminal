@@ -20,7 +20,7 @@ import argparse
 
 import pyspark.sql.functions as F
 from pyspark.ml import Pipeline
-from pyspark.ml.feature import StringIndexer, VectorAssembler, StandardScaler
+from pyspark.ml.feature import StandardScaler, StringIndexer, VectorAssembler
 from pyspark.ml.functions import vector_to_array
 from pyspark.sql import SparkSession
 

@@ -22,7 +22,7 @@ import os
 
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md") as fh:
     long_description = fh.read()
 
 with open('requirements.txt') as f:

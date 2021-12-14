@@ -32,7 +32,7 @@ except Exception:
     sys.stdout.write(f"INFO: {msg}")
 
 _LOG = logging.getLogger('volume_util')
-_LOCAL_VOLUMES = set([])
+_LOCAL_VOLUMES = set()
 _kubernetes = client.CoreV1Api()
 
 

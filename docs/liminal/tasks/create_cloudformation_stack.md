@@ -43,4 +43,3 @@ The `create_cloudformation_stack` task allows you to create cloudformation stack
 
 `properties`: any attribute of [aws-create-stack-request-parameters](
 https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html#API_CreateStack_RequestParameters)
-

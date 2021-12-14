@@ -17,7 +17,7 @@
 # under the License.
 
 import yaml
-from flask import Flask, request, Blueprint
+from flask import Blueprint, Flask, request
 
 
 def __get_module(kls):
@@ -38,12 +38,10 @@ if __name__ == '__main__':
     with open('service.yml') as stream:
         config = yaml.safe_load(stream)
 
-    endpoints = dict(
-        [
-            (endpoint_config['endpoint'][1:], __get_endpoint_function(endpoint_config))
-            for endpoint_config in config['endpoints']
-        ]
-    )
+    endpoints = {
+        endpoint_config['endpoint'][1:]: __get_endpoint_function(endpoint_config)
+        for endpoint_config in config['endpoints']
+    }
 
     blueprint = Blueprint('liminal_python_server_blueprint', __name__)
 

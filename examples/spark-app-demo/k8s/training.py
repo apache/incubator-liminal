@@ -15,25 +15,25 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
 import sys
 import time
 
 import model_store
-import pandas as pd
 import numpy as np
+import pandas as pd
 from model_store import ModelStore
-from sklearn import datasets
+from sklearn import datasets, model_selection
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn import model_selection
-import os
 
 _CANDIDATE_MODEL_STORE = ModelStore(model_store.CANDIDATE)
 _PRODUCTION_MODEL_STORE = ModelStore(model_store.PRODUCTION)
 
-import numpy as np
-import csv
 import argparse
+import csv
+
+import numpy as np
 
 
 def load_iris_from_csv_file(f):
@@ -45,7 +45,7 @@ def load_iris_from_csv_file(f):
 
 
 def get_dataset(d):
-    print("searching for csv files in {}".format(d))
+    print(f"searching for csv files in {d}")
     for root, dirs, files in os.walk(d):
 
         for file in files:
@@ -57,7 +57,7 @@ def get_dataset(d):
 def load_and_split(input_uri):
     csv_file = get_dataset(input_uri)
     if csv_file:
-        print("found {} dataset".format(csv_file))
+        print(f"found {csv_file} dataset")
 
     iris = load_iris_from_csv_file(csv_file)
     return train_test_split(iris, test_size=0.2, random_state=8)

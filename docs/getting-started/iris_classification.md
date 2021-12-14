@@ -97,7 +97,7 @@ liminal create
 ### Liminal deploy
 The deploy command deploys a liminal server and deploys any liminal.yml files in your working directory or any of its subdirectories to your liminal home directory.
 ```BASH
-liminal deploy --clean  
+liminal deploy --clean
 ```
 
 *Note: liminal home directory is located in the path defined in LIMINAL_HOME env variable.
@@ -110,7 +110,7 @@ The start command spins up 3 containers that load the Apache Airflow stack. Limi
 liminal start
 ```
 
-It runs the following three containers: 
+It runs the following three containers:
 * liminal-postgress
 * liminal-webserver
 * liminal-scheduler
@@ -123,7 +123,7 @@ Once liminal server has completed starting up, you can navigate to admin UI in y
 
 ***Important:** Set off/on toggle to activate your pipeline (DAG), nothing will happen otherwise!*
 
-You can go to graph view to see all the tasks configured in the liminal.yml file: 
+You can go to graph view to see all the tasks configured in the liminal.yml file:
 [http://localhost:8080/admin/airflow/graph?dag_id=my_datascience_pipeline](
 http://localhost:8080/admin/airflow/graph?dag_id=my_datascience_pipeline
 )

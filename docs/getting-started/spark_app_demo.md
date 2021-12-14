@@ -117,7 +117,7 @@ The deploy command deploys a liminal server and deploys any liminal.yml files in
 directory or any of its subdirectories to your liminal home directory.
 
 ```BASH
-liminal deploy --clean  
+liminal deploy --clean
 ```
 
 *Note: liminal home directory is located in the path defined in LIMINAL_HOME env variable. If the

@@ -22,8 +22,8 @@ Can be removed when Airflow 2.0.0 is released.
 """
 from typing import List
 
-from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 from airflow.models import BaseOperator
+from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 from airflow.sensors.base import BaseSensorOperator
 from botocore.exceptions import ClientError
 

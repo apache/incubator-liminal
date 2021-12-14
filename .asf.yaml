@@ -1,3 +1,4 @@
+---
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -17,7 +18,9 @@
 # under the License.
 
 github:
-  description: "Apache Liminals goal is to operationalise the machine learning process, allowing data scientists to quickly transition from a successful experiment to an automated pipeline of model training, validation, deployment and inference in production. Liminal provides a Domain Specific Language to build ML workflows on top of Apache Airflow."
+  description: Apache Liminals goal is to operationalise the machine learning process, allowing data scientists to quickly transition from a successful
+    experiment to an automated pipeline of model training, validation, deployment and inference in production. Liminal provides a Domain Specific Language
+    to build ML workflows on top of Apache Airflow.
   homepage: https://liminal.apache.org
   labels:
     - data-science
@@ -25,12 +28,11 @@ github:
     - machine-learning
     - airflow
     - ai
-    - ml 
+    - ml
     - workflows
-    
+
 notifications:
-  commits:      commits@liminal.apache.org
-  issues:       issues@liminal.apache.org
+  commits: commits@liminal.apache.org
+  issues: issues@liminal.apache.org
   pullrequests: dev@liminal.apache.org
   jira_options: link label worklog
-  

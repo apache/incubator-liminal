@@ -15,9 +15,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import liminal.runners.airflow.dag as liminal
-from airflow import DAG
 import traceback
+
+from airflow import DAG
+
+import liminal.runners.airflow.dag as liminal
 
 pipelines = liminal.register_dags()
 

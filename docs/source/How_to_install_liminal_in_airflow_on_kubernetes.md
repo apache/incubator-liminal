@@ -62,12 +62,12 @@ You can read up about EFS [here](https://aws.amazon.com/efs/features/) and set i
 There are multiple ways to install liminal into the Airflow pods, depending on how you deployed Airflow on Kubernetes. \
 In principle, it requires the package to be pip-installed into the Airflow docker - either during build time or in run time.
 
-1. If you are rolling out your own Airflow Docker images based on the [official docker image](https://github.com/apache/airflow), 
-you can add apache-liminal installation during the build: 
+1. If you are rolling out your own Airflow Docker images based on the [official docker image](https://github.com/apache/airflow),
+you can add apache-liminal installation during the build:
 ```docker build --build-arg ADDITIONAL_PYTHON_DEPS="apache-liminal"```
 
-2. If you already have a running Airflow on Kubernetes, you can run a command which iterates over Airflow pods and executes a ```pip install apache-liminal``` 
-on each of the pods. 
+2. If you already have a running Airflow on Kubernetes, you can run a command which iterates over Airflow pods and executes a ```pip install apache-liminal```
+on each of the pods.
 
 3. If you used the [airflow-helm-chart-7.16.0], you just need to specifiy apache-liminal inside the ```requirements.txt``` file as per the instructions [here][airflow-helm-chart-7.16.0]
 
@@ -110,7 +110,7 @@ Finally, the one time setup is done, and by this point, you should have:
 1. A deployment box which can deploy Liminal to an EFS folder
 2. Airflow pods which will pick up the Yamls from that folder automatically.
 
-Deploying the actual Yaml files is the simple part. 
+Deploying the actual Yaml files is the simple part.
 
 Each time you want to deploy the Liminal Yamls from the deployment box:
 ```

@@ -21,7 +21,7 @@ under the License.
 
 `metrics_backend` is the definition of a metrics backend to which all automatically
 generated metrics from your pipeline are sent to and is part of the `metrics_backends` list in the
-`monitoring` section of your liminal.yml 
+`monitoring` section of your liminal.yml
 
 ```yaml
   - metrics_backend: cloudwatch_metrics

@@ -48,7 +48,7 @@ class JobStatusOperator(BaseOperator):
                 for metric in self.metrics(context):
                     self.report_functions[backend](self, metric)
             else:
-                raise AirflowException('No such metrics backend: {}'.format(backend))
+                raise AirflowException(f'No such metrics backend: {backend}')
 
     def metrics(self, context):
         raise NotImplementedError

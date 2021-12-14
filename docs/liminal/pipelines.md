@@ -33,9 +33,9 @@ pipelines:
         type: sql
         query: "SELECT * FROM
         {{my_database_name}}.{{my_table_name}}
-        WHERE event_date_prt >= 
+        WHERE event_date_prt >=
               '{{yesterday_ds}}'"
-              AND cms_platform = 'xsite'          
+              AND cms_platform = 'xsite'
         output_table: my_db.my_out_table
         output_path: s3://my_bky/{{env}}/mydir
       - task: my_python_task
@@ -47,7 +47,7 @@ pipelines:
           fizz: buzz
 ```
 
-`pipelines` is a section in the root lof your liminal.yml file and is a list of `pipeline`s defined 
+`pipelines` is a section in the root lof your liminal.yml file and is a list of `pipeline`s defined
 by the following attributes:
 
 ## pipeline attributes

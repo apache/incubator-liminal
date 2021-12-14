@@ -22,8 +22,7 @@ import traceback
 
 from liminal.core import environment
 from liminal.core.config.defaults import base, default_configs
-from liminal.core.util import dict_util
-from liminal.core.util import files_util
+from liminal.core.util import dict_util, files_util
 
 
 class ConfigUtil:

@@ -29,8 +29,12 @@ from liminal.runners.airflow.operators.cloudformation import (
     CloudFormationDeleteStackOperator,
     CloudFormationDeleteStackSensor,
 )
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
-from liminal.runners.airflow.tasks.delete_cloudformation_stack import DeleteCloudFormationStackTask
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
+from liminal.runners.airflow.tasks.delete_cloudformation_stack import (
+    DeleteCloudFormationStackTask,
+)
 from tests.util import dag_test_utils
 
 

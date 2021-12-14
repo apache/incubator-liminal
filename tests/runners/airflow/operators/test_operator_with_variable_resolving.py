@@ -18,11 +18,13 @@
 
 import os
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from airflow.models import BaseOperator
 
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
 
 
 class TestKubernetesPodOperatorWithAutoImage(TestCase):
@@ -165,7 +167,7 @@ class BaseTestOperator(BaseOperator):
 
 class TestOperator(BaseTestOperator):
     def __init__(self, *args, **kwargs):
-        super(TestOperator, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def execute(self, context):
         return self.expected
