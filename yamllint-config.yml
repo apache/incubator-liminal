@@ -1,0 +1,21 @@
+---
+# https://yamllint.readthedocs.io/en/stable/
+extends: default
+
+locale: en_US.UTF-8
+
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - '.yamllint'
+
+rules:
+  line-length:
+    max: 110
+    # level: warning
+  truthy:
+    level: warning
+
+ignore: |
+  docs/
+  .asf.yaml
