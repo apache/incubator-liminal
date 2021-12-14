@@ -30,6 +30,7 @@ class ConfigUtil:
     """
     Load and enrich config files under configs_path.
     """
+
     __BASE = 'base'
     __PIPELINES = 'pipelines'
     __SUPER = 'super'
@@ -61,8 +62,7 @@ class ConfigUtil:
         self.config_files = files_util.load(configs_path)
         self.base = base.BASE
         self.loaded_subliminals = []
-        self.snapshot_path = os.path.join(environment.get_airflow_home_dir(),
-                                          '../liminal_config_files')
+        self.snapshot_path = os.path.join(environment.get_airflow_home_dir(), '../liminal_config_files')
 
     def safe_load(self, is_render_variables, soft_merge=False):
         """
@@ -80,8 +80,7 @@ class ConfigUtil:
             # noinspection PyBroadException
             try:
                 superliminal = self.__get_superliminal(subliminal, soft_merge)
-                enriched_config = self.__merge_configs(subliminal, superliminal,
-                                                       is_render_variables, soft_merge)
+                enriched_config = self.__merge_configs(subliminal, superliminal, is_render_variables, soft_merge)
                 enriched_configs.append(enriched_config)
             except Exception:
                 logging.error(f'Failed to load yml {name}')
@@ -98,8 +97,9 @@ class ConfigUtil:
         sub = subliminal.copy()
         supr = superliminal.copy()
 
-        merged_superliminal = self.__merge_configs(supr, self.__get_superliminal(supr, soft_merge),
-                                                   is_render_variables, soft_merge)
+        merged_superliminal = self.__merge_configs(
+            supr, self.__get_superliminal(supr, soft_merge), is_render_variables, soft_merge
+        )
 
         sub[self.__EXECUTORS] = self.__merge_section(sub, merged_superliminal, self.__EXECUTORS)
         sub[self.__IMAGES] = self.__merge_section(sub, merged_superliminal, self.__IMAGES)
@@ -118,8 +118,9 @@ class ConfigUtil:
             else:
                 superliminal = self.__get_config(superliminal_name)
                 if not superliminal:
-                    supr_is_missing_msg = f"superliminal '{superliminal_name}' " + \
-                                          f"is missing from '{self.configs_path}'"
+                    supr_is_missing_msg = (
+                        f"superliminal '{superliminal_name}' " + f"is missing from '{self.configs_path}'"
+                    )
                     if soft_merge:
                         logging.warning(supr_is_missing_msg)
                     else:
@@ -161,25 +162,23 @@ class ConfigUtil:
         super2_pipeline_defaults = super2.get(self.__PIPELINE_DEFAULTS, {}).copy()
 
         super1[self.__PIPELINE_DEFAULTS] = super1_pipeline_defaults
-        super1[self.__PIPELINE_DEFAULTS][self.__BEFORE_TASKS] = \
-            super2_pipeline_defaults.pop(self.__BEFORE_TASKS, []) + super1_pipeline_defaults.pop(
-                self.__BEFORE_TASKS, [])
+        super1[self.__PIPELINE_DEFAULTS][self.__BEFORE_TASKS] = super2_pipeline_defaults.pop(
+            self.__BEFORE_TASKS, []
+        ) + super1_pipeline_defaults.pop(self.__BEFORE_TASKS, [])
 
         super2[self.__PIPELINE_DEFAULTS] = super2_pipeline_defaults
-        super1[self.__PIPELINE_DEFAULTS][self.__AFTER_TASKS] = \
-            super1_pipeline_defaults.pop(self.__AFTER_TASKS, []) + super2_pipeline_defaults.pop(
-                self.__AFTER_TASKS, [])
+        super1[self.__PIPELINE_DEFAULTS][self.__AFTER_TASKS] = super1_pipeline_defaults.pop(
+            self.__AFTER_TASKS, []
+        ) + super2_pipeline_defaults.pop(self.__AFTER_TASKS, [])
 
         # merge supers tasks
         return dict_util.merge_dicts(super1, super2, True)
 
     def snapshot_final_liminal_configs(self):
-        files_util.dump_liminal_configs(liminal_configs=self.loaded_subliminals,
-                                        path=self.snapshot_path)
+        files_util.dump_liminal_configs(liminal_configs=self.loaded_subliminals, path=self.snapshot_path)
 
     def __merge_section(self, subliminal, superliminal, section):
-        return self.__deep_list_keyword_merge(section[:-1], subliminal.get(section, []),
-                                              superliminal.get(section, []))
+        return self.__deep_list_keyword_merge(section[:-1], subliminal.get(section, []), superliminal.get(section, []))
 
     @staticmethod
     def __apply_pipeline_defaults(subliminal, superliminal, pipeline):
@@ -190,5 +189,4 @@ class ConfigUtil:
         subliminal_key_map = {item[unique_key_name]: item for item in subliminal_list_conf}
         superliminal_key_map = {item[unique_key_name]: item for item in superliminal_list_conf}
 
-        return list(dict_util.merge_dicts(superliminal_key_map, subliminal_key_map,
-                                          recursive=True).values())
+        return list(dict_util.merge_dicts(superliminal_key_map, subliminal_key_map, recursive=True).values())

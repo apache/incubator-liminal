@@ -45,3 +45,4 @@ apache-airflow-providers-cncf-kubernetes==1.0.2
 #apache-airflow-providers-google==4.0.0
 #apache-airflow[google,amazon,apache.spark]==2.0.0
 cfn-lint==0.53.0
+pre-commit==2.16.0

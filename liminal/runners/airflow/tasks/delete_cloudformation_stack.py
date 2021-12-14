@@ -20,8 +20,10 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 
-from liminal.runners.airflow.operators.cloudformation import CloudFormationDeleteStackOperator, \
-    CloudFormationDeleteStackSensor
+from liminal.runners.airflow.operators.cloudformation import (
+    CloudFormationDeleteStackOperator,
+    CloudFormationDeleteStackSensor,
+)
 from liminal.runners.airflow.tasks import airflow
 
 
@@ -30,10 +32,10 @@ class DeleteCloudFormationStackTask(airflow.AirflowTask):
     Deletes cloud_formation stack.
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, variables=None):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, variables)
+    def __init__(
+        self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
+    ):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables)
         self.stack_name = task_config['stack_name']
 
     def apply_task_to_dag(self):
@@ -42,7 +44,7 @@ class DeleteCloudFormationStackTask(airflow.AirflowTask):
             python_callable=self.__queued_dag_runs_exists,
             provide_context=True,
             trigger_rule=TriggerRule.ALL_DONE,
-            dag=self.dag
+            dag=self.dag,
         )
 
         delete_stack_task = self._add_variables_to_operator(
@@ -59,10 +61,7 @@ class DeleteCloudFormationStackTask(airflow.AirflowTask):
             )
         )
 
-        stack_delete_end_task = DummyOperator(
-            task_id=f'delete-end-{self.task_id}',
-            dag=self.dag
-        )
+        stack_delete_end_task = DummyOperator(task_id=f'delete-end-{self.task_id}', dag=self.dag)
 
         if self.parent:
             self.parent.set_downstream(check_dags_queued_task)

@@ -25,34 +25,28 @@ class TestDefaultsServiceConfig(TestCase):
     def test_apply(self):
         subliminal = {
             "services": [
-                {
-                    "name": "my_python_server",
-                    "type": "python_server",
-                    "image": "default_image"
-                },
-                {
-                    "name": "my_python_server_for_stg",
-                    "type": "python_server",
-                    "image": "test_image"
-                }
-            ]}
-
-        superliminal = {
-            "service_defaults": {
-                "param": "param1",
-                "param2": "param2"
-            }
+                {"name": "my_python_server", "type": "python_server", "image": "default_image"},
+                {"name": "my_python_server_for_stg", "type": "python_server", "image": "test_image"},
+            ]
         }
 
-        expected = [{'image': 'default_image',
-                     'name': 'my_python_server',
-                     'param': 'param1',
-                     'param2': 'param2',
-                     'type': 'python_server'},
-                    {'image': 'test_image',
-                     'name': 'my_python_server_for_stg',
-                     'param': 'param1',
-                     'param2': 'param2',
-                     'type': 'python_server'}]
+        superliminal = {"service_defaults": {"param": "param1", "param2": "param2"}}
+
+        expected = [
+            {
+                'image': 'default_image',
+                'name': 'my_python_server',
+                'param': 'param1',
+                'param2': 'param2',
+                'type': 'python_server',
+            },
+            {
+                'image': 'test_image',
+                'name': 'my_python_server_for_stg',
+                'param': 'param1',
+                'param2': 'param2',
+                'type': 'python_server',
+            },
+        ]
 
         self.assertEqual(expected, default_configs.apply_service_defaults(subliminal, superliminal))

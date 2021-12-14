@@ -64,16 +64,16 @@ def create_local_volume(conf, namespace='default') -> None:
     _LOG.info(f'Requested volume {name}')
 
     if name not in _LOCAL_VOLUMES:
-        matching_volumes = _kubernetes.list_persistent_volume(
-            field_selector=f'metadata.name={name}'
-        ).to_dict()['items']
+        matching_volumes = _kubernetes.list_persistent_volume(field_selector=f'metadata.name={name}').to_dict()[
+            'items'
+        ]
 
         while len(matching_volumes) == 0:
             _create_local_volume(conf, name)
             sleep(5)
-            matching_volumes = _kubernetes.list_persistent_volume(
-                field_selector=f'metadata.name={name}'
-            ).to_dict()['items']
+            matching_volumes = _kubernetes.list_persistent_volume(field_selector=f'metadata.name={name}').to_dict()[
+                'items'
+            ]
 
         pvc_name = conf.get('claim_name', f'{name}-pvc')
 
@@ -131,9 +131,7 @@ def _list_persistent_volume_claims(name):
 
 
 def _list_persistent_volumes(name):
-    return _kubernetes.list_persistent_volume(
-        field_selector=f'metadata.name={name}'
-    ).to_dict()['items']
+    return _kubernetes.list_persistent_volume(field_selector=f'metadata.name={name}').to_dict()['items']
 
 
 def _create_persistent_volume_claim(pvc_name, volume_name, namespace):
@@ -143,30 +141,21 @@ def _create_persistent_volume_claim(pvc_name, volume_name, namespace):
         'volumeMode': 'Filesystem',
         'storageClassName': 'local-storage',
         'accessModes': ['ReadWriteOnce'],
-        'resources': {
-            'requests': {
-                'storage': '100Gi'
-            }
-        }
+        'resources': {'requests': {'storage': '100Gi'}},
     }
 
     _kubernetes.create_namespaced_persistent_volume_claim(
         namespace,
         V1PersistentVolumeClaim(
-            api_version='v1',
-            kind='PersistentVolumeClaim',
-            metadata={'name': pvc_name},
-            spec=spec
-        )
+            api_version='v1', kind='PersistentVolumeClaim', metadata={'name': pvc_name}, spec=spec
+        ),
     )
 
 
 def _create_local_volume(conf, name):
     _LOG.info(f'Creating persistent volume {name} with spec {conf}')
     spec = {
-        'capacity': {
-            'storage': '100Gi'
-        },
+        'capacity': {'storage': '100Gi'},
         'volumeMode': 'Filesystem',
         'accessModes': ['ReadWriteOnce'],
         'persistentVolumeReclaimPolicy': 'Retain',
@@ -174,29 +163,14 @@ def _create_local_volume(conf, name):
         'nodeAffinity': {
             'required': {
                 'nodeSelectorTerms': [
-                    {
-                        'matchExpressions': [
-                            {
-                                'key': 'kubernetes.io/hostname',
-                                'operator': 'NotIn',
-                                'values': [
-                                    ''
-                                ]
-                            }
-                        ]
-                    }
+                    {'matchExpressions': [{'key': 'kubernetes.io/hostname', 'operator': 'NotIn', 'values': ['']}]}
                 ]
             }
-        }
+        },
     }
 
     spec.update(conf)
 
     _kubernetes.create_persistent_volume(
-        V1PersistentVolume(
-            api_version='v1',
-            kind='PersistentVolume',
-            metadata={'name': name},
-            spec=spec
-        )
+        V1PersistentVolume(api_version='v1', kind='PersistentVolume', metadata={'name': name}, spec=spec)
     )

@@ -37,10 +37,10 @@ class ContainerTask(task.Task, ABC):
     K8S Containerable task
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, variables=None):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, variables)
+    def __init__(
+        self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
+    ):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables)
         env = standalone_variable_backend.get_variable(ENV, DEFAULT)
         self.env_vars = self.__env_vars(env)
         self.image = self.task_config['image']
@@ -50,9 +50,7 @@ class ContainerTask(task.Task, ABC):
     def _kubernetes_cmds_and_arguments(self):
         cmds = ['/bin/sh', '-c']
 
-        arguments = [
-            self.task_config['cmd']
-        ]
+        arguments = [self.task_config['cmd']]
 
         return cmds, arguments
 
@@ -77,8 +75,7 @@ class ContainerTask(task.Task, ABC):
         env_vars = dict(self.task_config['env_vars']) if 'env_vars' in self.task_config else {}
         env_vars.update(self.__get_local_env_params_from_env_file())
         airflow_configuration_variable = get_variable(
-            f'''{self.pipeline_config['pipeline']}_dag_configuration''',
-            default_val=None
+            f'''{self.pipeline_config['pipeline']}_dag_configuration''', default_val=None
         )
 
         if airflow_configuration_variable:

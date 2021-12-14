@@ -58,8 +58,7 @@ class ImageBuilder:
             no_cache = '--no-cache=true'
 
         docker = 'docker' if shutil.which('docker') is not None else '/usr/local/bin/docker'
-        docker_build_command = f'{docker} build {no_cache} ' + \
-                               f'--tag {self.tag} '
+        docker_build_command = f'{docker} build {no_cache} ' + f'--tag {self.tag} '
 
         docker_build_command += f'--progress=plain {self._build_flags()} '
 
@@ -72,9 +71,9 @@ class ImageBuilder:
 
         docker_build_out = ''
         try:
-            docker_build_out = subprocess.check_output(docker_build_command,
-                                                       shell=True, stderr=subprocess.STDOUT,
-                                                       timeout=960)
+            docker_build_out = subprocess.check_output(
+                docker_build_command, shell=True, stderr=subprocess.STDOUT, timeout=960
+            )
         except subprocess.CalledProcessError as e:
             docker_build_out = e.output
             raise e

@@ -40,10 +40,8 @@ class KubernetesPodExecutor(executor.Executor):
 
     supported_task_types = [containerable.ContainerTask]
 
-    def __init__(self, task_id,
-                 liminal_config, executor_config):
-        super().__init__(task_id,
-                         liminal_config, executor_config)
+    def __init__(self, task_id, liminal_config, executor_config):
+        super().__init__(task_id, liminal_config, executor_config)
 
         self.task_name = self.executor_config['executor']
         self.volumes = self._volumes()
@@ -55,11 +53,7 @@ class KubernetesPodExecutor(executor.Executor):
         self._validate_task_type(task)
 
         pod_task = executor.add_variables_to_operator(
-            KubernetesPodOperator(
-                trigger_rule=task.trigger_rule,
-                **self.__kubernetes_kwargs(task)
-            ),
-            task
+            KubernetesPodOperator(trigger_rule=task.trigger_rule, **self.__kubernetes_kwargs(task)), task
         )
 
         if parent:
@@ -75,12 +69,7 @@ class KubernetesPodExecutor(executor.Executor):
             claim_name = volume_config.get('claim_name')
             if not claim_name and 'local' in volume_config:
                 claim_name = f'{name}-pvc'
-            volume = V1Volume(
-                name=name,
-                persistent_volume_claim={
-                    'claimName': claim_name
-                }
-            )
+            volume = V1Volume(name=name, persistent_volume_claim={'claimName': claim_name})
             volumes.append(volume)
         return volumes
 
@@ -105,13 +94,14 @@ class KubernetesPodExecutor(executor.Executor):
             'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__CLUSTER_CONTEXT', None),
             'cmds': task.cmds,
             'volume_mounts': [
-                V1VolumeMount(name=mount['volume'],
-                              mount_path=mount['path'],
-                              sub_path=mount.get('sub_path'),
-                              read_only=mount.get('read_only', False))
-                for mount
-                in task.mounts
-            ]
+                V1VolumeMount(
+                    name=mount['volume'],
+                    mount_path=mount['path'],
+                    sub_path=mount.get('sub_path'),
+                    read_only=mount.get('read_only', False),
+                )
+                for mount in task.mounts
+            ],
         }
 
         config.pop('in_cluster', None)
@@ -127,9 +117,11 @@ class KubernetesPodExecutor(executor.Executor):
             kubernetes_kwargs['namespace'] = 'jenkins'
 
         if not task.dag:
-            kubernetes_kwargs.update({
-                'start_date': datetime.datetime(1970, 1, 1),
-            })
+            kubernetes_kwargs.update(
+                {
+                    'start_date': datetime.datetime(1970, 1, 1),
+                }
+            )
 
         return kubernetes_kwargs
 
@@ -140,20 +132,10 @@ class KubernetesPodExecutor(executor.Executor):
                 "requiredDuringSchedulingIgnoredDuringExecution": [
                     {
                         "labelSelector": {
-                            "matchExpressions": [
-                                {
-                                    "key": "liminal",
-                                    "operator": "In",
-                                    "values": [
-                                        "unittest"
-                                    ]
-                                }
-                            ]
+                            "matchExpressions": [{"key": "liminal", "operator": "In", "values": ["unittest"]}]
                         },
-                        "namespaces": [
-                            "jenkins"
-                        ],
-                        "topologyKey": "kubernetes.io/hostname"
+                        "namespaces": ["jenkins"],
+                        "topologyKey": "kubernetes.io/hostname",
                     }
                 ]
             }

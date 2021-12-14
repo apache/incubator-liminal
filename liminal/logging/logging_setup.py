@@ -31,18 +31,13 @@ def logging_initialization():
     root_logger = logging.getLogger()
 
     log_formatter = logging.Formatter(
-        '[%(asctime)s] [%(filename)s:%(lineno)d] %(levelname)s - %(message)s',
-        '%m-%d %H:%M:%S'
+        '[%(asctime)s] [%(filename)s:%(lineno)d] %(levelname)s - %(message)s', '%m-%d %H:%M:%S'
     )
 
     logs_dir = os.path.join(environment.get_liminal_home(), LOGS_DIR)
     os.makedirs(logs_dir, exist_ok=True)
 
-    file_handler = RotatingFileHandler(
-        os.path.join(logs_dir, LOG_FILENAME),
-        maxBytes=MAX_FILE_SIZE,
-        backupCount=3
-    )
+    file_handler = RotatingFileHandler(os.path.join(logs_dir, LOG_FILENAME), maxBytes=MAX_FILE_SIZE, backupCount=3)
 
     root_logger.addHandler(file_handler)
     root_logger.setLevel(logging.INFO)

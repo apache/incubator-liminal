@@ -23,7 +23,6 @@ import pytz
 
 
 class DummyDagRun:
-
     def __init__(self) -> None:
         self.start_date = pytz.utc.localize(datetime.utcnow())
         self.conf = None
@@ -35,13 +34,14 @@ class DummyDagRun:
 
     def get_task_instance(self, _):
         return self
-      
+
+
 from datetime import datetime
 
 TASK_ID_SEPARATOR = '.'
 
-class DummyDag:
 
+class DummyDag:
     def __init__(self, dag_id, task_id):
         self.dag_id = dag_id
         self.task_id = task_id
@@ -57,7 +57,7 @@ class DummyDag:
             'task': self,
             'ti': self,
             'ts': datetime.now().timestamp(),
-            'dag_run': DummyDagRun()
+            'dag_run': DummyDagRun(),
         }
 
     def get_dagrun(self):

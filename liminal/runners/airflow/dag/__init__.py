@@ -19,7 +19,8 @@ import os
 from liminal.core import environment as env
 from liminal.runners.airflow.dag import liminal_register_dags
 
-BASE_PATH=os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR)
+BASE_PATH = os.path.join(env.get_airflow_home_dir(), env.DEFAULT_PIPELINES_SUBDIR)
+
 
 def register_dags():
     return liminal_register_dags.register_dags(BASE_PATH)

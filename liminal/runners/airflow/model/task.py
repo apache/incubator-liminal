@@ -32,8 +32,9 @@ class Task(ABC):
     Task.
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, variables=None):
+    def __init__(
+        self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
+    ):
         self.liminal_config = liminal_config
         self.dag = dag
         self.pipeline_config = pipeline_config

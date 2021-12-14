@@ -20,10 +20,12 @@ from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import BranchPythonOperator
 from flatdict import FlatDict
 
-from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
-    CloudFormationCreateStackSensor, CloudFormationHook
-from liminal.runners.airflow.operators.operator_with_variable_resolving import \
-    OperatorWithVariableResolving
+from liminal.runners.airflow.operators.cloudformation import (
+    CloudFormationCreateStackOperator,
+    CloudFormationCreateStackSensor,
+    CloudFormationHook,
+)
+from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
 from liminal.runners.airflow.tasks import airflow
 
 
@@ -32,10 +34,10 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
     Creates cloud_formation stack.
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, variables=None):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config,
-                         pipeline_config, task_config, variables)
+    def __init__(
+        self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
+    ):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables)
         self.stack_name = task_config['stack_name']
 
     def apply_task_to_dag(self):
@@ -50,10 +52,7 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
 
         create_cloudformation_stack_task = self._add_variables_to_operator(
             CloudFormationCreateStackOperator(
-                task_id=f'create-cloudformation-{self.task_id}',
-                params={
-                    **self.__reformatted_params()
-                }
+                task_id=f'create-cloudformation-{self.task_id}', params={**self.__reformatted_params()}
             )
         )
 
@@ -65,9 +64,7 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
         )
 
         stack_creation_end_task = DummyOperator(
-            task_id=f'creation-end-{self.task_id}',
-            trigger_rule='all_done',
-            dag=self.dag
+            task_id=f'creation-end-{self.task_id}', trigger_rule='all_done', dag=self.dag
         )
 
         if self.parent:
@@ -83,8 +80,7 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
     def __cloudformation_stack_running_branch(self, stack_name):
         cloudformation = CloudFormationHook().get_conn()
         try:
-            stack_status = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0][
-                'StackStatus']
+            stack_status = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]['StackStatus']
             if stack_status in ['CREATE_COMPLETE', 'DELETE_FAILED']:
                 print(f'Stack {stack_name} is running')
                 return f'creation-end-{self.task_id}'
@@ -104,6 +100,8 @@ class CreateCloudFormationStackTask(airflow.AirflowTask):
         return {
             'StackName': self.stack_name,
             **self.task_config['properties'],
-            'Parameters': [{'ParameterKey': x, 'ParameterValue': str(y)} for (x, y) in
-                           FlatDict(self.task_config['properties']['Parameters']).items()]
+            'Parameters': [
+                {'ParameterKey': x, 'ParameterValue': str(y)}
+                for (x, y) in FlatDict(self.task_config['properties']['Parameters']).items()
+            ],
         }

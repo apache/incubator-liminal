@@ -61,8 +61,7 @@ def register_dags(configs_path):
 
             executors = __initialize_executors(config)
 
-            default_executor = airflow.AirflowExecutor("default_executor", liminal_config=config,
-                                                       executor_config={})
+            default_executor = airflow.AirflowExecutor("default_executor", liminal_config=config, executor_config={})
 
             for pipeline in config['pipelines']:
                 default_args = __default_args(pipeline)
@@ -80,16 +79,18 @@ def register_dags(configs_path):
                         liminal_config=config,
                         pipeline_config=pipeline,
                         task_config=task,
-                        variables=config.get('variables', {})
+                        variables=config.get('variables', {}),
                     )
 
                     executor_id = task.get('executor')
                     if executor_id:
                         executor = executors[executor_id]
                     else:
-                        logging.info(f"Did not find `executor` in ${task['task']} config."
-                                     f" Using the default executor (${type(default_executor)})"
-                                     f" instead.")
+                        logging.info(
+                            f"Did not find `executor` in ${task['task']} config."
+                            f" Using the default executor (${type(default_executor)})"
+                            f" instead."
+                        )
                         executor = default_executor
 
                     parent = executor.apply_task_to_dag(task=task_instance)
@@ -109,9 +110,7 @@ def __initialize_executors(liminal_config):
     executors = {}
     for executor_config in liminal_config.get('executors', {}):
         executors[executor_config['executor']] = get_executor_class(executor_config['type'])(
-            executor_config['executor'],
-            liminal_config,
-            executor_config
+            executor_config['executor'], liminal_config, executor_config
         )
     return executors
 
@@ -141,7 +140,7 @@ def __initialize_dag(default_args, pipeline, owner):
         dagrun_timeout=timedelta(minutes=pipeline['timeout_minutes']),
         start_date=start_date,
         schedule_interval=schedule_interval,
-        catchup=False
+        catchup=False,
     )
 
     return dag
@@ -151,9 +150,7 @@ def __default_args(pipeline):
     default_args = {k: v for k, v in pipeline.items()}
     override_args = {
         'start_date': datetime.combine(pipeline['start_date'], datetime.min.time()),
-        __DEPENDS_ON_PAST: default_args[
-            __DEPENDS_ON_PAST
-        ] if __DEPENDS_ON_PAST in default_args else False,
+        __DEPENDS_ON_PAST: default_args[__DEPENDS_ON_PAST] if __DEPENDS_ON_PAST in default_args else False,
     }
     default_args.update(override_args)
     return default_args
@@ -170,8 +167,8 @@ tasks_by_liminal_name = class_util.find_subclasses_in_packages([impl_packages], 
 logging.info(f'Finished loading task implementations: {tasks_by_liminal_name.keys()}')
 
 executors_by_liminal_name = class_util.find_subclasses_in_packages(
-    ['liminal.runners.airflow.executors'],
-    liminal_executor.Executor)
+    ['liminal.runners.airflow.executors'], liminal_executor.Executor
+)
 
 logging.info(f'Finished loading executor implementations: {executors_by_liminal_name.keys()}')
 

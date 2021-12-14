@@ -39,35 +39,23 @@ class OperatorWithVariableResolving(BaseOperator):
     Operator delegator that handles liminal variable substitution at run time
     """
 
-    def __init__(self,
-                 dag,
-                 task_config: dict,
-                 variables: dict = None,
-                 liminal_task_instance=None,
-                 **kwargs):
+    def __init__(self, dag, task_config: dict, variables: dict = None, liminal_task_instance=None, **kwargs):
         self.operator_delegate: BaseOperator = kwargs.pop('operator')
-        self.liminal_task_instance = \
-            liminal_task_instance.serialize() if liminal_task_instance else None
+        self.liminal_task_instance = liminal_task_instance.serialize() if liminal_task_instance else None
         if variables:
             self.variables = variables.copy()
         else:
             self.variables = {}
         self.task_config = task_config
-        super().__init__(
-            task_id=self.operator_delegate.task_id,
-            dag=dag
-        )
+        super().__init__(task_id=self.operator_delegate.task_id, dag=dag)
         self._LOG = logging.getLogger(self.__class__.__name__)
 
     def execute(self, context):
         attributes = self._get_operator_delegate_attributes()
         self._LOG.info(f'task_config: {self.task_config}')
         self._LOG.info(f'variables: {self.variables}')
-        self.operator_delegate.template_fields = set(list(self.operator_delegate.template_fields) +
-                                                     attributes)
-        self.operator_delegate.render_template_fields(context,
-                                                      LiminalEnvironment(self.variables,
-                                                                         self.task_config))
+        self.operator_delegate.template_fields = set(list(self.operator_delegate.template_fields) + attributes)
+        self.operator_delegate.render_template_fields(context, LiminalEnvironment(self.variables, self.task_config))
         self.operator_delegate.render_template_fields(context)
 
         if 'ti' in context:
@@ -80,8 +68,10 @@ class OperatorWithVariableResolving(BaseOperator):
 
     def _get_operator_delegate_attributes(self):
         return [
-            attr for attr in dir(self.operator_delegate) if
-            attr not in _BASE_OPERATOR_ATTRIBUTES and attr not in dir(BaseOperator)
+            attr
+            for attr in dir(self.operator_delegate)
+            if attr not in _BASE_OPERATOR_ATTRIBUTES
+            and attr not in dir(BaseOperator)
             and not attr.startswith('_')
             and attr not in ('args', 'kwargs', 'lineage_data', 'subdag', 'template_fields')
         ]
@@ -92,16 +82,19 @@ class OperatorWithVariableResolving(BaseOperator):
     def on_kill(self) -> None:
         self.operator_delegate.on_kill()
 
-    def render_template_fields(self, context: Dict,
-                               jinja_env: Optional[jinja2.Environment] = None) -> None:
+    def render_template_fields(self, context: Dict, jinja_env: Optional[jinja2.Environment] = None) -> None:
         pass
 
-    def render_template(self, content: Any, context: Dict,
-                        jinja_env: Optional[jinja2.Environment] = None,
-                        seen_oids: Optional[Set] = None) -> Any:
-        value = self.operator_delegate.render_template(content, context,
-                                                       LiminalEnvironment(self.variables,
-                                                                          self.task_config))
+    def render_template(
+        self,
+        content: Any,
+        context: Dict,
+        jinja_env: Optional[jinja2.Environment] = None,
+        seen_oids: Optional[Set] = None,
+    ) -> Any:
+        value = self.operator_delegate.render_template(
+            content, context, LiminalEnvironment(self.variables, self.task_config)
+        )
         return self.operator_delegate.render_template(value, context, jinja_env, seen_oids)
 
     def get_template_env(self) -> jinja2.Environment:
@@ -113,16 +106,25 @@ class OperatorWithVariableResolving(BaseOperator):
     def resolve_template_files(self) -> None:
         self.operator_delegate.resolve_template_files()
 
-    def clear(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None,
-              upstream: bool = False, downstream: bool = False, session: Session = None):
+    def clear(
+        self,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        upstream: bool = False,
+        downstream: bool = False,
+        session: Session = None,
+    ):
         return self.operator_delegate.clear(start_date, end_date, upstream, downstream, session)
 
-    def run(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None,
-            ignore_first_depends_on_past: bool = True, ignore_ti_state: bool = False,
-            mark_success: bool = False) -> None:
-        self.operator_delegate.run(start_date, end_date, ignore_first_depends_on_past,
-                                   ignore_ti_state,
-                                   mark_success)
+    def run(
+        self,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        ignore_first_depends_on_past: bool = True,
+        ignore_ti_state: bool = False,
+        mark_success: bool = False,
+    ) -> None:
+        self.operator_delegate.run(start_date, end_date, ignore_first_depends_on_past, ignore_ti_state, mark_success)
 
 
 class LiminalEnvironment(Environment):
@@ -158,28 +160,16 @@ class LiminalEnvironment(Environment):
             prefix = self.__render(token[1], dag_run_conf, unresolved_tags)
             suffix = self.__render(token[3], dag_run_conf, unresolved_tags)
             if dag_run_conf and tag_name in dag_run_conf:
-                return self.__render(prefix + str(dag_run_conf[tag_name]) + suffix,
-                                     dag_run_conf,
-                                     unresolved_tags)
+                return self.__render(prefix + str(dag_run_conf[tag_name]) + suffix, dag_run_conf, unresolved_tags)
             elif tag_name in self.variables:
-                return self.__render(prefix + str(self.variables[tag_name]) + suffix,
-                                     dag_run_conf,
-                                     unresolved_tags)
+                return self.__render(prefix + str(self.variables[tag_name]) + suffix, dag_run_conf, unresolved_tags)
             else:
                 backend_value = standalone_variable_backend.get_variable(tag_name, None)
                 if backend_value:
-                    return self.__render(
-                        prefix + backend_value + suffix,
-                        dag_run_conf,
-                        unresolved_tags
-                    )
+                    return self.__render(prefix + backend_value + suffix, dag_run_conf, unresolved_tags)
                 else:
                     unresolved_tags.add(tag_name)
-                    return self.__render(
-                        prefix + '{{' + token[2] + '}}' + suffix,
-                        dag_run_conf,
-                        unresolved_tags
-                    )
+                    return self.__render(prefix + '{{' + token[2] + '}}' + suffix, dag_run_conf, unresolved_tags)
         else:
             return val
 
@@ -197,5 +187,5 @@ def add_variables_to_operator(operator, task) -> BaseOperator:
         task_config=task.task_config,
         variables=task.variables,
         liminal_task_instance=task,
-        operator=operator
+        operator=operator,
     )

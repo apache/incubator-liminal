@@ -43,11 +43,9 @@ class TestPythonImageBuilder(TestCase):
         self.__remove_dir(self.temp_airflow_dir)
 
     def test_build(self):
-        for python_version in [None,
-                               PythonImageVersions().supported_versions[0]]:
+        for python_version in [None, PythonImageVersions().supported_versions[0]]:
             build_out = self.__test_build(python_version=python_version)
-        self.assertTrue('RUN pip install -r requirements.txt' in build_out,
-                        'Incorrect pip command')
+        self.assertTrue('RUN pip install -r requirements.txt' in build_out, 'Incorrect pip command')
 
         self.__test_image()
 
@@ -56,7 +54,8 @@ class TestPythonImageBuilder(TestCase):
 
         self.assertTrue(
             'RUN --mount=type=secret,id=pip_config,dst=/etc/pip.conf  pip install' in build_out,
-            'Incorrect pip command')
+            'Incorrect pip command',
+        )
 
         self.__test_image()
 
@@ -75,10 +74,9 @@ class TestPythonImageBuilder(TestCase):
         if python_version:
             config['python_version'] = python_version
 
-        builder = PythonImageBuilder(config=config,
-                                     base_path=base_path,
-                                     relative_source_path='write_inputs',
-                                     tag=self.__IMAGE_NAME)
+        builder = PythonImageBuilder(
+            config=config, base_path=base_path, relative_source_path='write_inputs', tag=self.__IMAGE_NAME
+        )
 
         build_out = str(builder.build())
 
@@ -90,18 +88,12 @@ class TestPythonImageBuilder(TestCase):
 
         cmds = ['/bin/bash', '-c', 'python write_inputs.py']
 
-        container_log = docker_client.containers.run(self.__IMAGE_NAME,
-                                                     cmds,
-                                                     volumes={
-                                                         self.temp_dir: {
-                                                             'bind': '/mnt/vol1',
-                                                             'mode': 'rw'
-                                                         }
-                                                     },
-                                                     environment={
-                                                         'NUM_FILES': 10,
-                                                         'NUM_SPLITS': 3
-                                                     })
+        container_log = docker_client.containers.run(
+            self.__IMAGE_NAME,
+            cmds,
+            volumes={self.temp_dir: {'bind': '/mnt/vol1', 'mode': 'rw'}},
+            environment={'NUM_FILES': 10, 'NUM_SPLITS': 3},
+        )
 
         docker_client.close()
 
@@ -120,7 +112,8 @@ class TestPythonImageBuilder(TestCase):
             "Writing input file /mnt/vol1/inputs/2/input8.json\\n"
             "Writing input file /mnt/vol1/inputs/0/input9.json\\n"
             "'",
-            str(container_log))
+            str(container_log),
+        )
 
     def __create_conf(self, task_id):
         return {

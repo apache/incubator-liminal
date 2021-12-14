@@ -32,11 +32,9 @@ for directory in os.listdir(inputs_dir):
     logging.info(f'Running write_outputs for split id {directory}')
     inputs_dir_file = os.path.join(inputs_dir, directory)
     for filename in os.listdir(inputs_dir_file):
-        with open(os.path.join(inputs_dir_file, filename)) as infile, \
-                open(os.path.join(
-                    outputs_dir,
-                    filename.replace('input', 'output').replace('.json', '.txt')
-                ), 'w') as outfile:
+        with open(os.path.join(inputs_dir_file, filename)) as infile, open(
+            os.path.join(outputs_dir, filename.replace('input', 'output').replace('.json', '.txt')), 'w'
+        ) as outfile:
             logging.info(f'Writing output file: {outfile.name}')
             data = json.loads(infile.read())
             outfile.write(data['mykey'])

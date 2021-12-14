@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,16 +14,27 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+---
+minimum_pre_commit_version: "2.16.0"
+exclude: >
+  (?x)^(
+      .+/.venv/.+|.+/dist/.+|.+/.autovenv|.+/docs/|.github
+  )$
+fail_fast: true
+default_language_version:
+  python: python3
+default_stages:
+  - prepare-commit-msg
+  - commit
+  # - push
 
-
-from datetime import datetime
-
-from airflow import DAG
-
-
-def create_dag():
-    """
-    Test util to create a basic DAG for testing.
-    """
-
-    return DAG(dag_id='test_dag', default_args={'start_date': datetime(1970, 1, 1)})
+repos:
+  - repo: https://github.com/psf/black
+    rev: 21.12b0
+    hooks:
+      - id: black
+        args: [ --safe, --quiet ]
+        files: \.pyi?$
+        exclude: .github/
+        # override until resolved: https://github.com/psf/black/issues/402
+        types: [ ]

@@ -53,7 +53,8 @@ def __build_image(base_path, builder_config, builder):
         config=builder_config,
         base_path=base_path,
         relative_source_path=builder_config['source'],
-        tag=builder_config['image'])
+        tag=builder_config['image'],
+    )
     builder_instance.build()
 
 
@@ -67,9 +68,7 @@ logging.info(f'Loading image builder implementations..')
 image_builders_package = 'liminal.build.image'
 # user_image_builders_package = 'TODO: user_image_builders_package'
 
-image_builder_types = class_util.find_subclasses_in_packages(
-    [image_builders_package],
-    ImageBuilder)
+image_builder_types = class_util.find_subclasses_in_packages([image_builders_package], ImageBuilder)
 
 logging.info(f'Finished loading image builder implementations: {image_builder_types}')
 logging.info(f'Loading service image builder implementations..')
