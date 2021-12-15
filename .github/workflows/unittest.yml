@@ -9,6 +9,9 @@ on:
   pull_request:
     branches:
       - master
+  # Trigger the workflow on cron schedule
+  schedule:
+    - cron: '7 0 * * *'
 
 jobs:
   unittest:
