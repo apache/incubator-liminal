@@ -25,7 +25,9 @@ from liminal.runners.airflow.operators.cloudformation import (
     CloudFormationCreateStackSensor,
     CloudFormationHook,
 )
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
 from liminal.runners.airflow.tasks import airflow
 
 

@@ -20,7 +20,7 @@ from itertools import chain
 
 from flatdict import FlatDict
 
-from liminal.runners.airflow.tasks import hadoop, containerable
+from liminal.runners.airflow.tasks import containerable, hadoop
 
 
 class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
@@ -64,7 +64,7 @@ class SparkTask(hadoop.HadoopTask, containerable.ContainerTask):
 
         source_code = self.task_config.get("application_source")
 
-        for conf_arg in ['{}={}'.format(k, v) for (k, v) in FlatDict(self.task_config.get('conf', {})).items()]:
+        for conf_arg in [f'{k}={v}' for (k, v) in FlatDict(self.task_config.get('conf', {})).items()]:
             flat_conf_args.append('--conf')
             flat_conf_args.append(conf_arg)
 

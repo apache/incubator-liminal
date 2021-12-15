@@ -41,7 +41,7 @@ pipelines:
 In the example above we define an `executor` of type `kubernetes` with custom resources
 configuration.
 
-`executors` is a section in the root of your liminal.yml file and is a list of `executor`s defined 
+`executors` is a section in the root of your liminal.yml file and is a list of `executor`s defined
 by the following attributes:
 
 ## executor attributes

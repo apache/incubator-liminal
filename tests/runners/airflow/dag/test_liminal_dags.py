@@ -22,7 +22,10 @@ from unittest import TestCase, mock
 
 from liminal.core.config.config import ConfigUtil
 from liminal.runners.airflow.dag import liminal_register_dags
-from liminal.runners.airflow.operators.job_status_operator import JobEndOperator, JobStartOperator
+from liminal.runners.airflow.operators.job_status_operator import (
+    JobEndOperator,
+    JobStartOperator,
+)
 
 
 class Test(TestCase):

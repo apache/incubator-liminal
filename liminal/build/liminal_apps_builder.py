@@ -21,7 +21,7 @@ import os
 
 from liminal.build.image_builder import ImageBuilder
 from liminal.core.config.config import ConfigUtil
-from liminal.core.util import files_util, class_util
+from liminal.core.util import class_util, files_util
 
 
 def build_liminal_apps(path):

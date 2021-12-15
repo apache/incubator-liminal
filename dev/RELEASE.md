@@ -118,7 +118,7 @@ This can be any string which results in a legal call to:
 pip install ${LIMINAL_VERSION}
 ```
 
-This includes 
+This includes
 - A standard pip version like apache-liminal==0.0.1dev1 avail from pypi
 - A URL for git e.g. git+https://github.com/apache/incubator-liminal.git
 - A string indicating where to get the package from like --index <url> apache-liminal==xyz
@@ -128,16 +128,16 @@ in the scripts/ folder)
 This is useful if you are making changes in liminal locally and want to test them.
 
 If you don't specify this variable, liminal attempts to discover how to install itself
-by running a pip freeze and looking at the result. 
+by running a pip freeze and looking at the result.
 This covers pip repositories, files and installtion from URL.
 
-The fallback in case no string is found, is simply 'apache-liminal' assuming your .pypirc contains an 
+The fallback in case no string is found, is simply 'apache-liminal' assuming your .pypirc contains an
 index which has this package.
 
 
 ## Testing a version from testpypi:
 
-Installing liminal locally: 
+Installing liminal locally:
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple apache-liminal
 
 Tell liminal where to take the version to put inside the airflow docker:
@@ -240,7 +240,7 @@ The Release Candidate artifacts we vote upon should be the exact ones we vote ag
 export LIMINAL_BUILD_VERSION=0.0.1rc1-incubating
 
 # Example after cloning
-git clone https://github.com/apache/incubating-liminal.git 
+git clone https://github.com/apache/incubating-liminal.git
 cd incubating-liminal
 ```
 
@@ -249,7 +249,7 @@ cd incubating-liminal
 # Set Version
 sed -i '/^current_version /s/=.*$/= '"$LIMINAL_BUILD_VERSION"'/' .bumpversion.cfg
 ```
-  
+
 - Tag your release
 
 ```bash

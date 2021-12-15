@@ -29,8 +29,12 @@ from liminal.runners.airflow.operators.cloudformation import (
     CloudFormationCreateStackSensor,
     CloudFormationHook,
 )
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
-from liminal.runners.airflow.tasks.create_cloudformation_stack import CreateCloudFormationStackTask
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
+from liminal.runners.airflow.tasks.create_cloudformation_stack import (
+    CreateCloudFormationStackTask,
+)
 from tests.util import dag_test_utils
 
 

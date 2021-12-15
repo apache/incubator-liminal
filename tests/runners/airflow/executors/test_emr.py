@@ -28,7 +28,9 @@ from moto import mock_emr
 
 from liminal.runners.airflow import DummyDag
 from liminal.runners.airflow.executors.emr import EMRExecutor
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
 from liminal.runners.airflow.tasks import hadoop
 from tests.util import dag_test_utils
 

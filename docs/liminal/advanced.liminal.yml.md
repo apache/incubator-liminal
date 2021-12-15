@@ -227,7 +227,7 @@ pipeline_defaults:
       type: python
       image: myorg/myrepo:mypythonapp
       cmd: python -u my_teardown_module2.py
-```  
+```
 
 In the example above we set a list of `tasks` in `pipeline_defaults` which leads to each pipeline
 defined in our liminal.yml file will have `my_common_setup_task` run before its tasks and

@@ -33,4 +33,3 @@ The `delete_cloudformation_stack` task allows you to delete stack
 `task`: name of your task (must be made of alphanumeric, dash and/or underscore characters only).
 
 `stack_name`: the name of the stack to delete
-

@@ -94,8 +94,20 @@ Now on every commit, `pre-commit` will use a git hook to run the tools.
 
 ### Resolving failed commits
 
-* If `black` fail, they have reformatted your code. `git add` and `git commit` the changes.
+* If `black` fail, they have reformatted your code.
+* You should check the changes made. Then simply "git add --update ." and re-commit or `git add` and `git commit` the changes.
 
 Example:
 
 ![Fixing black failed commits](https://user-images.githubusercontent.com/16241795/146011210-7bc11b24-2033-43f7-8150-5ece4fe7bfea.png)
+
+### EnabledHooks
+
+1. [black](https://black.readthedocs.io/en/stable/): a Python automatic code formatter
+1. [yamllint](https://yamllint.readthedocs.io/): A linter for YAML files.
+  yamllint does not only check for syntax validity, but for weirdnesses like key repetition and cosmetic problems such as lines length, trailing spaces, indentation, etc.
+1. [OutOfBoxHooks](https://github.com/pre-commit/pre-commit-hooks) - Out-of-the-box hooks for pre-commit like Check for files that  contain merge conflict strings
+1. [Bandit](https://bandit.readthedocs.io/en/latest/) is a tool designed to find common security issues in Python code.
+1. [blacken-docs](https://github.com/asottile/blacken-docs) Run `black` on python code blocks in documentation files
+1. [pyupgrade](https://github.com/asottile/pyupgrade) A tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language.
+1. [isort](https://pycqa.github.io/isort/) A Python utility / library to sort imports.

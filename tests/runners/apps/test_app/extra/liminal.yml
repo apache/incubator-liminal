@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 ---
 name: extra_liminal
 type: super
@@ -28,11 +28,11 @@ images:
   - image: my_static_input_task_image
     type: python
     source: helloworld
-    no_cache: True
+    no_cache: true
   - image: my_task_output_input_task_image
     type: python
     source: helloworld
-    no_cache: True
+    no_cache: true
 pipeline_defaults:
   tasks:
     - task: my_static_input_task
@@ -40,17 +40,17 @@ pipeline_defaults:
       description: static input task
       image: my_static_input_task_image
       env_vars:
-        env2: "b"
+        env2: b
       cmd: python -u hello_world.py
     - task: extenable
       type: pipeline
       description: optional sub tasks
     - task: my_task_output_input_task
       type: python
-      no_cache: True
+      no_cache: true
       description: task with input from other task's output
       image: my_task_output_input_task_image
       env_vars:
-        env1: "c"
-        env2: "b"
+        env1: c
+        env2: b
       cmd: python -u hello_world.py

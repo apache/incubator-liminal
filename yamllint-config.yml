@@ -14,3 +14,38 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+---
+# https://yamllint.readthedocs.io/en/stable/
+extends: default
+
+locale: en_US.UTF-8
+
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - .yamllint
+
+rules:
+  line-length:
+    max: 110
+    # level: warning
+  brackets: enable
+  colons: enable
+  commas: enable
+  empty-lines: enable
+  empty-values: disable
+  key-duplicates: disable
+  hyphens: enable
+  key-ordering: disable
+  new-line-at-end-of-file: enable
+  new-lines: enable
+  # quoted-strings: disable
+  truthy:
+    level: warning
+  indentation:
+    spaces: 2
+    indent-sequences: true
+ignore: |
+  docs/
+  .asf.yaml

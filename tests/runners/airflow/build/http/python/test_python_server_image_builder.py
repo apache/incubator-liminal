@@ -27,8 +27,8 @@ from unittest import TestCase
 
 import docker
 
-from liminal.build.python import PythonImageVersions
 from liminal.build.image.python_server.python_server import PythonServerImageBuilder
+from liminal.build.python import PythonImageVersions
 
 IMAGE_NAME = 'liminal_server_image'
 

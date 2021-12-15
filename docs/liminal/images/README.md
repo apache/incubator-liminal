@@ -29,13 +29,13 @@ images:
     source: .
   - image: myorg/myrepo:myserver
     type: python_server
-    source: path/to/my/server/code 
+    source: path/to/my/server/code
     endpoints:
       - endpoint: /myendpoint
         module: my_module
 ```
 
-`images` is a section in the root lof your liminal.yml file and is a list of `image`s, defined 
+`images` is a section in the root lof your liminal.yml file and is a list of `image`s, defined
 by the following attributes:
 
 ## image attributes

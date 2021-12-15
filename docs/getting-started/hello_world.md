@@ -74,7 +74,7 @@ Create a kubernetes local volume:
 liminal create
 ```
 ```BASH
-liminal deploy --clean  
+liminal deploy --clean
 ```
 The deploy command deploys a liminal server and deploys any liminal.yml files in your working
 directory or any of its subdirectories to your liminal home directory.
@@ -89,7 +89,7 @@ liminal start
 ```
 The start command spins up the liminal server containers which will run pipelines based on your
 deployed liminal.yml files.
-It runs the following three containers: 
+It runs the following three containers:
 * liminal-postgress
 * liminal-webserver
 * liminal-scheduler
@@ -103,7 +103,7 @@ By default liminal server starts Apache Airflow servers and admin UI will be tha
 
 ***Important:** Set off/on toggle to activate your pipeline (DAG), nothing will happen otherwise!*
 
-You can go to graph view to see all the tasks configured in the liminal.yml file: 
+You can go to graph view to see all the tasks configured in the liminal.yml file:
 [http://localhost:8080/admin/airflow/graph?dag_id=example_pipeline](
 http://localhost:8080/admin/airflow/graph?dag_id=example_pipeline
 )

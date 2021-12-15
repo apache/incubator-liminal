@@ -1,4 +1,3 @@
-<!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -15,24 +14,3 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
--->
-
-# Services
-
-In the `services` section you can configure constantly running applications such as
-servers.
-
-```yaml
-services:
-  - service: my_server
-    image: myorg/myrepo:myserver
-```
-
-`services` is a section in the root lof your liminal.yml file and is a list of `service`s, defined
-by the following attributes:
-
-## service attributes
-
-`service`: name of your service.
-
-`image`: the service's docker image.

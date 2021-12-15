@@ -20,4 +20,3 @@ Replace this: describe the PR status. Examples:
 
 - [ ] [PreCommitChecks - Code linting](../CONTRIBUTING.md#InstallRunPreCommit) (required)
 - [ ] [Tests](../CONTRIBUTING.md#RunningTests)
-
