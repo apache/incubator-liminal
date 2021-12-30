@@ -27,6 +27,7 @@ import sys
 import click
 
 import scripts
+from liminal import settings
 from liminal.build import liminal_apps_builder
 from liminal.core import environment
 from liminal.core.config.config import ConfigUtil
@@ -36,6 +37,7 @@ from liminal.logging.logging_setup import logging_initialization
 from liminal.runners.airflow import dag
 
 logging_initialization()
+settings.initialize()
 
 try:
     import importlib.resources as pkg_resources
@@ -65,7 +67,7 @@ def build(path):
     if docker_is_running():
         liminal_apps_builder.build_liminal_apps(path)
     configs = ConfigUtil(path).safe_load(is_render_variables=True,
-                                                      soft_merge=True)
+                                         soft_merge=True)
     for config in configs:
         if config.get('volumes'):
             logging.info(f'local volume is being created')
@@ -141,6 +143,7 @@ def deploy_liminal_apps(path, clean):
     liminal_home = environment.get_liminal_home()
     os.makedirs(liminal_home, exist_ok=True)
     os.makedirs(environment.get_dags_dir(), exist_ok=True)
+
     deploy_liminal_core_internal(liminal_home, clean)
     config_files = files_util.find_config_files(path)
     for config_file in config_files:
@@ -149,6 +152,7 @@ def deploy_liminal_apps(path, clean):
         target_yml_name = os.path.join(environment.get_dags_dir(), relative_path)
         pathlib.Path(target_yml_name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(config_file, target_yml_name)
+
 
 def liminal_is_running():
     stdout, stderr = docker_compose_command('ps', [])
@@ -177,6 +181,7 @@ def logs(follow, tail):
             stdout, stderr = docker_compose_command('logs', [f'--tail={tail}'])
             logging.info(stdout)
 
+
 @cli.command("start",
              short_help="starts a local airflow in docker compose. should be run after deploy. " +
                         "Make sure docker is running on your machine")
@@ -193,13 +198,14 @@ def start(detached_mode):
         else:
             docker_compose_command('up', [])
 
+
 @cli.command("delete", short_help="delete liminal resource registration")
 @click.option('--path', default=os.getcwd(), help='Delete within this path.')
 @click.option('--clean', is_flag=True, default=False,
               help="Delete all resource: DAGs, Volumes")
 def delete(path, clean):
     configs = ConfigUtil(path).safe_load(is_render_variables=True,
-                                                    soft_merge=True)
+                                         soft_merge=True)
     for config in configs:
         if config.get('volumes'):
             logging.info(f'local volume is being deleted')
@@ -210,6 +216,7 @@ def delete(path, clean):
         dir_path = os.path.abspath(environment.get_liminal_home())
         shutil.rmtree(dir_path)
         docker_compose_command('down', ['--remove-orphans', '--rmi', 'local'])
+
 
 def get_docker_compose_paths():
     # noinspection PyTypeChecker

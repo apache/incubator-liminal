@@ -19,9 +19,8 @@
 import logging
 import os
 
-from liminal.build.image_builder import ImageBuilder
 from liminal.core.config.config import ConfigUtil
-from liminal.core.util import class_util, files_util
+from liminal.core.util import class_util, files_util, extensible
 
 
 def build_liminal_apps(path):
@@ -64,11 +63,8 @@ def __get_image_builder_class(task_type):
 
 logging.info(f'Loading image builder implementations..')
 
-# TODO: add configuration for user image builders package
-image_builders_package = 'liminal.build.image'
-# user_image_builders_package = 'TODO: user_image_builders_package'
-
-image_builder_types = class_util.find_subclasses_in_packages([image_builders_package], ImageBuilder)
+image_builder_types = extensible.load_image_builders()
+print(image_builder_types)
 
 logging.info(f'Finished loading image builder implementations: {image_builder_types}')
 logging.info(f'Loading service image builder implementations..')

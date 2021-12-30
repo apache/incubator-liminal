@@ -16,8 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from datetime import datetime
 from unittest.mock import MagicMock
+from datetime import datetime
 
 import pytz
 
@@ -35,11 +35,9 @@ class DummyDagRun:
     def get_task_instance(self, _):
         return self
 
-
 from datetime import datetime
 
 TASK_ID_SEPARATOR = '.'
-
 
 class DummyDag:
     def __init__(self, dag_id, task_id):

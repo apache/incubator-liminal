@@ -22,11 +22,9 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 
+from liminal.core.util import extensible
 from liminal.core.config.config import ConfigUtil
-from liminal.core.util import class_util
 from liminal.runners.airflow.executors import airflow
-from liminal.runners.airflow.model import executor as liminal_executor
-from liminal.runners.airflow.model.task import Task
 
 __DEPENDS_ON_PAST = 'depends_on_past'
 
@@ -158,17 +156,11 @@ def __default_args(pipeline):
 
 logging.info(f'Loading task implementations..')
 
-# TODO: add configuration for user tasks package
-impl_packages = 'liminal.runners.airflow.tasks'
-user_task_package = 'TODO: user_tasks_package'
-
-tasks_by_liminal_name = class_util.find_subclasses_in_packages([impl_packages], Task)
+tasks_by_liminal_name = extensible.load_tasks()
 
 logging.info(f'Finished loading task implementations: {tasks_by_liminal_name.keys()}')
 
-executors_by_liminal_name = class_util.find_subclasses_in_packages(
-    ['liminal.runners.airflow.executors'], liminal_executor.Executor
-)
+executors_by_liminal_name = extensible.load_executors()
 
 logging.info(f'Finished loading executor implementations: {executors_by_liminal_name.keys()}')
 

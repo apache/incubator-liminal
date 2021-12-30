@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -16,23 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+FROM alpine:3.4
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+WORKDIR /app
 
-yes | pip uninstall apache-liminal
-
-cd "$DIR" || exit
-
-rm -rf build
-rm -rf dist
-rm "${LIMINAL_HOME:-${HOME}/liminal_home}"/*.whl
-
-python setup.py sdist bdist_wheel
-
-pip install dist/*.whl
-
-mkdir -p "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cp dist/*.whl "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cd - || exit
+COPY . /app/

@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -16,23 +15,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from plugins.tasks import custom_task
+from liminal.runners.airflow.model import executor
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-yes | pip uninstall apache-liminal
+class CustomExecutor(executor.Executor):
+    supported_task_types = [custom_task.CustomTask]
 
-cd "$DIR" || exit
-
-rm -rf build
-rm -rf dist
-rm "${LIMINAL_HOME:-${HOME}/liminal_home}"/*.whl
-
-python setup.py sdist bdist_wheel
-
-pip install dist/*.whl
-
-mkdir -p "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cp dist/*.whl "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cd - || exit
+    def _apply_executor_task_to_dag(self, **kwargs):
+        print("Hello from custom executor")
+        return kwargs['task'].custom_task_logic()
