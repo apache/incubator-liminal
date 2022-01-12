@@ -15,37 +15,42 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import sys
+
+from liminal import settings
 from liminal.build.image_builder import ImageBuilder
 from liminal.core.util import class_util
 from liminal.runners.airflow.model import executor
 from liminal.runners.airflow.model.task import Task
+
+__PLUGINS = 'plugins'
+
+
+def __generate_extra_paths(plugin_type, extra_paths):
+    return extra_paths or [] + (
+        [f'{__PLUGINS}.{plugin_type}'] if f'{__PLUGINS}.{plugin_type}' in sys.path else [])
 
 
 def load_executors(extra_paths=None):
     """
     Load all Executor extensions
     """
-    extra_paths = extra_paths or []
-    return class_util.find_subclasses_in_packages(
-        ['liminal.runners.airflow.executors', 'plugins.executors'] + extra_paths,
-        executor.Executor)
+    package_paths = ['liminal.runners.airflow.executors'] + __generate_extra_paths('executors',
+                                                                                   extra_paths)
+    return class_util.find_subclasses_in_packages(package_paths, executor.Executor)
 
 
 def load_tasks(extra_paths=None):
     """
     Load all Task extensions
     """
-    extra_paths = extra_paths or []
-    return class_util.find_subclasses_in_packages(
-        ['liminal.runners.airflow.tasks', 'plugins.tasks'] + extra_paths,
-        Task)
+    package_paths = ['liminal.runners.airflow.tasks'] + __generate_extra_paths('tasks', extra_paths)
+    return class_util.find_subclasses_in_packages(package_paths, Task)
 
 
 def load_image_builders(extra_paths=None):
     """
     Load all ImageBuilder extensions
     """
-    extra_paths = extra_paths or []
-    return class_util.find_subclasses_in_packages(
-        ['liminal.build.image', 'plugins.images'] + extra_paths,
-        ImageBuilder)
+    package_paths = ['liminal.build.image'] + __generate_extra_paths('images', extra_paths)
+    return class_util.find_subclasses_in_packages(package_paths + extra_paths, ImageBuilder)
