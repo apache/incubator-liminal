@@ -22,8 +22,8 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 
-from liminal.core.util import extensible
 from liminal.core.config.config import ConfigUtil
+from liminal.core.util import extensible
 from liminal.runners.airflow.executors import airflow
 
 __DEPENDS_ON_PAST = 'depends_on_past'

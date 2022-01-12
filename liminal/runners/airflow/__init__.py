@@ -16,8 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from unittest.mock import MagicMock
 from datetime import datetime
+from unittest.mock import MagicMock
 
 import pytz
 

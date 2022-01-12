@@ -15,8 +15,9 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from liminal.runners.airflow.model import task
 from airflow.operators.bash import BashOperator
+
+from liminal.runners.airflow.model import task
 
 
 class CustomTask(task.Task):

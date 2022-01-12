@@ -20,7 +20,7 @@ import logging
 import os
 
 from liminal.core.config.config import ConfigUtil
-from liminal.core.util import class_util, files_util, extensible
+from liminal.core.util import class_util, extensible, files_util
 
 
 def build_liminal_apps(path):
