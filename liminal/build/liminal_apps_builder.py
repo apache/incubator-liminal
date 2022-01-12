@@ -64,7 +64,6 @@ def __get_image_builder_class(task_type):
 logging.info(f'Loading image builder implementations..')
 
 image_builder_types = extensible.load_image_builders()
-print(image_builder_types)
 
 logging.info(f'Finished loading image builder implementations: {image_builder_types}')
 logging.info(f'Loading service image builder implementations..')
