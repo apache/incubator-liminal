@@ -28,6 +28,6 @@ class TestSettings(TestCase):
     def test_set(self):
         settings.initialize()
         executors_by_liminal_name = class_util.find_subclasses_in_packages(
-            ['plugins.executors'],
-            liminal_executor.Executor)
+            ['plugins.executors'], liminal_executor.Executor
+        )
         print(executors_by_liminal_name)

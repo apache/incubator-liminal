@@ -57,7 +57,7 @@ cp -r ../../examples/extensibility/images/* $LIMINAL_HOME/liminal/plugins/images
 ```
 
 ```shell
-liminal build . 
-liminal deploy --clean 
+liminal build .
+liminal deploy --clean
 liminal start
 ```

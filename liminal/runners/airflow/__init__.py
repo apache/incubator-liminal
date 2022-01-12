@@ -35,9 +35,11 @@ class DummyDagRun:
     def get_task_instance(self, _):
         return self
 
+
 from datetime import datetime
 
 TASK_ID_SEPARATOR = '.'
+
 
 class DummyDag:
     def __init__(self, dag_id, task_id):
