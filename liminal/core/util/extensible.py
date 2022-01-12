@@ -26,14 +26,16 @@ __PLUGINS = 'plugins'
 
 
 def __generate_extra_paths(plugin_type, extra_paths):
-    return extra_paths or [] + ([f'{__PLUGINS}.{plugin_type}'] if f'{__PLUGINS}.{plugin_type}' in sys.path else [])
+    return extra_paths or [] + (
+        [f'{__PLUGINS}.{plugin_type}'] if f'{__PLUGINS}.{plugin_type}' in sys.path else [])
 
 
 def load_executors(extra_paths=None):
     """
     Load all Executor extensions
     """
-    package_paths = ['liminal.runners.airflow.executors'] + __generate_extra_paths('executors', extra_paths)
+    package_paths = ['liminal.runners.airflow.executors'] + __generate_extra_paths('executors',
+                                                                                   extra_paths)
     return class_util.find_subclasses_in_packages(package_paths, executor.Executor)
 
 
@@ -50,4 +52,4 @@ def load_image_builders(extra_paths=None):
     Load all ImageBuilder extensions
     """
     package_paths = ['liminal.build.image'] + __generate_extra_paths('images', extra_paths)
-    return class_util.find_subclasses_in_packages(package_paths + extra_paths, ImageBuilder)
+    return class_util.find_subclasses_in_packages(package_paths, ImageBuilder)
