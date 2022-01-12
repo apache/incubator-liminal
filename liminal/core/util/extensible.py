@@ -26,7 +26,7 @@ __PLUGINS = 'plugins'
 
 
 def __generate_extra_paths(plugin_type, extra_paths):
-    return extra_paths or [] + ([f'{__PLUGINS}.{plugin_type}'] if f'{__PLUGINS}.{plugin_type}' in sys.path else [])
+    return (extra_paths or []) + ([f'{__PLUGINS}.{plugin_type}'] if f'{__PLUGINS}.{plugin_type}' in sys.path else [])
 
 
 def load_executors(extra_paths=None):
