@@ -17,7 +17,6 @@
 # under the License.
 import sys
 
-from liminal import settings
 from liminal.build.image_builder import ImageBuilder
 from liminal.core.util import class_util
 from liminal.runners.airflow.model import executor
