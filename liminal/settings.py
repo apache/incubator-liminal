@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -16,23 +15,19 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
+import sys
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+from liminal.core.environment import get_liminal_home
 
-yes | pip uninstall apache-liminal
+LIMINAL_HOME = get_liminal_home()
 
-cd "$DIR" || exit
 
-rm -rf build
-rm -rf dist
-rm "${LIMINAL_HOME:-${HOME}/liminal_home}"/*.whl
+def prepare_syspath():
+    plugins = os.path.join(LIMINAL_HOME, 'liminal')
+    sys.path.append(plugins)
 
-python setup.py sdist bdist_wheel
 
-pip install dist/*.whl
-
-mkdir -p "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cp dist/*.whl "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cd - || exit
+def initialize():
+    # making sure all extensible modules are in root path
+    prepare_syspath()

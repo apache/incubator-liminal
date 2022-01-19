@@ -38,6 +38,7 @@ x-airflow-common: &airflow-common
     AIRFLOW_CONN_METADATA_DB: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     AIRFLOW_VAR__METADATA_DB_SCHEMA: airflow
   volumes:
+    - ${LIMINAL_HOME}/liminal:/opt/airflow/dags/liminal/
     - ${LIMINAL_HOME}:/opt/airflow/dags
     - ${LIMINAL_HOME}/logs:/opt/airflow/logs
     - ${HOME}/.kube:/home/airflow/kube

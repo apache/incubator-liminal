@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -16,23 +15,19 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from airflow.operators.bash import BashOperator
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+from liminal.runners.airflow.model import task
 
-yes | pip uninstall apache-liminal
 
-cd "$DIR" || exit
+class CustomTask(task.Task):
+    def custom_task_logic(self):
+        hello_world = BashOperator(
+            task_id='hello_world',
+            bash_command='echo "hello from liminal custom task"',
+        )
 
-rm -rf build
-rm -rf dist
-rm "${LIMINAL_HOME:-${HOME}/liminal_home}"/*.whl
+        if self.parent:
+            self.parent.set_downstream(hello_world)
 
-python setup.py sdist bdist_wheel
-
-pip install dist/*.whl
-
-mkdir -p "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cp dist/*.whl "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cd - || exit
+        return hello_world

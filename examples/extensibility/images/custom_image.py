@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -16,23 +15,15 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+from liminal.build.image_builder import ImageBuilder
 
-yes | pip uninstall apache-liminal
 
-cd "$DIR" || exit
+class CustomImageBuilder(ImageBuilder):
+    def __init__(self, config, base_path, relative_source_path, tag):
+        super().__init__(config, base_path, relative_source_path, tag)
 
-rm -rf build
-rm -rf dist
-rm "${LIMINAL_HOME:-${HOME}/liminal_home}"/*.whl
-
-python setup.py sdist bdist_wheel
-
-pip install dist/*.whl
-
-mkdir -p "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cp dist/*.whl "${LIMINAL_HOME:-${HOME}/liminal_home}"
-
-cd - || exit
+    @staticmethod
+    def _dockerfile_path():
+        return os.path.join(os.path.dirname(__file__), 'custom_image_builder/Dockerfile')
