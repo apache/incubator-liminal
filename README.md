@@ -36,7 +36,7 @@ perform), application servers,  and more.
 
 ## Getting Started
 
-A simple getting stated guide for Liminal can be found [here](docs/getting_started.md)
+A simple getting stated guide for Liminal can be found [here](docs/getting-started/hello_world.md)
 
 ## Apache Liminal Documentation
 
