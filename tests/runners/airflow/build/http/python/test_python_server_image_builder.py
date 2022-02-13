@@ -96,6 +96,10 @@ class TestPythonServer(TestCase):
 
         self.assertEqual(f'Input was: {json.loads(json_string)}', server_response)
 
+        server_favicon_response = urllib.request.urlopen('http://localhost:9294/favicon.ico')
+
+        self.assertEqual(204, server_favicon_response.status)
+
         self.__remove_containers()
 
         return build_out
