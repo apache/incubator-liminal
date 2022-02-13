@@ -17,7 +17,7 @@
 # under the License.
 
 import yaml
-from flask import Flask, request, Blueprint
+from flask import Blueprint, Flask, request
 
 
 def __get_module(kls):
