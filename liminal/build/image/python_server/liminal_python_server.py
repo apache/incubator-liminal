@@ -45,11 +45,9 @@ if __name__ == '__main__':
 
     blueprint = Blueprint('liminal_python_server_blueprint', __name__)
 
-
     @blueprint.route('/favicon.ico', methods=('GET', 'POST'))
     def no_content():
         return '', 204
-
 
     @blueprint.route('/', defaults={'endpoint': ''}, methods=('GET', 'POST'))
     @blueprint.route('/<endpoint>', methods=('GET', 'POST'))
@@ -58,7 +56,6 @@ if __name__ == '__main__':
             return endpoints[endpoint](request.get_data())
         else:
             return 'Page not found.', 404
-
 
     app = Flask(__name__)
     app.register_blueprint(blueprint)
