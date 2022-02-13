@@ -33,13 +33,11 @@ class JobStatusOperator(BaseOperator):
     """
     Base operator for job status operators.
     """
+
     template_ext = ()
 
     @apply_defaults
-    def __init__(
-            self,
-            backends,
-            *args, **kwargs):
+    def __init__(self, backends, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.backends = backends
         self.cloudwatch = None
@@ -50,7 +48,7 @@ class JobStatusOperator(BaseOperator):
                 for metric in self.metrics(context):
                     self.report_functions[backend](self, metric)
             else:
-                raise AirflowException('No such metrics backend: {}'.format(backend))
+                raise AirflowException(f'No such metrics backend: {backend}')
 
     def metrics(self, context):
         raise NotImplementedError
@@ -58,9 +56,7 @@ class JobStatusOperator(BaseOperator):
     def send_metric_to_cloudwatch(self, metric):
         self.get_cloudwatch().put_metric_data(metric)
 
-    report_functions = {
-        'cloudwatch': send_metric_to_cloudwatch
-    }
+    report_functions = {'cloudwatch': send_metric_to_cloudwatch}
 
     def get_cloudwatch(self):
         if not self.cloudwatch:
@@ -71,30 +67,19 @@ class JobStatusOperator(BaseOperator):
 class JobStartOperator(JobStatusOperator):
     ui_color = '#c5e5e8'
 
-    def __init__(
-            self,
-            namespace,
-            application_name,
-            backends,
-            *args, **kwargs):
+    def __init__(self, namespace, application_name, backends, *args, **kwargs):
         super().__init__(backends=backends, *args, **kwargs)
         self.namespace = namespace
         self.application_name = application_name
 
     def metrics(self, context):
-        return [Metric(self.namespace, 'JobStarted', 1,
-                       [Tag('ApplicationName', self.application_name)])]
+        return [Metric(self.namespace, 'JobStarted', 1, [Tag('ApplicationName', self.application_name)])]
 
 
 class JobEndOperator(JobStatusOperator):
     ui_color = '#6d8fad'
 
-    def __init__(
-            self,
-            namespace,
-            application_name,
-            backends,
-            *args, **kwargs):
+    def __init__(self, namespace, application_name, backends, *args, **kwargs):
         super().__init__(backends=backends, *args, **kwargs)
         self.namespace = namespace
         self.application_name = application_name
@@ -103,9 +88,11 @@ class JobEndOperator(JobStatusOperator):
     def execute(self, context):
         self.__calculate_job_result(context)
         super().execute(context)
-        
+
     def metrics(self, context):
-        duration = round((pytz.utc.localize(datetime.utcnow()) - context['ti'].get_dagrun().start_date).total_seconds())
+        duration = round(
+            (pytz.utc.localize(datetime.utcnow()) - context['ti'].get_dagrun().start_date).total_seconds()
+        )
 
         self.log.info('Elapsed time: %s' % duration)
 
@@ -113,7 +100,7 @@ class JobEndOperator(JobStatusOperator):
 
         return [
             Metric(self.namespace, 'JobResult', self.__job_result, [Tag('ApplicationName', self.application_name)]),
-            Metric(self.namespace, 'JobDuration', duration, [Tag('ApplicationName', self.application_name)])
+            Metric(self.namespace, 'JobDuration', duration, [Tag('ApplicationName', self.application_name)]),
         ]
 
     def __log_and_get_state(self, task_instance):
@@ -122,13 +109,15 @@ class JobEndOperator(JobStatusOperator):
         self.log.info(f'Task {task_instance.task_id} finished with state = {state}')
 
         return state
-    
+
     def __calculate_job_result(self, context):
         self.log.info('scanning task instances states.. ')
         task_instances = context['dag_run'].get_task_instances()
-        task_states = [self.__log_and_get_state(task_instance)
-                       for task_instance in task_instances
-                       if task_instance.task_id != context['task_instance'].task_id]
+        task_states = [
+            self.__log_and_get_state(task_instance)
+            for task_instance in task_instances
+            if task_instance.task_id != context['task_instance'].task_id
+        ]
 
         self.__job_result = 0
         if all((state == State.SUCCESS or state == State.SKIPPED) for state in task_states):
@@ -176,9 +165,9 @@ class CloudWatchHook(AwsHook):
                     'Dimensions': dimensions,
                     'Timestamp': datetime.utcnow(),
                     'Value': value,
-                    'Unit': 'None'
+                    'Unit': 'None',
                 }
-            ]
+            ],
         )
 
         self.log.info(f'Published metric: {metric.name} with value: {value}')
@@ -197,12 +186,7 @@ class Metric:
     :type tags: List[str]
     """
 
-    def __init__(
-            self,
-            namespace,
-            name,
-            value,
-            tags):
+    def __init__(self, namespace, name, value, tags):
         self.namespace = namespace
         self.name = name
         self.value = value
@@ -210,9 +194,6 @@ class Metric:
 
 
 class Tag:
-    def __init__(
-            self,
-            name,
-            value):
+    def __init__(self, name, value):
         self.name = name
         self.value = value

@@ -19,7 +19,7 @@ under the License.
 
 # Monitoring
 
-In the `monitoring` section you can configure monitoring for your pipelines and services. 
+In the `monitoring` section you can configure monitoring for your pipelines and services.
 
 ```yaml
 monitoring:

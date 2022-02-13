@@ -30,4 +30,4 @@ ADD scripts/webserver_config.py /opt/airflow/
 USER airflow
 
 RUN pip --disable-pip-version-check install -r /opt/airflow/dags/requirements-airflow.txt --user
-RUN pip --disable-pip-version-check install --user --no-deps ${LIMINAL_VERSION}
+RUN pip --disable-pip-version-check install --user ${LIMINAL_VERSION}

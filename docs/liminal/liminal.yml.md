@@ -48,14 +48,14 @@ images:
     source: .
   - image: myorg/myrepo:myserver
     type: python_server
-    source: path/to/my/server/code 
+    source: path/to/my/server/code
     endpoints:
       - endpoint: /myendpoint
         module: my_module
         function: my_function
 ```
 
-`images` is a section in the root lof your liminal.yml file and is a list of `image`s, defined 
+`images` is a section in the root lof your liminal.yml file and is a list of `image`s, defined
 by the following attributes:
 
 #### image attributes
@@ -94,9 +94,9 @@ pipelines:
         type: sql
         query: "SELECT * FROM
         {{my_database_name}}.{{my_table_name}}
-        WHERE event_date_prt >= 
+        WHERE event_date_prt >=
               '{{yesterday_ds}}'"
-              AND cms_platform = 'xsite'          
+              AND cms_platform = 'xsite'
         output_table: my_db.my_out_table
         output_path: s3://my_bky/{{env}}/mydir
       - task: my_python_task
@@ -115,7 +115,7 @@ pipelines:
           fizz: buzz
 ```
 
-`pipelines` is a section in the root lof your liminal.yml file and is a list of `pipeline`s defined 
+`pipelines` is a section in the root lof your liminal.yml file and is a list of `pipeline`s defined
 by the following attributes:
 
 #### pipeline attributes
@@ -149,7 +149,7 @@ Different task types require their own additional configuration. For example, `p
 For fully detailed information on services see: [services](services.md).
 
 In the `services` section you can configure constantly running applications such as
-servers. 
+servers.
 
 ```yaml
 services:
@@ -157,7 +157,7 @@ services:
     image: myorg/myrepo:myserver
 ```
 
-`services` is a section in the root lof your liminal.yml file and is a list of `service`s, defined 
+`services` is a section in the root lof your liminal.yml file and is a list of `service`s, defined
 by the following attributes:
 
 #### service attributes
@@ -170,7 +170,7 @@ by the following attributes:
 
 For fully detailed information on monitoring see: [monitoring](monitoring.md).
 
-In the `monitoring` section you can configure monitoring for your pipelines and services. 
+In the `monitoring` section you can configure monitoring for your pipelines and services.
 
 ```yaml
 monitoring:

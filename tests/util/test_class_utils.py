@@ -32,7 +32,7 @@ class Test(TestCase):
             'test_clazz_child_1': B,
             'test_clazz_child_2': C,
             'test_clazz_leaf_1': D,
-            'test_clazz_leaf_2': E
+            'test_clazz_leaf_2': E,
         }
         self.hierarchy_check(A, expected_set)
 

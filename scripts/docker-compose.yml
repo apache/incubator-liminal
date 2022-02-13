@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,20 +14,19 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 ---
 version: '3'
-x-airflow-common:
-  &airflow-common
+x-airflow-common: &airflow-common
   image: liminal-airflow
   build:
     context: .
     dockerfile: scripts/Dockerfile-airflow
     args:
-        LIMINAL_VERSION: ${LIMINAL_VERSION}
-  environment:
-    &airflow-common-env
-    LOAD_EX: 'n'
-    AIRFLOW__CORE__EXECUTOR: 'LocalExecutor'
+      LIMINAL_VERSION: ${LIMINAL_VERSION}
+  environment: &airflow-common-env
+    LOAD_EX: n
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
     KUBECONFIG: /home/airflow/kube/config
     AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
     AIRFLOW__WEBSERVER__WORKERS: '1'
@@ -40,6 +38,7 @@ x-airflow-common:
     AIRFLOW_CONN_METADATA_DB: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     AIRFLOW_VAR__METADATA_DB_SCHEMA: airflow
   volumes:
+    - ${LIMINAL_HOME}/liminal:/opt/airflow/dags/liminal/
     - ${LIMINAL_HOME}:/opt/airflow/dags
     - ${LIMINAL_HOME}/logs:/opt/airflow/logs
     - ${HOME}/.kube:/home/airflow/kube
@@ -47,53 +46,53 @@ x-airflow-common:
     postgres:
       condition: service_healthy
   healthcheck:
-      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
+    test: [CMD-SHELL, '[ -f /usr/local/airflow/airflow-webserver.pid ]']
+    interval: 30s
+    timeout: 30s
+    retries: 3
   logging:
-      options:
-          max-size: 10m
-          max-file: "3"
+    options:
+      max-size: 10m
+      max-file: '3'
   restart: always
 
 services:
-    postgres:
-        image: postgres:13
-        container_name: liminal-postgress
-        environment:
-          POSTGRES_USER: airflow
-          POSTGRES_PASSWORD: airflow
-          POSTGRES_DB: ""
-        ports:
-            - "5432:5432"
-        volumes:
-            - ${LIMINAL_HOME}/db:/var/lib/postgresql/data
-        logging:
-            options:
-                max-size: 10m
-                max-file: "3"
-        healthcheck:
-            test: ["CMD", "pg_isready", "-U", "airflow"]
-            interval: 30s
-            timeout: 30s
-            retries: 3
-        restart: always
+  postgres:
+    image: postgres:13
+    container_name: liminal-postgress
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: ''
+    ports:
+      - 5432:5432
+    volumes:
+      - ${LIMINAL_HOME}/db:/var/lib/postgresql/data
+    logging:
+      options:
+        max-size: 10m
+        max-file: '3'
+    healthcheck:
+      test: [CMD, pg_isready, -U, airflow]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    restart: always
 
-    webserver:
-        <<: *airflow-common
-        container_name: liminal-webserver
-        environment:
-          <<: *airflow-common-env
-        ports:
-            - "8080:8080"
-        command: "webserver"
+  webserver:
+    <<: *airflow-common
+    container_name: liminal-webserver
+    environment:
+      <<: *airflow-common-env
+    ports:
+      - 8080:8080
+    command: webserver
 
-    scheduler:
-        <<: *airflow-common
-        container_name: liminal-scheduler
-        environment:
-          <<: *airflow-common-env
-        ports:
-            - "8793:8793"
-        command: "scheduler"
+  scheduler:
+    <<: *airflow-common
+    container_name: liminal-scheduler
+    environment:
+      <<: *airflow-common-env
+    ports:
+      - 8793:8793
+    command: scheduler

@@ -24,44 +24,17 @@ from liminal.core.util import dict_util
 
 class TestDictUtils(TestCase):
     def setUp(self) -> None:
-        self.dict1 = {
-            "env": "env1",
-            "env_dict":
-                {
-                    "env3": "env3"
-                },
-            "env4": "env4"
-        }
+        self.dict1 = {"env": "env1", "env_dict": {"env3": "env3"}, "env4": "env4"}
 
-        self.dict2 = {
-            "env": "env1",
-            "env_dict":
-                {
-                    "env2": "env2"
-                }
-        }
+        self.dict2 = {"env": "env1", "env_dict": {"env2": "env2"}}
 
     def test_merge_dicts(self):
-        expected = {
-            "env": "env1",
-            "env4": "env4",
-            "env_dict":
-                {
-                    "env2": "env2"
-                }
-        }
+        expected = {"env": "env1", "env4": "env4", "env_dict": {"env2": "env2"}}
 
         self.assertEqual(expected, dict_util.merge_dicts(self.dict1, self.dict2))
 
     def test_recursive_merge_dicts(self):
-        expected = {
-            "env": "env1",
-            "env4": "env4",
-            "env_dict": {
-                "env2": "env2",
-                "env3": "env3"
-            }
-        }
+        expected = {"env": "env1", "env4": "env4", "env_dict": {"env2": "env2", "env3": "env3"}}
         self.assertEqual(expected, dict_util.merge_dicts(self.dict1, self.dict2, True))
 
     def test_merge_with_empty(self):
@@ -74,30 +47,20 @@ class TestDictUtils(TestCase):
     def test_replace_variables_simple_case(self):
         dct = {
             "env": "{{env_var}}",
-            "env_dict":
-                {
-                    "env3": "{{ var1 }}"
-                },
+            "env_dict": {"env3": "{{ var1 }}"},
             "env4": "{{var2 }}",
             "env5": "{{{var2}}",
-            "env6": "{{var3}}"
+            "env6": "{{var3}}",
         }
 
-        variables = {
-            "env_var": "env value",
-            "var1": "value1",
-            "var2": "value2"
-        }
+        variables = {"env_var": "env value", "var1": "value1", "var2": "value2"}
 
         expected = {
             "env": "env value",
-            "env_dict":
-                {
-                    "env3": "value1"
-                },
+            "env_dict": {"env3": "value1"},
             "env4": "value2",
             "env5": "{value2",
-            "env6": "{{var3}}"
+            "env6": "{{var3}}",
         }
 
         self.assertEqual(expected, dict_util.replace_placeholders(dct, variables))
@@ -105,13 +68,10 @@ class TestDictUtils(TestCase):
     def test_replace_variables_empty_var(self):
         dct = {
             "env": "{{env_var}}",
-            "env_dict":
-                {
-                    "env3": "{{ var1 }}"
-                },
+            "env_dict": {"env3": "{{ var1 }}"},
             "env4": "{{var2 }}",
             "env5": "{{{var2}}",
-            "env6": "{{var3}}"
+            "env6": "{{var3}}",
         }
         self.assertEqual(dct, dict_util.replace_placeholders(dct, {}))
 
@@ -124,24 +84,23 @@ class TestDictUtils(TestCase):
         airflow_variable_mock.side_effect = airflow_variable_values
 
         dct = {
-            "query": "select * from my_table "
-                     "where event_type = {{event_type}} and region = {{region}}",
+            "query": "select * from my_table " "where event_type = {{event_type}} and region = {{region}}",
             "env": "{{prod}}, {{stg}}, {{playground}}",
-            "optional": "{{optionals}}"
+            "optional": "{{optionals}}",
         }
 
         variables = {
             "region": "us_east_1",
             "event_type": "subscription",
             "prod": "liminal production",
-            "stg": "liminal staging"
+            "stg": "liminal staging",
         }
 
         expected = {
-            'query': 'select * from my_table '
-                     'where event_type = subscription and region = us_east_1',
+            'query': 'select * from my_table ' 'where event_type = subscription and region = us_east_1',
             "env": "liminal production, liminal staging, liminal playground",
-            "optional": "{{optionals}}"}
+            "optional": "{{optionals}}",
+        }
 
         self.assertEqual(expected, dict_util.replace_placeholders(dct, variables))
 
@@ -154,16 +113,10 @@ class TestDictUtils(TestCase):
         airflow_variable_mock.side_effect = airflow_variable_values
 
         dct = {
-            "query": "select * from my_table "
-                     "where event_type = {{event_type}} and region = {{region}}",
+            "query": "select * from my_table " "where event_type = {{event_type}} and region = {{region}}",
             "env": ['{{prod}}', '{{stg}}', '{{playground}}'],
-            "tasks": [
-                {
-                    'id': 'id1',
-                    'image': '{{image}}'
-                }
-            ],
-            "optional": "{{optionals}}"
+            "tasks": [{'id': 'id1', 'image': '{{image}}'}],
+            "optional": "{{optionals}}",
         }
 
         variables = {
@@ -171,14 +124,15 @@ class TestDictUtils(TestCase):
             "event_type": "subscription",
             "prod": "liminal production",
             "stg": "liminal staging",
-            "image": "my_image_name"
+            "image": "my_image_name",
         }
 
-        expected = {'env': ['liminal production', 'liminal staging', 'liminal playground'],
-                    'optional': '{{optionals}}',
-                    'query': 'select * from my_table where event_type = subscription and region = '
-                             'us_east_1',
-                    'tasks': [{'id': 'id1', 'image': 'my_image_name'}]}
+        expected = {
+            'env': ['liminal production', 'liminal staging', 'liminal playground'],
+            'optional': '{{optionals}}',
+            'query': 'select * from my_table where event_type = subscription and region = ' 'us_east_1',
+            'tasks': [{'id': 'id1', 'image': 'my_image_name'}],
+        }
 
         self.assertEqual(expected, dict_util.replace_placeholders(dct, variables))
 
@@ -186,14 +140,16 @@ class TestDictUtils(TestCase):
     def test_replace_variables_from_env(self):
         dct = {
             "query": "select * from my_table "
-                     "where event_type = {{event_type}} and region = {{region}} from {{table}}"
+            "where event_type = {{event_type}} and region = {{region}} from {{table}}"
         }
 
         variables = {}
 
-        expected = {'query': 'select * from my_table '
-                             'where event_type = {{event_type}} '
-                             'and region = {{region}} from my_table'}
+        expected = {
+            'query': 'select * from my_table '
+            'where event_type = {{event_type}} '
+            'and region = {{region}} from my_table'
+        }
 
         self.assertEqual(expected, dict_util.replace_placeholders(dct, variables))
 
@@ -201,16 +157,16 @@ class TestDictUtils(TestCase):
     def test_replace_variables_from_variable_and_not_env(self):
         dct = {
             "query": "select * from my_table "
-                     "where event_type = {{event_type}} and region = {{region}} from {{table}}"
+            "where event_type = {{event_type}} and region = {{region}} from {{table}}"
         }
 
-        variables = {
-            "table": "my_variable_table"
-        }
+        variables = {"table": "my_variable_table"}
 
-        expected = {'query': 'select * from my_table '
-                             'where event_type = {{event_type}} '
-                             'and region = {{region}} from my_variable_table'}
+        expected = {
+            'query': 'select * from my_table '
+            'where event_type = {{event_type}} '
+            'and region = {{region}} from my_variable_table'
+        }
 
         self.assertEqual(expected, dict_util.replace_placeholders(dct, variables))
 
@@ -224,13 +180,15 @@ class TestDictUtils(TestCase):
 
         dct = {
             "query": "select * from my_table "
-                     "where event_type = {{event_type}} and region = {{region}} from {{table}}"
+            "where event_type = {{event_type}} and region = {{region}} from {{table}}"
         }
 
         variables = {}
 
-        expected = {'query': 'select * from my_table '
-                             'where event_type = {{event_type}} '
-                             'and region = {{region}} from my_airflow_table'}
+        expected = {
+            'query': 'select * from my_table '
+            'where event_type = {{event_type}} '
+            'and region = {{region}} from my_airflow_table'
+        }
 
         self.assertEqual(expected, dict_util.replace_placeholders(dct, variables))

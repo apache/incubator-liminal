@@ -25,10 +25,16 @@ from airflow.operators.python_operator import BranchPythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 from moto import mock_cloudformation
 
-from liminal.runners.airflow.operators.cloudformation import CloudFormationDeleteStackOperator, \
-    CloudFormationDeleteStackSensor
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
-from liminal.runners.airflow.tasks.delete_cloudformation_stack import DeleteCloudFormationStackTask
+from liminal.runners.airflow.operators.cloudformation import (
+    CloudFormationDeleteStackOperator,
+    CloudFormationDeleteStackSensor,
+)
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
+from liminal.runners.airflow.tasks.delete_cloudformation_stack import (
+    DeleteCloudFormationStackTask,
+)
 from tests.util import dag_test_utils
 
 
@@ -44,24 +50,21 @@ class TestDeleteCloudFormationStackTask(TestCase):
         self.dag.context = {
             'ti': self.dag,
             'ts': datetime.now().timestamp(),
-            'execution_date': datetime.now().timestamp()
+            'execution_date': datetime.now().timestamp(),
         }
         self.dag.get_dagrun = MagicMock()
 
         self.cluster_name = "liminal-cluster-for-tests"
 
-        self.delete_cloudformation_task = \
-            DeleteCloudFormationStackTask(
-                'delete-emr',
-                self.dag,
-                [],
-                trigger_rule='all_success',
-                liminal_config={},
-                pipeline_config={},
-                task_config={
-                    'stack_name': self.cluster_name
-                }
-            )
+        self.delete_cloudformation_task = DeleteCloudFormationStackTask(
+            'delete-emr',
+            self.dag,
+            [],
+            trigger_rule='all_success',
+            liminal_config={},
+            pipeline_config={},
+            task_config={'stack_name': self.cluster_name},
+        )
 
         self.delete_cloudformation_task.apply_task_to_dag()
 
@@ -82,10 +85,8 @@ class TestDeleteCloudFormationStackTask(TestCase):
         check_dags_queued_task = self.dag.tasks[0]
         self.assertEqual(check_dags_queued_task.trigger_rule, TriggerRule.ALL_DONE)
 
-        self.assertEqual(check_dags_queued_task.python_callable(),
-                         f'delete-end-delete-emr')
+        self.assertEqual(check_dags_queued_task.python_callable(), f'delete-end-delete-emr')
 
         self.dag.get_num_active_runs.return_value = 1
 
-        self.assertEqual(check_dags_queued_task.python_callable(),
-                         f'delete-cloudformation-delete-emr')
+        self.assertEqual(check_dags_queued_task.python_callable(), f'delete-cloudformation-delete-emr')

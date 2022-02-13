@@ -27,7 +27,4 @@ def create_dag():
     Test util to create a basic DAG for testing.
     """
 
-    return DAG(
-        dag_id='test_dag',
-        default_args={'start_date': datetime(1970, 1, 1)}
-    )
+    return DAG(dag_id='test_dag', default_args={'start_date': datetime(1970, 1, 1)})

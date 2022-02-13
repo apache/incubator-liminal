@@ -24,7 +24,6 @@ from liminal.build.python import BasePythonImageBuilder
 
 
 class PythonServerImageBuilder(BasePythonImageBuilder):
-
     def __init__(self, config, base_path, relative_source_path, tag):
         super().__init__(config, base_path, relative_source_path, tag)
 
@@ -36,9 +35,8 @@ class PythonServerImageBuilder(BasePythonImageBuilder):
     def _additional_files_from_paths():
         return [
             os.path.join(os.path.dirname(__file__), 'liminal_python_server.py'),
-            os.path.join(os.path.dirname(__file__), 'python_server_requirements.txt')
+            os.path.join(os.path.dirname(__file__), 'python_server_requirements.txt'),
         ]
 
     def _additional_files_from_filename_content_pairs(self):
-        return super()._additional_files_from_filename_content_pairs() + \
-               [('service.yml', yaml.safe_dump(self.config))]
+        return super()._additional_files_from_filename_content_pairs() + [('service.yml', yaml.safe_dump(self.config))]

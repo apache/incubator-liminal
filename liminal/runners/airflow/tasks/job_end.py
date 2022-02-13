@@ -22,13 +22,13 @@ from liminal.runners.airflow.tasks import airflow
 
 class JobEndTask(airflow.AirflowTask):
     """
-      Job end task. Reports job end metrics.
+    Job end task. Reports job end metrics.
     """
 
-    def __init__(self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                 task_config, variables=None):
-        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config,
-                         task_config, variables)
+    def __init__(
+        self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
+    ):
+        super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables)
         metrics = self.liminal_config.get('metrics', {})
         self.metrics_namespace = metrics.get('namespace', '')
         self.metrics_backends = metrics.get('backends', [])
@@ -40,7 +40,7 @@ class JobEndTask(airflow.AirflowTask):
             application_name=self.pipeline_config['pipeline'],
             backends=self.metrics_backends,
             dag=self.dag,
-            trigger_rule=self.trigger_rule
+            trigger_rule=self.trigger_rule,
         )
 
         if self.parent:

@@ -35,15 +35,19 @@ Using simple YAML configuration, create your own schedule data pipelines (a sequ
 perform), application servers,  and more.
 
 ## Getting Started
-A simple getting stated guide for Liminal can be found [here](docs/getting_started.md)
+
+A simple getting stated guide for Liminal can be found [here](docs/getting-started/hello_world.md)
 
 ## Apache Liminal Documentation
+
 Full documentation of Apache Liminal can be found [here](docs/liminal)
 
 ## High Level Architecture
+
 High level architecture documentation can be found [here](docs/architecture.md)
 
 ## Example YAML config file
+
 ```yaml
 ---
 name: MyLiminalStack
@@ -104,13 +108,16 @@ services:
     image: my_server_image
 ```
 
-
 # Installation
+
 1. Install this repository (HEAD)
+
 ```bash
    pip install git+https://github.com/apache/incubator-liminal.git
 ```
+
 2. Optional: set LIMINAL_HOME to path of your choice (if not set, will default to ~/liminal_home)
+
 ```bash
 echo 'export LIMINAL_HOME=</path/to/some/folder>' >> ~/.bash_profile && source ~/.bash_profile
 ```
@@ -119,11 +126,11 @@ echo 'export LIMINAL_HOME=</path/to/some/folder>' >> ~/.bash_profile && source ~
 
 This involves at minimum creating a single file called liminal.yml as in the example above.
 
-If your pipeline requires custom python code to implement tasks, they should be organized 
+If your pipeline requires custom python code to implement tasks, they should be organized
 [like this](https://github.com/apache/incubator-liminal/tree/master/tests/runners/airflow/liminal)
 
-If your pipeline  introduces imports of external packages which are not already a part 
-of the liminal framework (i.e. you had to pip install them yourself), you need to also provide 
+If your pipeline  introduces imports of external packages which are not already a part
+of the liminal framework (i.e. you had to pip install them yourself), you need to also provide
 a requirements.txt in the root of your project.
 
 # Testing the pipeline locally
@@ -131,22 +138,24 @@ a requirements.txt in the root of your project.
 When your pipeline code is ready, you can test it by running it locally on your machine.
 
 1. Ensure you have The Docker engine running locally, and enable a local Kubernetes cluster:
-![Kubernetes configured](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/k8s_running.png)
 
-And allocate it at least 3 CPUs (under "Resources" in the Docker preference UI).
+  ![Kubernetes configured](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/k8s_running.png)
 
-If you want to execute your pipeline on a remote kubernetes cluster, make sure the cluster is configured
-using :
-```bash
-kubectl config set-context <your remote kubernetes cluster>
-``` 
+  And allocate it at least 3 CPUs (under "Resources" in the Docker preference UI).
+
+  If you want to execute your pipeline on a remote kubernetes cluster, make sure the cluster is configured using:
+
+  ```bash
+  kubectl config set-context <your remote kubernetes cluster>
+  ```
+
 2. Build the docker images used by your pipeline.
 
-In the example pipeline above, you can see that tasks and services have an "image" field - such as 
-"my_static_input_task_image". This means that the task is executed inside a docker container, and the docker container 
+In the example pipeline above, you can see that tasks and services have an "image" field - such as
+"my_static_input_task_image". This means that the task is executed inside a docker container, and the docker container
 is created from a docker image where various code and libraries are installed.
 
-You can take a look at what the build process looks like, e.g. 
+You can take a look at what the build process looks like, e.g.
 [here](https://github.com/apache/incubator-liminal/tree/master/liminal/build/image/python)
 
 In order for the images to be available for your pipeline, you'll need to build them locally:
@@ -161,34 +170,41 @@ You'll see that a number of outputs indicating various docker images built.
 3. Create a kubernetes local volume \
 In case your Yaml includes working with [volumes](https://github.com/apache/incubator-liminal/blob/6253f8b2c9dc244af032979ec6d462dc3e07e170/docs/getting_started.md#mounted-volumes)
 please first run the following command:
+
 ```bash
-cd </path/to/your/liminal/code> 
+cd </path/to/your/liminal/code>
 liminal create
 ```
 
 4. Deploy the pipeline:
+
 ```bash
-cd </path/to/your/liminal/code> 
+cd </path/to/your/liminal/code>
 liminal deploy
 ```
-Note: after upgrading liminal, it's recommended to issue the command 
+
+Note: after upgrading liminal, it's recommended to issue the command
+
 ```bash
 liminal deploy --clean
-``` 
+```
 
 This will rebuild the airlfow docker containers from scratch with a fresh version of liminal, ensuring consistency.
 
 5. Start the server
+
 ```bash
 liminal start
 ```
 
 6. Stop the server
+
 ```bash
 liminal stop
 ```
 
 7. Display the server logs
+
 ```bash
 liminal logs --follow/--tail
 
@@ -205,8 +221,9 @@ liminal logs --follow
 The pipeline is scheduled to run according to the ```json schedule: 0 * 1 * *``` field in the .yml file you provided.
 
 10. To manually activate your pipeline:
-Click your pipeline and then click "trigger DAG"
-Click "Graph view"
+
+- Click your pipeline and then click "trigger DAG"
+- Click "Graph view"
 You should see the steps in your pipeline getting executed in "real time" by clicking "Refresh" periodically.
 
 ![Pipeline activation](https://raw.githubusercontent.com/apache/incubator-liminal/master/images/airflow_trigger.png)
@@ -215,5 +232,13 @@ You should see the steps in your pipeline getting executed in "real time" by cli
 
 More information on contributing can be found [here](CONTRIBUTING.md)
 
+# Community
+
+The Liminal community holds a public call every Monday
+
+- [Liminal Community Calendar](https://calendar.google.com/calendar/u/0/r?cid=jom1i20emghura6s6ookhe2skk@group.calendar.google.com)
+- [Dev-Mailing-List](https://lists.apache.org/list.html?dev@liminal.apache.org)
+
 ## Running Tests (for contributors)
+
 When doing local development and running Liminal unit-tests, make sure to set LIMINAL_STAND_ALONE_MODE=True

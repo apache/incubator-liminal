@@ -22,11 +22,19 @@ from unittest import TestCase
 
 from termcolor import colored
 
-EXCLUDED_EXTENSIONS = [
-    '.gif', '.png', '.pyc', 'LICENSE', 'DISCLAIMER', 'DISCLAIMER-WIP', 'NOTICE', '.whl'
+EXCLUDED_EXTENSIONS = ['.gif', '.png', '.pyc', 'LICENSE', 'DISCLAIMER', 'DISCLAIMER-WIP', 'NOTICE', '.whl']
+EXCLUDED_DIRS = [
+    'docs/build',
+    'build',
+    'dist',
+    '.git',
+    '.idea',
+    'venv',
+    '.venv',
+    'apache_liminal.egg-info',
+    '.pytest_cache',
 ]
-EXCLUDED_DIRS = ['docs/build', 'build', 'dist', '.git', '.idea', 'venv', 'apache_liminal.egg-info']
-EXCLUDED_FILES = ['DISCLAIMER-WIP']
+EXCLUDED_FILES = ['DISCLAIMER-WIP', 'LICENSE.txt', '.autovenv']
 
 PYTHON_LICENSE_HEADER = """
 #
@@ -46,7 +54,9 @@ PYTHON_LICENSE_HEADER = """
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-""".strip().split("\n")
+""".strip().split(
+    "\n"
+)
 
 MD_LICENSE_HEADER = """
 <!--
@@ -67,7 +77,9 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-""".strip().split("\n")
+""".strip().split(
+    "\n"
+)
 
 RST_LICENSE_HEADER = """
 ..
@@ -90,7 +102,9 @@ RST_LICENSE_HEADER = """
    specific language governing permissions and limitations
    under the License.
 ..
-""".strip().split("\n")
+""".strip().split(
+    "\n"
+)
 
 BAT_LICENSE_HEADER = """
 REM
@@ -110,7 +124,9 @@ REM "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 REM KIND, either express or implied.  See the License for the
 REM specific language governing permissions and limitations
 REM under the License.
-""".strip().split("\n")
+""".strip().split(
+    "\n"
+)
 
 JSON_LICENSE_HEADER = """
   "": [
@@ -131,21 +147,23 @@ JSON_LICENSE_HEADER = """
     "specific language governing permissions and limitations",
     "under the License."
   ],
-""".strip().split("\n")
+""".strip().split(
+    "\n"
+)
 
 
 class TestLicenses(TestCase):
-
     def test_licenses(self):
         files = []
         base_dir = os.path.join(pathlib.Path(__file__).parent.parent.absolute())
         print(f'Checking licenses for files in {base_dir}')
         for r, d, f in os.walk(base_dir):
-            if not any(os.path.relpath(r, base_dir).startswith(excluded) for excluded in
-                       EXCLUDED_DIRS):
+            if not any(os.path.relpath(r, base_dir).startswith(excluded) for excluded in EXCLUDED_DIRS):
                 for file in f:
-                    if not any(os.path.basename(file).endswith(ext) for ext in EXCLUDED_EXTENSIONS) \
-                            and not os.path.basename(file) in EXCLUDED_FILES:
+                    if (
+                        not any(os.path.basename(file).endswith(ext) for ext in EXCLUDED_EXTENSIONS)
+                        and not os.path.basename(file) in EXCLUDED_FILES
+                    ):
                         files.append(os.path.join(r, file))
 
         output = ''

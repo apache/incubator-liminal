@@ -20,7 +20,7 @@ under the License.
 # Services
 
 In the `services` section you can configure constantly running applications such as
-servers. 
+servers.
 
 ```yaml
 services:
@@ -28,7 +28,7 @@ services:
     image: myorg/myrepo:myserver
 ```
 
-`services` is a section in the root lof your liminal.yml file and is a list of `service`s, defined 
+`services` is a section in the root lof your liminal.yml file and is a list of `service`s, defined
 by the following attributes:
 
 ## service attributes

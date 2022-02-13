@@ -43,20 +43,14 @@ class TestSparkTask(TestCase):
             'volumes': [
                 {
                     'volume': self._VOLUME_NAME,
-                    'local': {
-                        'path': self.temp_dir.replace(
-                            "/var/folders",
-                            "/private/var/folders"
-                        )
-                    }
+                    'local': {'path': self.temp_dir.replace("/var/folders", "/private/var/folders")},
                 }
             ]
         }
         volume_util.create_local_volumes(self.liminal_config, None)
 
         # build spark image
-        liminal_apps_builder.build_liminal_apps(
-            os.path.join(os.path.dirname(__file__), '../../apps/test_spark_app'))
+        liminal_apps_builder.build_liminal_apps(os.path.join(os.path.dirname(__file__), '../../apps/test_spark_app'))
 
         outputs_dir = os.path.join(self.temp_dir, 'outputs')
 
@@ -66,13 +60,7 @@ class TestSparkTask(TestCase):
             'application_source': 'wordcount.py',
             'application_arguments': ['words.txt', '/mnt/vol1/outputs/'],
             'env_vars': {},
-            'mounts': [
-                {
-                    'mount': 'mymount',
-                    'volume': self._VOLUME_NAME,
-                    'path': '/mnt/vol1'
-                }
-            ]
+            'mounts': [{'mount': 'mymount', 'volume': self._VOLUME_NAME, 'path': '/mnt/vol1'}],
         }
 
         dag = dag_test_utils.create_dag()
@@ -81,20 +69,14 @@ class TestSparkTask(TestCase):
             task_id="my_spark_task",
             dag=dag,
             liminal_config=self.liminal_config,
-            pipeline_config={
-                'pipeline': 'my_pipeline'
-            },
+            pipeline_config={'pipeline': 'my_pipeline'},
             task_config=task_config,
             parent=None,
-            trigger_rule='all_success')
+            trigger_rule='all_success',
+        )
 
         executor = KubernetesPodExecutor(
-            task_id='k8s',
-            liminal_config=self.liminal_config,
-            executor_config={
-                'executor': 'k8s',
-                'name': 'mypod'
-            }
+            task_id='k8s', liminal_config=self.liminal_config, executor_config={'executor': 'k8s', 'name': 'mypod'}
         )
         executor.apply_task_to_dag(task=task1)
 
@@ -102,11 +84,13 @@ class TestSparkTask(TestCase):
             print(f'Executing task {task.task_id}')
             task.execute(DummyDag('my_dag', task.task_id).context)
 
-        expected_output = '{"word":"my","count":1}\n' \
-                          '{"word":"first","count":1}\n' \
-                          '{"word":"liminal","count":1}\n' \
-                          '{"word":"spark","count":1}\n' \
-                          '{"word":"task","count":1}\n'.split("\n")
+        expected_output = (
+            '{"word":"my","count":1}\n'
+            '{"word":"first","count":1}\n'
+            '{"word":"liminal","count":1}\n'
+            '{"word":"spark","count":1}\n'
+            '{"word":"task","count":1}\n'.split("\n")
+        )
 
         actual = ''
         for filename in os.listdir(outputs_dir):
@@ -124,28 +108,32 @@ class TestSparkTask(TestCase):
             'conf': {
                 'spark.driver.memory': '1g',
                 'spark.driver.maxResultSize': '1g',
-                'spark.yarn.executor.memoryOverhead': '500M'
+                'spark.yarn.executor.memoryOverhead': '500M',
             },
             'application_arguments': {
-                '--query': "select * from "
-                           "my_table where date_prt >= "
-                           "'{{yesterday_ds}}'",
-                '--output': 'mytable'
-            }
+                '--query': "select * from " "my_table where date_prt >= " "'{{yesterday_ds}}'",
+                '--output': 'mytable',
+            },
         }
 
-        expected = ['spark-submit',
-                    '--master',
-                    'yarn',
-                    '--class',
-                    'org.apache.liminal.MySparkApp',
-                    '--conf',
-                    'spark.driver.maxResultSize=1g', '--conf', 'spark.driver.memory=1g', '--conf',
-                    'spark.yarn.executor.memoryOverhead=500M', 'my_app.py',
-                    '--query',
-                    "select * from my_table where "
-                    "date_prt >= '{{yesterday_ds}}'",
-                    '--output', 'mytable']
+        expected = [
+            'spark-submit',
+            '--master',
+            'yarn',
+            '--class',
+            'org.apache.liminal.MySparkApp',
+            '--conf',
+            'spark.driver.maxResultSize=1g',
+            '--conf',
+            'spark.driver.memory=1g',
+            '--conf',
+            'spark.yarn.executor.memoryOverhead=500M',
+            'my_app.py',
+            '--query',
+            "select * from my_table where " "date_prt >= '{{yesterday_ds}}'",
+            '--output',
+            'mytable',
+        ]
 
         actual = SparkTask(
             'my_spark_task',
@@ -154,7 +142,7 @@ class TestSparkTask(TestCase):
             trigger_rule='all_success',
             liminal_config={},
             pipeline_config={'pipeline': 'pipeline'},
-            task_config=task_config
+            task_config=task_config,
         ).get_runnable_command()
 
         self.assertEqual(actual.sort(), expected.sort())
@@ -163,17 +151,19 @@ class TestSparkTask(TestCase):
         task_config = {
             'application_source': 'my_app.py',
             'application_arguments': {
-                '--query': "select * from my_table where"
-                           " date_prt >= '{{yesterday_ds}}'",
-                '--output': 'myoutputtable'
-            }
+                '--query': "select * from my_table where" " date_prt >= '{{yesterday_ds}}'",
+                '--output': 'myoutputtable',
+            },
         }
 
-        expected = ['spark-submit', 'my_app.py',
-                    '--query',
-                    "select * from my_table where "
-                    "date_prt >= '{{yesterday_ds}}'",
-                    '--output', 'myoutputtable']
+        expected = [
+            'spark-submit',
+            'my_app.py',
+            '--query',
+            "select * from my_table where " "date_prt >= '{{yesterday_ds}}'",
+            '--output',
+            'myoutputtable',
+        ]
 
         actual = SparkTask(
             'my_spark_task',
@@ -182,7 +172,7 @@ class TestSparkTask(TestCase):
             trigger_rule='all_success',
             liminal_config={},
             pipeline_config={'pipeline': 'pipeline'},
-            task_config=task_config
+            task_config=task_config,
         ).get_runnable_command()
 
         self.assertEqual(actual.sort(), expected.sort())
@@ -194,30 +184,30 @@ class TestSparkTask(TestCase):
             'conf': {
                 'spark.driver.memory': '1g',
                 'spark.driver.maxResultSize': '1g',
-                'spark.yarn.executor.memoryOverhead': '500M'
+                'spark.yarn.executor.memoryOverhead': '500M',
             },
             'application_arguments': {
-                '--query': "select * from my_table where "
-                           "date_prt >= '{{yesterday_ds}}'",
-                '--output': 'myoutputtable'
-            }
+                '--query': "select * from my_table where " "date_prt >= '{{yesterday_ds}}'",
+                '--output': 'myoutputtable',
+            },
         }
 
-        expected = ['spark-submit',
-                    '--class',
-                    'org.apache.liminal.MySparkApp',
-                    '--conf',
-                    'spark.driver.maxResultSize=1g',
-                    '--conf',
-                    'spark.driver.memory=1g',
-                    '--conf',
-                    'spark.yarn.executor.memoryOverhead=500M',
-                    'my_app.py',
-                    '--query',
-                    'select * from my_table where '
-                    "date_prt >= '{{yesterday_ds}}'",
-                    '--output',
-                    'myoutputtable']
+        expected = [
+            'spark-submit',
+            '--class',
+            'org.apache.liminal.MySparkApp',
+            '--conf',
+            'spark.driver.maxResultSize=1g',
+            '--conf',
+            'spark.driver.memory=1g',
+            '--conf',
+            'spark.yarn.executor.memoryOverhead=500M',
+            'my_app.py',
+            '--query',
+            'select * from my_table where ' "date_prt >= '{{yesterday_ds}}'",
+            '--output',
+            'myoutputtable',
+        ]
 
         actual = SparkTask(
             'my_spark_task',
@@ -226,7 +216,7 @@ class TestSparkTask(TestCase):
             trigger_rule='all_success',
             liminal_config={},
             pipeline_config={'pipeline': 'pipeline'},
-            task_config=task_config
+            task_config=task_config,
         ).get_runnable_command()
 
         self.assertEqual(actual.sort(), expected.sort())

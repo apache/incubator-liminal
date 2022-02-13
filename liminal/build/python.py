@@ -47,9 +47,11 @@ class PythonImageVersions:
         else:
             python_version = str(python_version)
         if python_version[:3] not in self.supported_versions:
-            raise ValueError(f'liminal supports the following python versions: '
-                             f'{self.supported_versions} but {python_version} '
-                             f'were passed')
+            raise ValueError(
+                f'liminal supports the following python versions: '
+                f'{self.supported_versions} but {python_version} '
+                f'were passed'
+            )
         return f'python:{python_version}-slim'
 
 
@@ -61,8 +63,7 @@ class BasePythonImageBuilder(ImageBuilder):
     __PIP_CONF = 'pip_conf'
     __PYTHON_VERSION = 'python_version'
 
-    def __init__(self, config, base_path, relative_source_path, tag,
-                 base_image=PythonImageVersions()):
+    def __init__(self, config, base_path, relative_source_path, tag, base_image=PythonImageVersions()):
         super().__init__(config, base_path, relative_source_path, tag)
         self._base_image = base_image
 
@@ -92,8 +93,7 @@ class BasePythonImageBuilder(ImageBuilder):
 
         if self.__PIP_CONF in self.config:
             new_data = '# syntax = docker/dockerfile:1.0-experimental\n' + data
-            new_data = new_data.replace('{{mount}}',
-                                        '--mount=type=secret,id=pip_config,dst=/etc/pip.conf \\\n')
+            new_data = new_data.replace('{{mount}}', '--mount=type=secret,id=pip_config,dst=/etc/pip.conf \\\n')
         else:
             new_data = new_data.replace('{{mount}} ', '')
 

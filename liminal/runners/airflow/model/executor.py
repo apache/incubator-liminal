@@ -20,8 +20,9 @@ from abc import ABC, abstractmethod
 
 from airflow.models import BaseOperator
 
-from liminal.runners.airflow.operators.operator_with_variable_resolving import \
-    OperatorWithVariableResolving
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
 
 
 def add_variables_to_operator(operator, task) -> BaseOperator:
@@ -36,7 +37,7 @@ def add_variables_to_operator(operator, task) -> BaseOperator:
         task_config=task.task_config,
         variables=task.variables,
         liminal_task_instance=task,
-        operator=operator
+        operator=operator,
     )
 
 
@@ -44,6 +45,7 @@ class Executor(ABC):
     """
     Executor Task.
     """
+
     # list of task types supported by the executor
     supported_task_types = []
 
@@ -64,5 +66,6 @@ class Executor(ABC):
         pass
 
     def _validate_task_type(self, task):
-        assert any([isinstance(task, tYp) for tYp in self.supported_task_types]), \
-            f'supported task types: {self.supported_task_types}'
+        assert any(
+            [isinstance(task, tYp) for tYp in self.supported_task_types]
+        ), f'supported task types: {self.supported_task_types}'

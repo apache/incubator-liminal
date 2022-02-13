@@ -43,8 +43,7 @@ class TestSparkImageBuilder(TestCase):
 
     def test_build(self):
         build_out = self.__test_build()
-        self.assertTrue('RUN pip install -r requirements.txt' in build_out,
-                        'Incorrect pip command')
+        self.assertTrue('RUN pip install -r requirements.txt' in build_out, 'Incorrect pip command')
 
         self.__test_image()
 
@@ -53,10 +52,9 @@ class TestSparkImageBuilder(TestCase):
 
         base_path = os.path.join(os.path.dirname(__file__), '../../../apps/test_spark_app')
 
-        builder = SparkImageBuilder(config=config,
-                                    base_path=base_path,
-                                    relative_source_path='wordcount',
-                                    tag=self.__IMAGE_NAME)
+        builder = SparkImageBuilder(
+            config=config, base_path=base_path, relative_source_path='wordcount', tag=self.__IMAGE_NAME
+        )
 
         build_out = str(builder.build())
 
@@ -68,14 +66,9 @@ class TestSparkImageBuilder(TestCase):
 
         cmds = ['spark-submit', 'wordcount.py', 'words.txt', '/mnt/vol1/outputs']
 
-        container_log = docker_client.containers.run(self.__IMAGE_NAME,
-                                                     cmds,
-                                                     volumes={
-                                                         self.temp_dir: {
-                                                             'bind': '/mnt/vol1',
-                                                             'mode': 'rw'
-                                                         }
-                                                     })
+        container_log = docker_client.containers.run(
+            self.__IMAGE_NAME, cmds, volumes={self.temp_dir: {'bind': '/mnt/vol1', 'mode': 'rw'}}
+        )
 
         docker_client.close()
 
@@ -89,7 +82,8 @@ class TestSparkImageBuilder(TestCase):
             "spark: 1\\n"
             "task: 1\\n"
             "writing the results to /mnt/vol1/outputs\\n'",
-            str(container_log))
+            str(container_log),
+        )
 
     def __create_conf(self, task_id):
         return {

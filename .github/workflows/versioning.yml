@@ -1,10 +1,11 @@
+---
 name: Versioning RC
 
 on:
   workflow_run:
-    workflows: ["Running unittest"]
+    workflows: [Running unittest]
     branches: [master]
-    types: 
+    types:
       - completed
 
 jobs:

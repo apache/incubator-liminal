@@ -25,7 +25,7 @@ The `python` task allows you to run python code packaged as docker images.
   - task: my_python_task
     type: python
     image: myorg/myrepo:mypythonapp
-    cmd: python my_python_app.py 
+    cmd: python my_python_app.py
     env_vars:
       env: '{{env}}'
       fizz: buzz

@@ -20,7 +20,7 @@ import argparse
 
 import pyspark.sql.functions as F
 from pyspark.ml import Pipeline
-from pyspark.ml.feature import StringIndexer, VectorAssembler, StandardScaler
+from pyspark.ml.feature import StandardScaler, StringIndexer, VectorAssembler
 from pyspark.ml.functions import vector_to_array
 from pyspark.sql import SparkSession
 
@@ -28,16 +28,14 @@ from pyspark.sql import SparkSession
 def transform(data):
     columns_to_scale = data.columns[:-1]
     vectorizer = VectorAssembler(inputCols=columns_to_scale, outputCol="features")
-    scaler = StandardScaler(inputCol="features", outputCol="scaled_features",
-                            withStd=True, withMean=True)
+    scaler = StandardScaler(inputCol="features", outputCol="scaled_features", withStd=True, withMean=True)
     labeler = StringIndexer(inputCol=data.columns[-1], outputCol='label')
     pipeline = Pipeline(stages=[vectorizer, scaler, labeler])
     fitted = pipeline.fit(data)
     transformed = fitted.transform(data)
 
-    result = (
-        transformed.withColumn("feature_arr", vector_to_array("scaled_features"))
-        .select([F.col("feature_arr")[i].alias(columns_to_scale[i]) for i in range(len(columns_to_scale))] + ['label'])
+    result = transformed.withColumn("feature_arr", vector_to_array("scaled_features")).select(
+        [F.col("feature_arr")[i].alias(columns_to_scale[i]) for i in range(len(columns_to_scale))] + ['label']
     )
 
     return result
@@ -52,10 +50,7 @@ def load(data, output_uri):
 
 
 def data_pipeline(input_uri, output_uri):
-    spark = SparkSession \
-        .builder \
-        .appName("Prepare Iris Data") \
-        .getOrCreate()
+    spark = SparkSession.builder.appName("Prepare Iris Data").getOrCreate()
 
     input = extract(spark, input_uri)
     data = transform(input)

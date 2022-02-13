@@ -22,7 +22,7 @@ import os
 
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md") as fh:
     long_description = fh.read()
 
 with open('requirements.txt') as f:
@@ -50,7 +50,12 @@ setuptools.setup(
     scripts=['scripts/liminal'],
     include_package_data=True,
     package_data={
-        'liminal': ['../DISCLAIMER', '../LICENSE', '../NOTICE', '../README.md',
-                    '../liminal/core/config/defaults/base/liminal.yml'],
-    }
+        'liminal': [
+            '../DISCLAIMER',
+            '../LICENSE',
+            '../NOTICE',
+            '../README.md',
+            '../liminal/core/config/defaults/base/liminal.yml',
+        ],
+    },
 )

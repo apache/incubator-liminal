@@ -26,7 +26,6 @@ from tests.util import dag_test_utils
 
 # noinspection DuplicatedCode
 class TestJobEndTask(TestCase):
-
     def test_apply_task_to_dag(self):
         dag = dag_test_utils.create_dag()
 
@@ -37,7 +36,7 @@ class TestJobEndTask(TestCase):
             task_config={},
             parent=None,
             trigger_rule='all_done',
-            liminal_config={'metrics': {'namespace': 'EndJobNameSpace', 'backends': ['cloudwatch']}}
+            liminal_config={'metrics': {'namespace': 'EndJobNameSpace', 'backends': ['cloudwatch']}},
         )
         airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
@@ -53,10 +52,15 @@ class TestJobEndTask(TestCase):
         conf = {'pipeline': 'my_pipeline'}
         dag = dag_test_utils.create_dag()
 
-        task0 = job_end.JobEndTask(task_id="job_end", dag=dag,
-                                   pipeline_config={'pipeline': 'my_end_pipeline'},
-                                   liminal_config=conf, parent=None,
-                                   trigger_rule='all_done', task_config={})
+        task0 = job_end.JobEndTask(
+            task_id="job_end",
+            dag=dag,
+            pipeline_config={'pipeline': 'my_end_pipeline'},
+            liminal_config=conf,
+            parent=None,
+            trigger_rule='all_done',
+            task_config={},
+        )
 
         airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
@@ -70,13 +74,15 @@ class TestJobEndTask(TestCase):
     def test_apply_task_to_dag_with_partial_configuration(self):
         dag = dag_test_utils.create_dag()
 
-        task0 = job_end.JobEndTask(task_id="job_enc",
-                                   dag=dag,
-                                   liminal_config={'metrics': {'namespace': 'EndJobNameSpace'}},
-                                   pipeline_config={'pipeline': 'my_end_pipeline'},
-                                   task_config={},
-                                   parent=None,
-                                   trigger_rule='all_done')
+        task0 = job_end.JobEndTask(
+            task_id="job_enc",
+            dag=dag,
+            liminal_config={'metrics': {'namespace': 'EndJobNameSpace'}},
+            pipeline_config={'pipeline': 'my_end_pipeline'},
+            task_config={},
+            parent=None,
+            trigger_rule='all_done',
+        )
         task0.apply_task_to_dag()
 
         self.assertEqual(len(dag.tasks), 1)

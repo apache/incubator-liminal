@@ -1,0 +1,58 @@
+---
+name: PreCommitChecks
+
+on:
+  push:
+    branches:
+      - master
+      # - '!release*'
+  pull_request:
+    branches:
+      - master
+      # - '!release*'
+jobs:
+  linting:
+    name: Run pre-commit hooks on py3.6
+    runs-on: ubuntu-latest
+    steps:
+      #----------------------------------------------
+      # Checkout, SetUp Python, Load Cache and Run PreCommitChecks
+      #----------------------------------------------
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Install Python
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+
+      - name: Check Python ${{ matrix.python-version }} version
+        run: python -V
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip
+          restore-keys: ${{ runner.os }}-pip
+
+      - name: Install python requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pre-commit
+
+      # load cached venv if cache exists
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+
+      - run: pre-commit install
+      - name: Run pre-commit hooks on all the files
+        run: pre-commit run --all-files --show-diff-on-failure --color always --verbose
+      # - uses: pre-commit/action@v2.0.3
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}

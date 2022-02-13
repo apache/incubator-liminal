@@ -16,11 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import glob
+import os
 import pickle
 import time
-import glob
-
-import os
 
 MOUNT_PATH = os.environ.get('MOUNT_PATH', '/mnt/gettingstartedvol')
 PRODUCTION = 'production'
@@ -28,8 +27,8 @@ CANDIDATE = 'candidate'
 
 _ONE_HOUR = 60 * 60
 
-class ModelStore:
 
+class ModelStore:
     def __init__(self, env):
         self.env = env
         self._latest_model = None
@@ -50,8 +49,8 @@ class ModelStore:
         pickle.dump(model, open(f'{path}/{key}', "wb"))
 
     def _download_latest_model(self):
-        objects = (glob.glob(f'{MOUNT_PATH}/{self.env}/**/*'))
-        models = list(reversed(sorted([obj for obj in objects if obj.endswith('.p')])))
+        objects = glob.glob(f'{MOUNT_PATH}/{self.env}/**/*')
+        models = list(reversed(sorted(obj for obj in objects if obj.endswith('.p'))))
         latest_key = models[0]
         version = latest_key.rsplit('/')[-2]
         print(f'Loading model version {version}')

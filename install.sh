@@ -31,6 +31,8 @@ python setup.py sdist bdist_wheel
 
 pip install dist/*.whl
 
+mkdir -p "${LIMINAL_HOME:-${HOME}/liminal_home}"
+
 cp dist/*.whl "${LIMINAL_HOME:-${HOME}/liminal_home}"
 
 cd - || exit

@@ -26,19 +26,17 @@ from tests.util import dag_test_utils
 
 # noinspection DuplicatedCode
 class TestJobStartTask(TestCase):
-
     def test_apply_task_to_dag(self):
         dag = dag_test_utils.create_dag()
 
         task0 = job_start.JobStartTask(
             task_id="start_task",
             dag=dag,
-            liminal_config={
-                'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']}},
+            liminal_config={'metrics': {'namespace': 'StartJobNameSpace', 'backends': ['cloudwatch']}},
             pipeline_config={'pipeline': 'my_start_pipeline'},
             task_config={},
             parent=None,
-            trigger_rule='all_success'
+            trigger_rule='all_success',
         )
         task0.apply_task_to_dag()
 
@@ -62,7 +60,8 @@ class TestJobStartTask(TestCase):
             task_config={},
             pipeline_config={'pipeline': 'my_end_pipeline'},
             parent=None,
-            trigger_rule='all_success')
+            trigger_rule='all_success',
+        )
         airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
         self.assertEqual(len(dag.tasks), 1)
@@ -75,14 +74,15 @@ class TestJobStartTask(TestCase):
     def test_apply_task_to_dag_with_partial_configuration(self):
         dag = dag_test_utils.create_dag()
 
-        task0 = job_start.JobStartTask(task_id="start_task",
-                                       dag=dag,
-                                       liminal_config={
-                                           'metrics': {'namespace': 'StartJobNameSpace'}},
-                                       pipeline_config={'pipeline': 'my_start_pipeline'},
-                                       task_config={},
-                                       parent=None,
-                                       trigger_rule='all_success', )
+        task0 = job_start.JobStartTask(
+            task_id="start_task",
+            dag=dag,
+            liminal_config={'metrics': {'namespace': 'StartJobNameSpace'}},
+            pipeline_config={'pipeline': 'my_start_pipeline'},
+            task_config={},
+            parent=None,
+            trigger_rule='all_success',
+        )
         airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=task0)
 
         self.assertEqual(len(dag.tasks), 1)

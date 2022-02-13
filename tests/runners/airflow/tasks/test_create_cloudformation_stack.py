@@ -24,10 +24,17 @@ from airflow.operators.python import BranchPythonOperator
 from moto import mock_cloudformation
 
 from liminal.runners.airflow.executors import airflow
-from liminal.runners.airflow.operators.cloudformation import CloudFormationCreateStackOperator, \
-    CloudFormationCreateStackSensor, CloudFormationHook
-from liminal.runners.airflow.operators.operator_with_variable_resolving import OperatorWithVariableResolving
-from liminal.runners.airflow.tasks.create_cloudformation_stack import CreateCloudFormationStackTask
+from liminal.runners.airflow.operators.cloudformation import (
+    CloudFormationCreateStackOperator,
+    CloudFormationCreateStackSensor,
+    CloudFormationHook,
+)
+from liminal.runners.airflow.operators.operator_with_variable_resolving import (
+    OperatorWithVariableResolving,
+)
+from liminal.runners.airflow.tasks.create_cloudformation_stack import (
+    CreateCloudFormationStackTask,
+)
 from tests.util import dag_test_utils
 
 
@@ -43,7 +50,7 @@ class TestCreateCloudFormationStackTask(TestCase):
         self.dag.context = {
             'ti': self.dag,
             'ts': datetime.now().timestamp(),
-            'execution_date': datetime.now().timestamp()
+            'execution_date': datetime.now().timestamp(),
         }
         self.dag.get_dagrun = MagicMock()
 
@@ -66,24 +73,22 @@ class TestCreateCloudFormationStackTask(TestCase):
                     'CoreServerCount': '1',
                     'EmrApplicationRelease': '5.28',
                     'InstanceTypeMaster': 'm5.xlarge',
-                    'InstanceTypeCore': 'm5.xlarge'
-                }
-            }
+                    'InstanceTypeCore': 'm5.xlarge',
+                },
+            },
         }
 
-        self.create_cloudformation_task = \
-            CreateCloudFormationStackTask(
-                self.config['task'],
-                self.dag,
-                [],
-                trigger_rule='all_success',
-                liminal_config={},
-                pipeline_config={},
-                task_config=self.config
-            )
+        self.create_cloudformation_task = CreateCloudFormationStackTask(
+            self.config['task'],
+            self.dag,
+            [],
+            trigger_rule='all_success',
+            liminal_config={},
+            pipeline_config={},
+            task_config=self.config,
+        )
 
-        airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(
-            task=self.create_cloudformation_task)
+        airflow.AirflowExecutor("airflow-executor", {}, {}).apply_task_to_dag(task=self.create_cloudformation_task)
 
     def test_apply_task_to_dag(self):
         self.assertEqual(len(self.dag.tasks), 4)
@@ -107,7 +112,8 @@ class TestCreateCloudFormationStackTask(TestCase):
             print(is_cloudformation_exists)
             self.assertEqual(
                 is_cloudformation_exists.python_callable(stack_name=self.cluster_name),
-                'create-cloudformation-create_emr')
+                'create-cloudformation-create_emr',
+            )
 
     def test_cloudformation_exist_and_running(self):
         is_cloudformation_exists = self.dag.tasks[0].operator_delegate
@@ -115,19 +121,13 @@ class TestCreateCloudFormationStackTask(TestCase):
         for status in ['CREATE_COMPLETE', 'DELETE_FAILED']:
             with mock.patch.object(CloudFormationHook, 'get_conn') as mock_conn:
                 mock_cloudformation_conn = MagicMock()
-                mock_cloudformation_conn.describe_stacks.return_value = {
-                    'Stacks': [
-                        {
-                            'StackStatus': status
-                        }
-                    ]
-                }
+                mock_cloudformation_conn.describe_stacks.return_value = {'Stacks': [{'StackStatus': status}]}
 
                 mock_conn.return_value = mock_cloudformation_conn
 
                 self.assertEqual(
-                    is_cloudformation_exists.python_callable(stack_name=self.cluster_name),
-                    'creation-end-create_emr')
+                    is_cloudformation_exists.python_callable(stack_name=self.cluster_name), 'creation-end-create_emr'
+                )
 
     def test_cloudformation_exists_and_not_running(self):
         is_cloudformation_exists = self.dag.tasks[0].operator_delegate
@@ -135,19 +135,14 @@ class TestCreateCloudFormationStackTask(TestCase):
         for status in ['DELETED']:
             with mock.patch.object(CloudFormationHook, 'get_conn') as mock_conn:
                 mock_cloudformation_conn = MagicMock()
-                mock_cloudformation_conn.describe_stacks.return_value = {
-                    'Stacks': [
-                        {
-                            'StackStatus': status
-                        }
-                    ]
-                }
+                mock_cloudformation_conn.describe_stacks.return_value = {'Stacks': [{'StackStatus': status}]}
 
                 mock_conn.return_value = mock_cloudformation_conn
 
                 self.assertEqual(
                     is_cloudformation_exists.python_callable(stack_name=self.cluster_name),
-                    'create-cloudformation-create_emr')
+                    'create-cloudformation-create_emr',
+                )
 
     def test_cloudformation_create_stack_operator_task(self):
         create_cloudformation_stack = self.dag.tasks[1]

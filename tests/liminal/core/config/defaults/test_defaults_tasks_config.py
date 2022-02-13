@@ -26,150 +26,103 @@ class TestDefaultsTaskConfig(TestCase):
         pipeline = {
             'pipeline': 'mypipe',
             "tasks": [
-                {
-                    "task": "middle",
-                    "type": "spark",
-                    "task_param": "task_middle_param"
-                },
-                {
-                    "task": "end",
-                    "type": "python",
-                    "task_param": "task_end_param"
-                }
-            ]
+                {"task": "middle", "type": "spark", "task_param": "task_middle_param"},
+                {"task": "end", "type": "python", "task_param": "task_end_param"},
+            ],
         }
 
         subliminal = {'pipelines': [pipeline]}
 
         superliminal = {
             "task_defaults": {
-                "python": {
-                    "env_vars": {
-                        "env2": "env2value"
-                    }
-                },
-                "spark": {
-                    "task_param": "task_spark_param",
-                    "executor": "emr"
-                }
+                "python": {"env_vars": {"env2": "env2value"}},
+                "spark": {"task_param": "task_spark_param", "executor": "emr"},
             }
         }
 
-        expected = {'pipeline': 'mypipe',
-                    'tasks': [{'env_vars': {'env1': 'env1value', 'env2': 'env2value'},
-                               'task': 'start',
-                               'type': 'python'},
-                              {'executor': 'emr',
-                               'task': 'middle',
-                               'task_param': 'task_middle_param',
-                               'type': 'spark'},
-                              {'env_vars': {'env2': 'env2value'},
-                               'task': 'end',
-                               'task_param': 'task_end_param',
-                               'type': 'python'}]}
-        self.assertEqual(expected, default_configs.apply_task_defaults(subliminal,
-                                                                       superliminal,
-                                                                       pipeline=pipeline,
-                                                                       superliminal_before_tasks=[{
-                                                                           "task": "start",
-                                                                           "type": "python",
-                                                                           "env_vars": {
-                                                                               "env1": "env1value"
-                                                                           }
-                                                                       }],
-                                                                       superliminal_after_tasks=[]))
+        expected = {
+            'pipeline': 'mypipe',
+            'tasks': [
+                {'env_vars': {'env1': 'env1value', 'env2': 'env2value'}, 'task': 'start', 'type': 'python'},
+                {'executor': 'emr', 'task': 'middle', 'task_param': 'task_middle_param', 'type': 'spark'},
+                {'env_vars': {'env2': 'env2value'}, 'task': 'end', 'task_param': 'task_end_param', 'type': 'python'},
+            ],
+        }
+        self.assertEqual(
+            expected,
+            default_configs.apply_task_defaults(
+                subliminal,
+                superliminal,
+                pipeline=pipeline,
+                superliminal_before_tasks=[{"task": "start", "type": "python", "env_vars": {"env1": "env1value"}}],
+                superliminal_after_tasks=[],
+            ),
+        )
 
     def test_missing_tasks_from_supr(self):
         pipeline = {
             'pipeline': 'mypipe',
             "tasks": [
-                {
-                    "task": "middle",
-                    "type": "spark",
-                    "task_param": "task_middle_param"
-                },
-                {
-                    "task": "end",
-                    "type": "python",
-                    "task_param": "task_end_param"
-                }
-            ]
+                {"task": "middle", "type": "spark", "task_param": "task_middle_param"},
+                {"task": "end", "type": "python", "task_param": "task_end_param"},
+            ],
         }
 
         subliminal = {'pipelines': [pipeline]}
 
         superliminal = {
             "task_defaults": {
-                "python": {
-                    "env_vars": {
-                        "env2": "env2value"
-                    }
-                },
-                "spark": {
-                    "task_param": "task_spark_param"
-                }
+                "python": {"env_vars": {"env2": "env2value"}},
+                "spark": {"task_param": "task_spark_param"},
             }
         }
 
-        expected = {'pipeline': 'mypipe',
-                    'tasks': [{'task': 'middle',
-                               'task_param': 'task_middle_param',
-                               'type': 'spark'},
-                              {'env_vars': {'env2': 'env2value'},
-                               'task': 'end',
-                               'task_param': 'task_end_param',
-                               'type': 'python'}]}
+        expected = {
+            'pipeline': 'mypipe',
+            'tasks': [
+                {'task': 'middle', 'task_param': 'task_middle_param', 'type': 'spark'},
+                {'env_vars': {'env2': 'env2value'}, 'task': 'end', 'task_param': 'task_end_param', 'type': 'python'},
+            ],
+        }
 
-        self.assertEqual(expected, default_configs.apply_task_defaults(subliminal,
-                                                                       superliminal,
-                                                                       pipeline=pipeline,
-                                                                       superliminal_before_tasks=[],
-                                                                       superliminal_after_tasks=[]))
+        self.assertEqual(
+            expected,
+            default_configs.apply_task_defaults(
+                subliminal, superliminal, pipeline=pipeline, superliminal_before_tasks=[], superliminal_after_tasks=[]
+            ),
+        )
 
     def test_missing_tasks_from_sub(self):
-        pipeline = {
-            'pipeline': 'mypipe'
-        }
+        pipeline = {'pipeline': 'mypipe'}
 
         subliminal = {'pipelines': [pipeline]}
 
         superliminal = {
             "task_defaults": {
-                "python": {
-                    "env_vars": {
-                        "env2": "env2value"
-                    }
-                },
+                "python": {"env_vars": {"env2": "env2value"}},
                 "spark": {
                     "task_param": "task_start_param",
-                }
+                },
             }
         }
 
-        expected = {'pipeline': 'mypipe',
-                    'tasks': [{
-                        'task': 'start',
-                        'task_param': 'task_middle_param',
-                        'type': 'spark'},
-                        {'env_vars': {'env2': 'env2value'},
-                         'task': 'end',
-                         'task_param': 'task_end_param',
-                         'type': 'end'}]}
+        expected = {
+            'pipeline': 'mypipe',
+            'tasks': [
+                {'task': 'start', 'task_param': 'task_middle_param', 'type': 'spark'},
+                {'env_vars': {'env2': 'env2value'}, 'task': 'end', 'task_param': 'task_end_param', 'type': 'end'},
+            ],
+        }
 
-        self.assertEqual(expected,
-                         default_configs.apply_task_defaults(subliminal,
-                                                             superliminal,
-                                                             pipeline=pipeline,
-                                                             superliminal_before_tasks=[{
-                                                                 "task": "start",
-                                                                 "task_param": "task_middle_param",
-                                                                 "type": "spark"
-                                                             }],
-                                                             superliminal_after_tasks=[{
-                                                                 "env_vars": {
-                                                                     "env2": "env2value"
-                                                                 },
-                                                                 "task": "end",
-                                                                 "task_param": "task_end_param",
-                                                                 "type": "end"
-                                                             }]))
+        self.assertEqual(
+            expected,
+            default_configs.apply_task_defaults(
+                subliminal,
+                superliminal,
+                pipeline=pipeline,
+                superliminal_before_tasks=[{"task": "start", "task_param": "task_middle_param", "type": "spark"}],
+                superliminal_after_tasks=[
+                    {"env_vars": {"env2": "env2value"}, "task": "end", "task_param": "task_end_param", "type": "end"}
+                ],
+            ),
+        )

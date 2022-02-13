@@ -22,8 +22,8 @@ Can be removed when Airflow 2.0.0 is released.
 """
 from typing import List
 
-from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 from airflow.models import BaseOperator
+from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 from airflow.sensors.base import BaseSensorOperator
 from botocore.exceptions import ClientError
 
@@ -53,16 +53,13 @@ class BaseCloudFormationOperator(BaseOperator):
     :param aws_conn_id: aws connection to uses
     :type aws_conn_id: str
     """
+
     template_fields: List[str] = []
     template_ext = ()
     ui_color = '#1d472b'
     ui_fgcolor = '#FFF'
 
-    def __init__(
-            self,
-            params,
-            aws_conn_id='aws_default',
-            *args, **kwargs):
+    def __init__(self, params, aws_conn_id='aws_default', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.params = params
         self.aws_conn_id = aws_conn_id
@@ -89,15 +86,12 @@ class CloudFormationCreateStackOperator(BaseCloudFormationOperator):
     :param aws_conn_id: aws connection to uses
     :type aws_conn_id: str
     """
+
     template_fields: List[str] = []
     template_ext = ()
     ui_color = '#6b9659'
 
-    def __init__(
-            self,
-            params,
-            aws_conn_id='aws_default',
-            *args, **kwargs):
+    def __init__(self, params, aws_conn_id='aws_default', *args, **kwargs):
         super().__init__(params=params, aws_conn_id=aws_conn_id, *args, **kwargs)
 
     def cloudformation_op(self, cloudformation):
@@ -114,16 +108,13 @@ class CloudFormationDeleteStackOperator(BaseCloudFormationOperator):
     :param aws_conn_id: aws connection to uses
     :type aws_conn_id: str
     """
+
     template_fields: List[str] = []
     template_ext = ()
     ui_color = '#1d472b'
     ui_fgcolor = '#FFF'
 
-    def __init__(
-            self,
-            params,
-            aws_conn_id='aws_default',
-            *args, **kwargs):
+    def __init__(self, params, aws_conn_id='aws_default', *args, **kwargs):
         super().__init__(params=params, aws_conn_id=aws_conn_id, *args, **kwargs)
 
     def cloudformation_op(self, cloudformation):
@@ -143,14 +134,16 @@ class BaseCloudFormationSensor(BaseSensorOperator):
     :type poke_interval: int
     """
 
-    def __init__(self,
-                 stack_name,
-                 complete_status,
-                 in_progress_status,
-                 aws_conn_id='aws_default',
-                 poke_interval=30,
-                 *args,
-                 **kwargs):
+    def __init__(
+        self,
+        stack_name,
+        complete_status,
+        in_progress_status,
+        aws_conn_id='aws_default',
+        poke_interval=30,
+        *args,
+        **kwargs,
+    ):
         super().__init__(poke_interval=poke_interval, *args, **kwargs)
         self.aws_conn_id = aws_conn_id
         self.stack_name = stack_name
@@ -216,19 +209,16 @@ class CloudFormationCreateStackSensor(BaseCloudFormationSensor):
     template_fields = ['stack_name']
     ui_color = '#C5CAE9'
 
-    def __init__(self,
-                 stack_name,
-                 aws_conn_id='aws_default',
-                 poke_interval=30,
-                 *args,
-                 **kwargs):
-        super().__init__(stack_name=stack_name,
-                         complete_status='CREATE_COMPLETE',
-                         in_progress_status='CREATE_IN_PROGRESS',
-                         aws_conn_id=aws_conn_id,
-                         poke_interval=poke_interval,
-                         *args,
-                         **kwargs)
+    def __init__(self, stack_name, aws_conn_id='aws_default', poke_interval=30, *args, **kwargs):
+        super().__init__(
+            stack_name=stack_name,
+            complete_status='CREATE_COMPLETE',
+            in_progress_status='CREATE_IN_PROGRESS',
+            aws_conn_id=aws_conn_id,
+            poke_interval=poke_interval,
+            *args,
+            **kwargs,
+        )
 
 
 class CloudFormationDeleteStackSensor(BaseCloudFormationSensor):
@@ -247,17 +237,16 @@ class CloudFormationDeleteStackSensor(BaseCloudFormationSensor):
     template_fields = ['stack_name']
     ui_color = '#C5CAE9'
 
-    def __init__(self,
-                 stack_name,
-                 aws_conn_id='aws_default',
-                 poke_interval=30,
-                 *args,
-                 **kwargs):
-        super().__init__(stack_name=stack_name,
-                         complete_status='DELETE_COMPLETE',
-                         in_progress_status='DELETE_IN_PROGRESS',
-                         aws_conn_id=aws_conn_id,
-                         poke_interval=poke_interval, *args, **kwargs)
+    def __init__(self, stack_name, aws_conn_id='aws_default', poke_interval=30, *args, **kwargs):
+        super().__init__(
+            stack_name=stack_name,
+            complete_status='DELETE_COMPLETE',
+            in_progress_status='DELETE_IN_PROGRESS',
+            aws_conn_id=aws_conn_id,
+            poke_interval=poke_interval,
+            *args,
+            **kwargs,
+        )
 
     def allow_non_existing_stack_status(self):
         return True
