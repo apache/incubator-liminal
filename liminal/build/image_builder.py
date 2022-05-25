@@ -69,10 +69,11 @@ class ImageBuilder:
             docker_build_command = f'DOCKER_BUILDKIT=1 {docker_build_command}'
 
         logging.info(docker_build_command)
-
+        docker_build_out = []
+        build_process = None
         try:
             build_start = time.time()
-            build_process = subprocess.Popen(docker_build_command, shell=True, stdout=subprocess.PIPE)
+            build_process = subprocess.Popen(docker_build_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             # Poll process.stdout to show stdout live
             logging.info('=' * 80)
             timeout = 960
@@ -81,19 +82,23 @@ class ImageBuilder:
                 if build_process.poll() is not None:
                     break
                 if output:
-                    logging.info(output.strip())
+                    log_msg = output.strip().decode('utf-8')
+                    docker_build_out.append(log_msg)
+                    logging.info(log_msg)
             logging.info('=' * 80)
-
         except subprocess.CalledProcessError as e:
             for line in str(e.output)[2:-3].split('\\n'):
                 logging.info(line)
             raise e
+        finally:
+            if build_process:
+                build_process.stdout.close()
 
         self.__remove_dir(temp_dir)
 
         logging.info(f'[X] Building image: {self.tag} (Success).')
 
-        return build_process
+        return '\n'.join(docker_build_out)
 
     def __copy_source_code(self, temp_dir):
         self.__copy_dir(os.path.join(self.base_path, self.relative_source_path), temp_dir)
