@@ -21,6 +21,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 
 
 class ImageBuilder:
@@ -70,10 +71,12 @@ class ImageBuilder:
         logging.info(docker_build_command)
 
         try:
+            build_start = time.time()
             build_process = subprocess.Popen(docker_build_command, shell=True, stdout=subprocess.PIPE)
             # Poll process.stdout to show stdout live
             logging.info('=' * 80)
-            while True:
+            timeout = 960
+            while time.time() < build_start + timeout:
                 output = build_process.stdout.readline()
                 if build_process.poll() is not None:
                     break
