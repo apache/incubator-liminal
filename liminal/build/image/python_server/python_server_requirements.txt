@@ -16,5 +16,5 @@
 # specific language governing permissions and limitations
 # under the License.
 
-Flask==1.1.1
+Flask
 pyyaml

@@ -21,6 +21,8 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
+
 
 class ImageBuilder:
     """
@@ -69,18 +71,22 @@ class ImageBuilder:
         logging.info(docker_build_command)
         docker_build_out = []
         try:
-            build_process = subprocess.Popen(
-                docker_build_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
+            build_start = time.time()
+            # Poll process.stdout to show stdout live
+            build_process = subprocess.Popen(docker_build_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             logging.info('=' * 80)
-            for stdout_line in iter(lambda: build_process.stdout.readline(), b''):
+            timeout = 960
+            while time.time() < build_start + timeout:
+                output = build_process.stdout.readline()
                 if build_process.poll() is not None:
                     break
-                logging.info(stdout_line.strip().decode('utf-8'))
-                docker_build_out.append(stdout_line.strip().decode('utf-8'))
+                if output:
+                    stdout_log_str = output.strip().decode('utf-8')
+                    docker_build_out.append(stdout_log_str)
+                    logging.info(stdout_log_str)
             logging.info('=' * 80)
-            build_process.communicate(timeout=960)
             build_process.stdout.close()
+            build_process.wait(time.time() - (build_start + timeout))
         except subprocess.CalledProcessError as e:
             for line in str(e.output)[2:-3].split('\\n'):
                 logging.info(line)
