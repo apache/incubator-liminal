@@ -21,8 +21,6 @@ import os
 import shutil
 import subprocess
 import tempfile
-import time
-
 
 class ImageBuilder:
     """
@@ -70,31 +68,23 @@ class ImageBuilder:
 
         logging.info(docker_build_command)
         docker_build_out = []
-        build_process = None
         try:
-            build_start = time.time()
             build_process = subprocess.Popen(
                 docker_build_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             )
-            # Poll process.stdout to show stdout live
             logging.info('=' * 80)
-            timeout = 960
-            while time.time() < build_start + timeout:
-                output = build_process.stdout.readline()
+            for stdout_line in iter(lambda: build_process.stdout.readline(), b''):
                 if build_process.poll() is not None:
                     break
-                if output:
-                    log_msg = output.strip().decode('utf-8')
-                    docker_build_out.append(log_msg)
-                    logging.info(log_msg)
+                logging.info(stdout_line.strip().decode('utf-8'))
+                docker_build_out.append(stdout_line.strip().decode('utf-8'))
             logging.info('=' * 80)
+            build_process.communicate(timeout=960)
+            build_process.stdout.close()
         except subprocess.CalledProcessError as e:
             for line in str(e.output)[2:-3].split('\\n'):
                 logging.info(line)
             raise e
-        finally:
-            if build_process:
-                build_process.stdout.close()
 
         self.__remove_dir(temp_dir)
 
