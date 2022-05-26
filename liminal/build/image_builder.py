@@ -73,7 +73,9 @@ class ImageBuilder:
         try:
             build_start = time.time()
             # Poll process.stdout to show stdout live
-            build_process = subprocess.Popen(docker_build_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            build_process = subprocess.Popen(
+                docker_build_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
             logging.info('=' * 80)
             timeout = 960
             while time.time() < build_start + timeout:
