@@ -17,7 +17,7 @@
 # under the License.
 
 scikit-learn==0.23.2
-apache-liminal==0.0.2
-Werkzeug==0.16.1
+Werkzeug==1.0.1
 itsdangerous==1.1.0
-MarkupSafe==2.0.1
+MarkupSafe==1.1.1
+Flask
