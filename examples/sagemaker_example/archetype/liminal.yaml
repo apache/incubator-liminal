@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,5 +15,29 @@
 # specific language governing permissions and limitations
 # under the License.
 
-Flask
-pyyaml
+---
+
+# superliminal for local development
+name: InfraSageMaker
+owner: Bosco Albert Baracus
+type: super
+executors:
+  - executor: k8s
+    type: kubernetes
+variables:
+  output_root_dir: /mnt/smvolume
+  input_root_dir: ''
+  sagemaker_role: arn:aws:iam::468326661668:role/AWSSageMakerExecutionRole
+images:
+  - image: my_sm_image
+    source: .
+    type: python
+    no_cache: true
+task_defaults:
+  python:
+    executor: k8s
+    application_source: '{{application}}'
+    mounts:
+      - mount: mymount
+        volume: smvolume
+        path: /mnt/smvolume
