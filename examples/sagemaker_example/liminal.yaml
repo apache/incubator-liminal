@@ -31,6 +31,13 @@ task_defaults:
       - mount: mymount
         volume: smvolume
         path: /mnt/smvolume
+      - mount: awsmount
+        volume: awsvolume
+        path: /root/.aws
+variables:
+  output_root_dir: /mnt/smvolume
+  input_root_dir: ''
+  sagemaker_role: arn:aws:iam::468326661668:role/AWSSageMakerExecutionRole
 pipelines:
   - pipeline: sagemaker_diamonds_train_and_inference
     start_date: 1970-01-01
@@ -40,33 +47,37 @@ pipelines:
       - task: data_preprocessing
         type: python
         description: prepare the data for training
-        cmd: python -u liminal_sm.py --action train data_prep --output_uri_base liminal-sm-example/data
-        env:
+        cmd: python -u liminal_sm.py --action data_prep --output_uri_base liminal-sm-example/data
+        env_vars:
           COMM_PATH: /mnt/smvolume
-          SM_ROLE: '{{sagemaker_role}}'
+          SM_ROLE: "{{sagemaker_role}}"
       - task: train
         type: python
         description: train model
         cmd: python -u liminal_sm.py --action train --base_job_name liminal-base_training_job --train_instance_type ml.m5.large --n_jobs 5
         env:
           COMM_PATH: /mnt/smvolume
-          SM_ROLE: '{{sagemaker_role}}'
+          SM_ROLE: "{{sagemaker_role}}"
       - task: deploy
         type: python
         description: Deploy model
         cmd: python -u liminal_sm.py --action deploy --model_name liminal-sm-diamonds-model --deploy_instance_type ml.m5.large
-        env:
+        env_vars:
           COMM_PATH: /mnt/smvolume
-          SM_ROLE: '{{sagemaker_role}}'
+          SM_ROLE: "{{sagemaker_role}}"
       - task: validate
         type: python
         description: validate model post deployment
         cmd: python -u liminal_sm.py --action validate
-        env:
+        env_vars:
           COMM_PATH: /mnt/smvolume
-          SM_ROLE: '{{sagemaker_role}}'
+          SM_ROLE: "{{sagemaker_role}}"
 volumes:
   - volume: smvolume
     claim_name: smvolume-pvc
     local:
-      path: .
+      path: /Users/assaf/liminal_home/
+  - volume: awsvolume
+    claim_name: awsvolume-pvc
+    local:
+      path: /Users/assaf/liminal_home/.aws

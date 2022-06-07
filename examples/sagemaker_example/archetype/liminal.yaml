@@ -32,12 +32,16 @@ images:
   - image: my_sm_image
     source: .
     type: python
-    no_cache: true
+    no_cache: false
 task_defaults:
   python:
     executor: k8s
+    image: my_sm_image
     application_source: '{{application}}'
     mounts:
       - mount: mymount
         volume: smvolume
         path: /mnt/smvolume
+      - mount: awsmount
+        volume: awsolume
+        path: /root/.aws
