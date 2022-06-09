@@ -141,6 +141,9 @@ def docker_compose_command(command_name, args):
 def deploy_liminal_apps(path, clean):
     click.echo("deploying liminal yaml files")
     liminal_home = environment.get_liminal_home()
+    if (clean):
+        click.echo("cleaning liminal home directory")
+        shutil.rmtree(liminal_home)
     os.makedirs(liminal_home, exist_ok=True)
     os.makedirs(environment.get_dags_dir(), exist_ok=True)
 
