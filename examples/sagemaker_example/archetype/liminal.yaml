@@ -27,7 +27,6 @@ executors:
 variables:
   output_root_dir: /mnt/smvolume
   input_root_dir: ''
-  sagemaker_role: arn:aws:iam::468326661668:role/AWSSageMakerExecutionRole
 images:
   - image: my_sm_image
     source: .
@@ -40,7 +39,6 @@ task_defaults:
     application_source: '{{application}}'
     env_vars:
       COMM_PATH: "{{output_root_dir}}"
-      SM_ROLE: "{{sagemaker_role}}"
       AWS_ACCESS_KEY_ID: "AWS_ACCESS_KEY_ID"
       AWS_SECRET_ACCESS_KEY: "AWS_SECRET_ACCESS_KEY"
       AWS_SESSION_TOKEN: "AWS_SESSION_TOKEN"
