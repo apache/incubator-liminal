@@ -38,10 +38,19 @@ task_defaults:
     executor: k8s
     image: my_sm_image
     application_source: '{{application}}'
+    env_vars:
+      COMM_PATH: "{{output_root_dir}}"
+      SM_ROLE: "{{sagemaker_role}}"
+      AWS_ACCESS_KEY_ID: "AWS_ACCESS_KEY_ID"
+      AWS_SECRET_ACCESS_KEY: "AWS_SECRET_ACCESS_KEY"
+      AWS_SESSION_TOKEN: "AWS_SESSION_TOKEN"
+      AWS_DEFAULT_REGION: "AWS_DEFAULT_REGION"
     mounts:
       - mount: mymount
         volume: smvolume
         path: /mnt/smvolume
-      - mount: awsmount
-        volume: awsolume
-        path: /root/.aws
+volumes:
+  - volume: smvolume
+    claim_name: smvolume-pvc
+    local:
+      path: .

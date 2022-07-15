@@ -89,7 +89,7 @@ class KubernetesPodExecutor(executor.Executor):
             'get_logs': config.pop('get_logs', True),
             'is_delete_operator_pod': config.pop('is_delete_operator_pod', True),
             'startup_timeout_seconds': config.pop('startup_timeout_seconds', 1200),
-            'env_vars': [k8s.V1EnvVar(name=x, value=v) for x, v in task.env_vars.items()],
+            'env_vars': [k8s.V1EnvVar(name=x, value=os.environ.get(v,v)) for x, v in task.env_vars.items()],
             'do_xcom_push': task.task_config.get('do_xcom_push', False),
             'image_pull_secrets': config.pop('image_pull_secrets', 'regcred'),
             'volumes': self.volumes,

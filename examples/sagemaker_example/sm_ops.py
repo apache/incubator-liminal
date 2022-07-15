@@ -17,7 +17,7 @@ from data_preparation.data_preparation import (data_pipeline,
                                                DATASET_PUBLIC_URL,
                                                LABEL_COLUMN)
 from data_preparation.data_uploader import SagemakerDataUploader
-from train.train import feature_column_names
+from data_train.train import feature_column_names
 
 FRAMEWORK_VERSION = "0.23-1"
 
@@ -36,7 +36,7 @@ def get_role():
 
 def sm_train(train_path, test_path, base_job_name="Liminal-sm-training-job", instance_type="ml.m5.large", n_jobs=1):
     sklearn_estimator = SKLearn(
-        entry_point="train/train.py",
+        entry_point="data_train/train.py",
         source_dir="./",
         role=get_role(),
         instance_count=1,

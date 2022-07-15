@@ -74,7 +74,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model-dir', type=str, default=os.getenv('SM_MODEL_DIR', f"file://{data_path}"))
     parser.add_argument('--n-jobs', default=2)
-    parser.add_argument("--train", type=str, default=os.getenv("SM_CHANNEL_TRAIN", f"file://{data_path.joinpath('train')}"))
+    parser.add_argument("--train", type=str, default=os.getenv("SM_CHANNEL_TRAIN", f"file://{data_path.joinpath('train-set')}"))
     parser.add_argument("--test", type=str, default=os.getenv("SM_CHANNEL_TEST", f"file://{data_path.joinpath('test')}"))
     parser.add_argument("--train-file", type=str, default=TRAIN_CSV)
     parser.add_argument("--test-file", type=str, default=TEST_CSV)
