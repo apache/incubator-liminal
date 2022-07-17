@@ -132,5 +132,3 @@ if __name__ == '__main__':
     parser = create_sm_args_parser()
     args = parser.parse_args()
     sm_main(args)
-
-
