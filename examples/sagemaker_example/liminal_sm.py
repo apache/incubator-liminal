@@ -71,4 +71,3 @@ if __name__ == '__main__':
             predictor = Predictor(endpoint_name=endpoint, serializer=NumpySerializer(), deserializer=NumpyDeserializer())
             result = sm_validate(predictor, test)
             print(f"avg abs error:{result}")
-

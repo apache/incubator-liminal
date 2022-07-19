@@ -82,4 +82,3 @@ class SagemakerDataUploader(DataUploader):
         return self.sm_session.upload_data(
             path=local_path, bucket=bucket, key_prefix=o.path
         )
-

@@ -83,4 +83,3 @@ if __name__ == "__main__":
     input_data = df_to_inference_input()
     predictions = predict_fn(input_data, model)
     print(predictions)
-
