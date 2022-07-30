@@ -27,9 +27,7 @@ import sagemaker
 from sagemaker.sklearn.estimator import SKLearn
 from sagemaker.sklearn.model import SKLearnModel
 
-from data_preparation.data_preparation import (data_pipeline,
-                                               DATASET_PUBLIC_URL,
-                                               LABEL_COLUMN)
+from data_preparation.data_preparation import data_pipeline, DATASET_PUBLIC_URL, LABEL_COLUMN
 from data_preparation.data_uploader import SagemakerDataUploader
 from data_train.train import feature_column_names
 
@@ -60,9 +58,9 @@ def sm_train(train_path, test_path, base_job_name="Liminal-sm-training-job", ins
         }
     )
     sklearn_estimator.fit({"train": train_path, "test": test_path})
-    artifact = sm_boto3.describe_training_job(
-        TrainingJobName=sklearn_estimator.latest_training_job.name
-    )["ModelArtifacts"]["S3ModelArtifacts"]
+    artifact = sm_boto3.describe_training_job(TrainingJobName=sklearn_estimator.latest_training_job.name)[
+        "ModelArtifacts"
+    ]["S3ModelArtifacts"]
 
     print("Model artifact persisted at " + artifact)
     return artifact
@@ -98,32 +96,37 @@ def sm_validate(predictor, test_path):
 
 
 def sm_data_prep(input_uri, output_uri_base):
-    return data_pipeline(input_uri=input_uri or DATASET_PUBLIC_URL, output_uri_base=output_uri_base,
-                  data_uploader=SagemakerDataUploader())
+    return data_pipeline(
+        input_uri=input_uri or DATASET_PUBLIC_URL,
+        output_uri_base=output_uri_base,
+        data_uploader=SagemakerDataUploader(),
+    )
 
 
 def sm_main(args):
     test_path = 'sagemaker-us-east-1-468326661668/liminal-sm-example/test/diamonds_test.csv'
     train_path, test_path = sm_data_prep(args.input_uri, args.output_uri_base)
-    artifact = sm_train(train_path, test_path,  base_job_name=args.base_job_name, instance_type=args.train_instance_type, n_jobs=args.n_jobs)
-    #artifact = 's3://sagemaker-us-east-1-468326661668/Liminal-sm-training-job-2022-06-06-14-30-39-827/output/model.tar.gz'
+    artifact = sm_train(
+        train_path,
+        test_path,
+        base_job_name=args.base_job_name,
+        instance_type=args.train_instance_type,
+        n_jobs=args.n_jobs,
+    )
+    # artifact = 's3://sagemaker-us-east-1-468326661668/Liminal-sm-training-job-2022-06-06-14-30-39-827/output/model.tar.gz'
     predictor = sm_deploy(artifact, model_name=args.model_name, instance_type=args.deploy_instance_type)
-    #predictor =  Predictor(endpoint_name="Liminal-sm-demo-model-2022-06-06-14-35-48-079", serializer=NumpySerializer(), deserializer=NumpyDeserializer())
+    # predictor =  Predictor(endpoint_name="Liminal-sm-demo-model-2022-06-06-14-35-48-079", serializer=NumpySerializer(), deserializer=NumpyDeserializer())
     sm_validate(predictor, test_path)
 
 
 def create_sm_args_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_uri",
-                        default=DATASET_PUBLIC_URL)
-    parser.add_argument("--output_uri_base",
-                        default="liminal-sm-example")
-    parser.add_argument("--base_job_name",
-                        default="Liminal-sm-training-job")
+    parser.add_argument("--input_uri", default=DATASET_PUBLIC_URL)
+    parser.add_argument("--output_uri_base", default="liminal-sm-example")
+    parser.add_argument("--base_job_name", default="Liminal-sm-training-job")
     parser.add_argument("--train_instance_type", default="ml.m5.large")
     parser.add_argument("--n_jobs", default=1)
-    parser.add_argument("--model_name",
-                        default="Liminal-sm-demo-model")
+    parser.add_argument("--model_name", default="Liminal-sm-demo-model")
     parser.add_argument("--deploy_instance_type", default="ml.m5.large")
     return parser
 

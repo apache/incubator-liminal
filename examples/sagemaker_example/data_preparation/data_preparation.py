@@ -29,14 +29,14 @@ TRAIN_CSV = "diamonds_train.csv"
 
 LABEL_COLUMN = 'price'
 
-DATASET_PUBLIC_URL="https://www.openml.org/data/get_csv/21792853/dataset"
+DATASET_PUBLIC_URL = "https://www.openml.org/data/get_csv/21792853/dataset"
+
 
 def transform(data):
     X = data.drop(columns=LABEL_COLUMN)
     y = data[LABEL_COLUMN]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-                                                        random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     train = X_train.copy()
     train[LABEL_COLUMN] = y_train
 
@@ -65,12 +65,12 @@ def data_pipeline(input_uri, output_uri_base, data_uploader):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_uri",
-                        default=DATASET_PUBLIC_URL)
-    parser.add_argument("--output_uri_base",
-                        default=f"file://{Path(__file__).parent.parent.absolute().joinpath('data')}",
-                        help="a uri starting with 's3', 'file' or a relative path "
-                             "which will be treated as sagemaker prefix")
+    parser.add_argument("--input_uri", default=DATASET_PUBLIC_URL)
+    parser.add_argument(
+        "--output_uri_base",
+        default=f"file://{Path(__file__).parent.parent.absolute().joinpath('data')}",
+        help="a uri starting with 's3', 'file' or a relative path " "which will be treated as sagemaker prefix",
+    )
     args = parser.parse_args()
     data_uploader = get_uploader(args.output_uri_base)
     data_pipeline(args.input_uri, args.output_uri_base, data_uploader)

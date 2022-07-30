@@ -30,17 +30,7 @@ import argparse
 import pandas as pd
 
 
-feature_column_names = [
-    'carat',
-    'cut',
-    'color',
-    'clarity',
-    'depth',
-    'table',
-    'x',
-    'y',
-    'z'
-]
+feature_column_names = ['carat', 'cut', 'color', 'clarity', 'depth', 'table', 'x', 'y', 'z']
 
 
 categorical_cols = ['cut', 'clarity', 'color']
@@ -49,9 +39,7 @@ categorical_cols = ['cut', 'clarity', 'color']
 MODEL_JOBLIB_FILENAME = "model.joblib"
 
 preprocessor = ColumnTransformer(
-    transformers=[
-        ('categorical',  OneHotEncoder(), categorical_cols)
-    ], remainder='passthrough')
+    transformers=[('categorical',  OneHotEncoder(), categorical_cols)], remainder='passthrough')
 
 
 def train(train_df, test_df, n_jobs, model_dir):
@@ -64,12 +52,9 @@ def train(train_df, test_df, n_jobs, model_dir):
 
     # train
 
-    diamond_price_model=LinearRegression(n_jobs=n_jobs)
+    diamond_price_model = LinearRegression(n_jobs=n_jobs)
 
-    my_pipeline = Pipeline(steps=[
-        ('preprocessor', preprocessor),
-        ('model', diamond_price_model)
-    ])
+    my_pipeline = Pipeline(steps=[('preprocessor', preprocessor), ('model', diamond_price_model)])
 
     my_pipeline.fit(X_train, y_train)
 
@@ -92,8 +77,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model-dir', type=str, default=os.getenv('SM_MODEL_DIR', f"file://{data_path}"))
     parser.add_argument('--n-jobs', default=2)
-    parser.add_argument("--train", type=str, default=os.getenv("SM_CHANNEL_TRAIN", f"file://{data_path.joinpath('train')}"))
-    parser.add_argument("--test", type=str, default=os.getenv("SM_CHANNEL_TEST", f"file://{data_path.joinpath('test')}"))
+    parser.add_argument(
+        "--train", type=str, default=os.getenv("SM_CHANNEL_TRAIN", f"file://{data_path.joinpath('train')}")
+    )
+    parser.add_argument(
+        "--test", type=str, default=os.getenv("SM_CHANNEL_TEST", f"file://{data_path.joinpath('test')}")
+    )
     parser.add_argument("--train-file", type=str, default=TRAIN_CSV)
     parser.add_argument("--test-file", type=str, default=TEST_CSV)
 

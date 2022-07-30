@@ -25,17 +25,7 @@ import numpy as np
 import joblib
 
 
-feature_column_names = [
-    'carat',
-    'cut',
-    'color',
-    'clarity',
-    'depth',
-    'table',
-    'x',
-    'y',
-    'z'
-]
+feature_column_names = ['carat', 'cut', 'color', 'clarity', 'depth', 'table', 'x', 'y', 'z']
 
 
 categorical_cols = ['cut', 'clarity', 'color']
@@ -55,7 +45,9 @@ def input_fn(input_data, content_type):
         df = pd.DataFrame(data=input_np, columns=feature_column_names)
         return df
     else:
-        raise ValueError(f"content type {content_type} is not supported by this inference endpoint. Please send a legal application/x-npy payload")
+        raise ValueError(
+            f"content type {content_type} is not supported by this inference endpoint. Please send a legal application/x-npy payload"
+        )
 
 
 def predict_fn(input_data, model):

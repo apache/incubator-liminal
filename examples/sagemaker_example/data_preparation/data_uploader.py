@@ -79,6 +79,4 @@ class SagemakerDataUploader(DataUploader):
     def upload(self, local_path, output_uri_base):
         o = urlparse(output_uri_base)
         bucket = o.netloc or self.default_bucket
-        return self.sm_session.upload_data(
-            path=local_path, bucket=bucket, key_prefix=o.path
-        )
+        return self.sm_session.upload_data(path=local_path, bucket=bucket, key_prefix=o.path)
