@@ -20,7 +20,7 @@ import logging
 import os
 import sys
 from time import sleep
-import base64, shutil
+import base64
 from pathlib import Path
 
 from kubernetes import client, config
@@ -65,22 +65,23 @@ def create_local_volumes(liminal_config, base_dir):
             logging.info(f'Creating local kubernetes volume if needed: {volume_config}')
             create_local_volume(volume_config)
 
+
 def create_secret(conf, namespace='default') -> None:
     name = conf['volume']
 
     _LOG.info(f'Requested volume {name}')
 
     if name not in _LOCAL_VOLUMES:
-        matching_secrets = _kubernetes.list_namespaced_secret(namespace, field_selector=f'metadata.name={name}').to_dict()[
-                'items'
-            ]
+        matching_secrets = _kubernetes.list_namespaced_secret(
+            namespace, field_selector=f'metadata.name={name}'
+        ).to_dict()['items']
 
         while len(matching_secrets) == 0:
             _create_secret(namespace, conf, name)
             sleep(5)
-            matching_secrets = _kubernetes.list_namespaced_secret(namespace, field_selector=f'metadata.name={name}').to_dict()[
-                    'items'
-                ]
+            matching_secrets = _kubernetes.list_namespaced_secret(
+                namespace, field_selector=f'metadata.name={name}'
+            ).to_dict()['items']
 
         _LOCAL_VOLUMES.add(name)
 
@@ -89,16 +90,17 @@ def _create_secret(namespace, conf, name):
 
     _kubernetes.create_namespaced_secret(
         namespace,
-        V1Secret(api_version='v1', kind='Secret',
+        V1Secret(
+            api_version='v1',
+            kind='Secret',
             metadata={
                 'name': name,
-                'labels': {
-                    "apache/incubator-liminal" : "liminal.apache.org"
-                },
+                'labels': {"apache/incubator-liminal": "liminal.apache.org"},
             },
             data={
                 'credentials': base64.b64encode(
-                    Path(os.path.expanduser(conf['path'])).read_text().encode('ascii')).decode('ascii')
+                    Path(os.path.expanduser(conf['path'])).read_text().encode('ascii')
+                ).decode('ascii')
             },
         )
     )
@@ -149,9 +151,9 @@ def delete_local_volumes(liminal_config, base_dir):
 
 def delete_local_secret(volume_config, namespace='default'):
     name = volume_config['volume']
-    matching_secrets = _kubernetes.list_namespaced_secret(namespace, field_selector=f'metadata.name={name}').to_dict()[
-            'items'
-        ]
+    matching_secrets = _kubernetes.list_namespaced_secret(
+        namespace, field_selector=f'metadata.name={name}'
+    ).to_dict()['items']
 
     if len(matching_secrets) > 0:
         _LOG.info(f'Deleting secret {name}')
@@ -159,6 +161,7 @@ def delete_local_secret(volume_config, namespace='default'):
 
     if name in _LOCAL_VOLUMES:
         _LOCAL_VOLUMES.remove(name)
+
 
 def delete_local_volume(name, namespace='default'):
     pvc_name = f'{name}-pvc'
