@@ -16,12 +16,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import base64
 import logging
 import os
 import sys
-from time import sleep
-import base64
 from pathlib import Path
+from time import sleep
 
 from kubernetes import client, config
 from kubernetes.client import V1PersistentVolume, V1PersistentVolumeClaim, V1Secret
@@ -69,7 +69,7 @@ def create_local_volumes(liminal_config, base_dir):
 def create_secret(conf, namespace='default') -> None:
     name = conf['volume']
 
-    _LOG.info(f'Requested volume {name}')
+    _LOG.info(f'Requested secret {name}')
 
     if name not in _LOCAL_VOLUMES:
         matching_secrets = _kubernetes.list_namespaced_secret(
@@ -87,7 +87,7 @@ def create_secret(conf, namespace='default') -> None:
 
 
 def _create_secret(namespace, conf, name):
-    _LOG.info(f'Creating persistent volume {name} with spec {conf}')
+    _LOG.info(f'Creating kubernetes secret {name} with spec {conf}')
 
     _kubernetes.create_namespaced_secret(
         namespace,
