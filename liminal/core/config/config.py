@@ -71,15 +71,19 @@ class ConfigUtil:
             return self.loaded_subliminals
 
         configs = self.config_files.values()
+        # print(f"configs; {configs}")
         enriched_configs = []
 
         for subliminal in [config for config in configs if self.__is_subliminal(config)]:
             name = subliminal.get('name')
+            # logging.info(f'11111111111111111111111111111111')
             logging.info(f'Loading yml {name}')
             # noinspection PyBroadException
             try:
                 superliminal = self.__get_superliminal(subliminal, soft_merge)
+                # print(f"superliminal: {superliminal}")
                 enriched_config = self.__merge_configs(subliminal, superliminal, is_render_variables, soft_merge)
+                # print(f"enriched_config: {enriched_config}")
                 enriched_configs.append(enriched_config)
             except Exception:
                 logging.error(f'Failed to load yml {name}')
@@ -99,6 +103,7 @@ class ConfigUtil:
         merged_superliminal = self.__merge_configs(
             supr, self.__get_superliminal(supr, soft_merge), is_render_variables, soft_merge
         )
+        # print(f"merged_superliminal: {merged_superliminal}")
 
         sub[self.__EXECUTORS] = self.__merge_section(sub, merged_superliminal, self.__EXECUTORS)
         sub[self.__IMAGES] = self.__merge_section(sub, merged_superliminal, self.__IMAGES)
@@ -109,6 +114,8 @@ class ConfigUtil:
             return self.__merge_superliminals(sub, merged_superliminal)
 
     def __get_superliminal(self, liminal, soft_merge):
+        # print(f"liminal: {liminal}")
+        # print(f"soft_merge: {soft_merge}")
         superliminal = {}
         if not self.__is_base_config(liminal):
             superliminal_name = liminal.get(self.__SUPER, '')
@@ -124,7 +131,7 @@ class ConfigUtil:
                         logging.warning(supr_is_missing_msg)
                     else:
                         raise FileNotFoundError(supr_is_missing_msg)
-
+        # print(f"superliminal: {superliminal}")
         return superliminal
 
     def __get_base_config(self):

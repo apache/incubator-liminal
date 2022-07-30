@@ -28,6 +28,10 @@ x-airflow-common: &airflow-common
     LOAD_EX: n
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     KUBECONFIG: /home/airflow/kube/config
+<<<<<<< Updated upstream
+=======
+    AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION:-us-east-1}"
+>>>>>>> Stashed changes
     AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
     AIRFLOW__WEBSERVER__WORKERS: '1'
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'True'

@@ -24,7 +24,7 @@ import os
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
     KubernetesPodOperator,
 )
-from kubernetes.client import V1Volume, V1VolumeMount
+from kubernetes.client import V1Volume, V1VolumeMount, V1SecretVolumeSource
 from kubernetes.client import models as k8s
 
 from liminal.core.util import env_util
@@ -69,10 +69,14 @@ class KubernetesPodExecutor(executor.Executor):
         volumes = []
         for volume_config in volumes_config:
             name = volume_config['volume']
-            claim_name = volume_config.get('claim_name')
-            if not claim_name and 'local' in volume_config:
-                claim_name = f'{name}-pvc'
-            volume = V1Volume(name=name, persistent_volume_claim={'claimName': claim_name})
+            if 'secret' in volume_config:
+                volume = V1Volume(name=name, secret={'secretName': volume_config['secret']['secretName']})
+            else:
+                claim_name = volume_config.get('claim_name')
+                if not claim_name and 'local' in volume_config:
+                    claim_name = f'{name}-pvc'
+                volume = V1Volume(name=name, persistent_volume_claim={'claimName': claim_name})
+            
             volumes.append(volume)
         return volumes
 
@@ -106,6 +110,7 @@ class KubernetesPodExecutor(executor.Executor):
                 for mount in task.mounts
             ],
         }
+
 
         config.pop('in_cluster', None)
         config.pop('volumes', None)

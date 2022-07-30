@@ -35,6 +35,8 @@ def apply_variable_substitution(subliminal, superliminal, is_render_variables=Fa
        placeholders
     """
     keyword = "variables"
+    # print(f"subliminal: {subliminal}")
+    # print(f"superliminal: {superliminal}")
     merged_variables = dict_util.merge_dicts(subliminal.get(keyword, {}), superliminal.get(keyword, {}), True)
     if is_render_variables:
         for k, v in merged_variables.items():

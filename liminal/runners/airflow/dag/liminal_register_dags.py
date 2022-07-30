@@ -35,6 +35,7 @@ def register_dags(configs_path):
     Registers pipelines in liminal yml files found in given path (recursively) as airflow DAGs.
     """
     logging.info(f'Registering DAGs from path: {configs_path}')
+    logging.info(f'===========================================')
     config_util = ConfigUtil(configs_path)
     configs = config_util.safe_load(is_render_variables=False)
 

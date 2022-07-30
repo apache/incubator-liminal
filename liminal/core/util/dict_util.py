@@ -63,6 +63,8 @@ def replace_placeholders(dct, variables):
 
 
 def replace_placholders_in_string(string_value, variables, pattern=__PLACE_HOLDER_PATTERN):
+    print(f"string_value: {string_value}")
+    print(f"pattern: {pattern}")
     return re.sub(pattern, lambda m: __repl(m, variables), string_value, flags=re.IGNORECASE)
 
 
