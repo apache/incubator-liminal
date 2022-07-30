@@ -39,8 +39,8 @@ categorical_cols = ['cut', 'clarity', 'color']
 MODEL_JOBLIB_FILENAME = "model.joblib"
 
 preprocessor = ColumnTransformer(
-    transformers=[('categorical',  OneHotEncoder(), categorical_cols)], remainder='passthrough')
-
+    transformers=[('categorical', OneHotEncoder(), categorical_cols)], remainder='passthrough'
+)
 
 def train(train_df, test_df, n_jobs, model_dir):
     X_train = train_df[feature_column_names]

@@ -55,7 +55,7 @@ def sm_train(train_path, test_path, base_job_name="Liminal-sm-training-job", ins
         base_job_name=base_job_name,
         hyperparameters={
             "n-jobs": n_jobs,
-        }
+        },
     )
     sklearn_estimator.fit({"train": train_path, "test": test_path})
     artifact = sm_boto3.describe_training_job(TrainingJobName=sklearn_estimator.latest_training_job.name)[

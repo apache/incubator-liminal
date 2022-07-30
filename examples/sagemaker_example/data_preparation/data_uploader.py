@@ -35,7 +35,6 @@ def get_uploader(output_uri_base):
 
 
 class DataUploader(ABC):
-
     def __init__(self):
         pass
 
@@ -52,6 +51,7 @@ class LocalDataUploader(DataUploader):
         os.makedirs(o.path, exist_ok=True)
         shutil.copy2(local_path, o.path)
         return o.path
+
 
 class S3DataUploader(DataUploader):
     s3_client = None
