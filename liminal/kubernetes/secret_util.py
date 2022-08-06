@@ -20,7 +20,6 @@ import base64
 import logging
 import os
 import sys
-from pathlib import Path
 from time import sleep
 
 from kubernetes import client, config
@@ -47,6 +46,7 @@ def get_secret_configs(liminal_config, base_dir):
             open(secret_path, 'a').close()
             volume_config['path'] = secret_path
     return secrets_config
+
 
 def create_local_secrets(liminal_config, base_dir):
     secrets_config = get_secret_configs(liminal_config, base_dir)
