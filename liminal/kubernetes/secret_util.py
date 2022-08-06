@@ -43,10 +43,12 @@ def get_secret_configs(liminal_config, base_dir):
 
     for volume_config in secrets_config:
         if 'secret' in volume_config and 'path' not in volume_config:
-            volume_config['path'] = open(f"{os.getcwd()}/credentials.txt", 'a').close()
+            secret_path = f"{os.getcwd()}/credentials.txt"
+            open(secret_path, 'a').close()
+            volume_config['path'] = secret_path
     return secrets_config
 
-def create_local_volumes(liminal_config, base_dir):
+def create_local_secrets(liminal_config, base_dir):
     secrets_config = get_secret_configs(liminal_config, base_dir)
 
     for secret_config in secrets_config:
