@@ -46,28 +46,6 @@ def get_secret_configs(liminal_config, base_dir):
             volume_config['path'] = open(f"{os.getcwd()}/credentials.txt", 'a').close()
     return secrets_config
 
-#   volumes:
-#   - name: fool
-#     secret:
-#       secretName: mysecret
-#       optional: false # default setting; "mysecret" must exist
-
-# volumes:
-#   - volume: smvolume
-#     claim_name: smvolume-pvc
-#     local:
-#       path: .
-# secrets:
-#     - secret: aws
-#       path: "~/.aws/credentials"
-#       secret:
-#         secretName: aws
-      
-#   - volume: aws
-#     path: "~/.aws/credentials"
-#     secret:
-#       secretName: aws
-
 def create_local_volumes(liminal_config, base_dir):
     secrets_config = get_secret_configs(liminal_config, base_dir)
 
