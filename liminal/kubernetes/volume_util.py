@@ -16,7 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import base64
 import logging
 import os
 import sys
@@ -24,7 +23,7 @@ from pathlib import Path
 from time import sleep
 
 from kubernetes import client, config
-from kubernetes.client import V1PersistentVolume, V1PersistentVolumeClaim, V1Secret
+from kubernetes.client import V1PersistentVolume, V1PersistentVolumeClaim
 
 # noinspection PyBroadException
 try:
@@ -49,8 +48,6 @@ def get_volume_configs(liminal_config, base_dir):
             if path.startswith("."):
                 path = os.path.join(base_dir, path[1:])
             volume_config['local']['path'] = path
-        if 'secret' in volume_config and 'path' not in volume_config:
-            volume_config['path'] = '~/.aws/credentials'
     return volumes_config
 
 
@@ -58,53 +55,8 @@ def create_local_volumes(liminal_config, base_dir):
     volumes_config = get_volume_configs(liminal_config, base_dir)
 
     for volume_config in volumes_config:
-        if 'secret' in volume_config:
-            logging.info(f'Creating local kubernetes secret if needed: {volume_config}')
-            create_secret(volume_config)
-        else:
-            logging.info(f'Creating local kubernetes volume if needed: {volume_config}')
-            create_local_volume(volume_config)
-
-
-def create_secret(conf, namespace='default') -> None:
-    name = conf['volume']
-
-    _LOG.info(f'Requested secret {name}')
-
-    if name not in _LOCAL_VOLUMES:
-        matching_secrets = _kubernetes.list_namespaced_secret(
-            namespace, field_selector=f'metadata.name={name}'
-        ).to_dict()['items']
-
-        while len(matching_secrets) == 0:
-            _create_secret(namespace, conf, name)
-            sleep(5)
-            matching_secrets = _kubernetes.list_namespaced_secret(
-                namespace, field_selector=f'metadata.name={name}'
-            ).to_dict()['items']
-
-        _LOCAL_VOLUMES.add(name)
-
-
-def _create_secret(namespace, conf, name):
-    _LOG.info(f'Creating kubernetes secret {name} with spec {conf}')
-
-    _kubernetes.create_namespaced_secret(
-        namespace,
-        V1Secret(
-            api_version='v1',
-            kind='Secret',
-            metadata={
-                'name': name,
-                'labels': {"apache/incubator-liminal": "liminal.apache.org"},
-            },
-            data={
-                'credentials': base64.b64encode(
-                    Path(os.path.expanduser(conf['path'])).read_text().encode('ascii')
-                ).decode('ascii')
-            },
-        ),
-    )
+        logging.info(f'Creating local kubernetes volume if needed: {volume_config}')
+        create_local_volume(volume_config)
 
 
 def create_local_volume(conf, namespace='default') -> None:
@@ -144,26 +96,8 @@ def delete_local_volumes(liminal_config, base_dir):
     volumes_config = get_volume_configs(liminal_config, base_dir)
 
     for volume_config in volumes_config:
-        if 'secret' in volume_config:
-            logging.info(f'Delete local secret if needed: {volume_config}')
-            delete_local_secret(volume_config)
-        else:
-            logging.info(f'Delete local kubernetes volume if needed: {volume_config}')
-            delete_local_volume(volume_config['volume'])
-
-
-def delete_local_secret(volume_config, namespace='default'):
-    name = volume_config['volume']
-    matching_secrets = _kubernetes.list_namespaced_secret(namespace, field_selector=f'metadata.name={name}').to_dict()[
-        'items'
-    ]
-
-    if len(matching_secrets) > 0:
-        _LOG.info(f'Deleting secret {name}')
-        _kubernetes.delete_namespaced_secret(name, namespace)
-
-    if name in _LOCAL_VOLUMES:
-        _LOCAL_VOLUMES.remove(name)
+        logging.info(f'Delete local kubernetes volume if needed: {volume_config}')
+        delete_local_volume(volume_config['volume'])
 
 
 def delete_local_volume(name, namespace='default'):
