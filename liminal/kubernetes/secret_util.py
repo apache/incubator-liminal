@@ -20,6 +20,7 @@ import base64
 import logging
 import os
 import sys
+from pathlib import Path
 from time import sleep
 
 from kubernetes import client, config
