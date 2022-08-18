@@ -36,8 +36,10 @@ variables:
 task_defaults:
   python:
     executor: k8s
-    image: python:slim-buster
+    image: amazon/aws-cli:2.7.23
     executors: 2
+    env_vars:
+      AWS_CONFIG_FILE: "{{AWS_CONFIG_FILE}}"
     mounts:
       - mount: myaws-creds
         volume: aws
@@ -51,7 +53,7 @@ pipelines:
     tasks:
       - task: my_python_task
         type: python
-        cmd: python --version
+        cmd: aws s3 ls
 ```
 
 That example manifest defines a Secret Opaque for AWS credentials used. The values are Base64 strings in the manifest; however, when you use the Secret with a Pod then the kubelet provides the decoded data to the Pod and its containers.
