@@ -43,7 +43,7 @@ def get_secret_configs(liminal_config, base_dir):
 
     for volume_config in secrets_config:
         if 'secret' in volume_config and 'path' not in volume_config:
-            secret_path = f"{os.getcwd()}/credentials.txt"
+            secret_path = f"{os.getcwd()}/credentials-{volume_config['secret']}.txt"
             open(secret_path, 'a').close()
             volume_config['path'] = secret_path
     return secrets_config
@@ -67,12 +67,8 @@ def create_secret(conf, namespace='default') -> None:
             namespace, field_selector=f'metadata.name={name}'
         ).to_dict()['items']
 
-        while len(matching_secrets) == 0:
-            _create_secret(namespace, conf, name)
-            sleep(5)
-            matching_secrets = _kubernetes.list_namespaced_secret(
-                namespace, field_selector=f'metadata.name={name}'
-            ).to_dict()['items']
+        _create_secret(namespace, conf, name)
+        sleep(5)
 
         _LOCAL_VOLUMES.add(name)
 
