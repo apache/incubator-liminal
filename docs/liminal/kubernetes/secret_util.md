@@ -27,7 +27,8 @@ liminal.yml file.
 name: k8s_secret_example
 secrets:
   - secret: aws
-    path: "~/.aws/credentials"
+    remote_path: "/secrets"
+    local_path_file: "~/.aws/credentials"
 executors:
   - executor: k8s
     type: kubernetes
@@ -39,7 +40,10 @@ task_defaults:
     image: amazon/aws-cli:2.7.23
     executors: 2
     env_vars:
-      AWS_CONFIG_FILE: "{{AWS_CONFIG_FILE}}"
+      AWS_CONFIG_FILE: "/secrets/credentials"
+      AWS_PROFILE: "default"
+    secrets:
+      - secret: aws
     mounts:
       - mount: myaws-creds
         volume: aws

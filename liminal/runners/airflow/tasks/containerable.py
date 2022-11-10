@@ -45,6 +45,7 @@ class ContainerTask(task.Task, ABC):
         self.env_vars = self.__env_vars(env)
         self.image = self.task_config['image']
         self.mounts = self.task_config.get('mounts', [])
+        self.secrets = self.task_config.get('secrets', [])
         self.cmds, self.arguments = self._kubernetes_cmds_and_arguments()
 
     def _kubernetes_cmds_and_arguments(self):

@@ -22,7 +22,7 @@ import unittest
 from unittest import TestCase
 
 from liminal.build import liminal_apps_builder
-from liminal.kubernetes import volume_util
+from liminal.kubernetes import volume_util, secret_util
 from liminal.runners.airflow import DummyDag
 from liminal.runners.airflow.executors.kubernetes import KubernetesPodExecutor
 from liminal.runners.airflow.tasks import python
@@ -31,9 +31,11 @@ from tests.util import dag_test_utils
 
 class TestPythonTask(TestCase):
     _VOLUME_NAME = 'myvol1'
+    _SECRET_NAME = 'aws'
 
     def setUp(self) -> None:
         volume_util.delete_local_volume(self._VOLUME_NAME)
+        secret_util.delete_local_secret(self._SECRET_NAME)
         os.environ['TMPDIR'] = '/tmp'
         self.temp_dir = tempfile.mkdtemp()
         self.liminal_config = {
@@ -42,9 +44,19 @@ class TestPythonTask(TestCase):
                     'volume': self._VOLUME_NAME,
                     'local': {'path': self.temp_dir.replace("/var/folders", "/private/var/folders")},
                 }
+            ],
+            'secrets': [
+                {
+                    'secret': self._SECRET_NAME,
+                    'remote_path': "/mnt",
+                    'local_path_file': "~/.aws/credentials",
+                }
+
             ]
         }
+
         volume_util.create_local_volumes(self.liminal_config, None)
+        secret_util.create_local_secrets(self.liminal_config, None)
 
         liminal_apps_builder.build_liminal_apps(os.path.join(os.path.dirname(__file__), '../liminal'))
 
@@ -57,7 +69,7 @@ class TestPythonTask(TestCase):
             None,
             'my_python_task_img',
             'python -u write_inputs.py',
-            env_vars={'NUM_FILES': 10, 'NUM_SPLITS': 3},
+            env_vars={'NUM_FILES': 10, 'NUM_SPLITS': 3, 'AWS_CONFIG_FILE': '/mnt/credentials', 'AWS_PROFILE': 'dev'},
         )
         executor = KubernetesPodExecutor(
             task_id='k8s', liminal_config=self.liminal_config, executor_config={'executor': 'k8s', 'name': 'mypod'}
@@ -143,6 +155,7 @@ class TestPythonTask(TestCase):
             'image': image,
             'env_vars': env_vars if env_vars is not None else {},
             'mounts': [{'mount': 'mymount', 'volume': self._VOLUME_NAME, 'path': '/mnt/vol1'}],
+            'secrets': [{'secret': self._SECRET_NAME}],
         }
 
         if executors:

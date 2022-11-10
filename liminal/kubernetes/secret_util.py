@@ -42,10 +42,10 @@ def get_secret_configs(liminal_config, base_dir):
     secrets_config = liminal_config.get('secrets', [])
 
     for volume_config in secrets_config:
-        if 'secret' in volume_config and 'path' not in volume_config:
+        if 'secret' in volume_config and 'local_path_file' not in volume_config:
             secret_path = f"{os.getcwd()}/credentials-{volume_config['secret']}.txt"
             open(secret_path, 'a').close()
-            volume_config['path'] = secret_path
+            volume_config['local_path_file'] = secret_path
     return secrets_config
 
 
@@ -63,10 +63,6 @@ def create_secret(conf, namespace='default') -> None:
     _LOG.info(f'Requested secret {name}')
 
     if name not in _LOCAL_VOLUMES:
-        matching_secrets = _kubernetes.list_namespaced_secret(
-            namespace, field_selector=f'metadata.name={name}'
-        ).to_dict()['items']
-
         _create_secret(namespace, conf, name)
         sleep(5)
 
@@ -87,7 +83,7 @@ def _create_secret(namespace, conf, name):
             },
             data={
                 'credentials': base64.b64encode(
-                    Path(os.path.expanduser(conf['path'])).read_text().encode('ascii')
+                    Path(os.path.expanduser(conf['local_path_file'])).read_text().encode('ascii')
                 ).decode('ascii')
             },
         ),
@@ -102,8 +98,7 @@ def delete_local_secrets(liminal_config, base_dir):
         delete_local_secret(secret_config)
 
 
-def delete_local_secret(volume_config, namespace='default'):
-    name = volume_config['secret']
+def delete_local_secret(name, namespace='default'):
     matching_secrets = _kubernetes.list_namespaced_secret(namespace, field_selector=f'metadata.name={name}').to_dict()[
         'items'
     ]
