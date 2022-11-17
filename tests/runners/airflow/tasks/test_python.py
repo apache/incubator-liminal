@@ -48,11 +48,9 @@ class TestPythonTask(TestCase):
             'secrets': [
                 {
                     'secret': self._SECRET_NAME,
-                    'remote_path': "/mnt",
-                    'local_path_file': "~/.aws/credentials",
+                    'remote_path': "/mnt"
                 }
-
-            ]
+            ],
         }
 
         volume_util.create_local_volumes(self.liminal_config, None)
