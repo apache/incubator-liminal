@@ -22,7 +22,7 @@ import unittest
 from unittest import TestCase
 
 from liminal.build import liminal_apps_builder
-from liminal.kubernetes import volume_util, secret_util
+from liminal.kubernetes import secret_util, volume_util
 from liminal.runners.airflow import DummyDag
 from liminal.runners.airflow.executors.kubernetes import KubernetesPodExecutor
 from liminal.runners.airflow.tasks import python
