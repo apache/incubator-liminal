@@ -45,12 +45,7 @@ class TestPythonTask(TestCase):
                     'local': {'path': self.temp_dir.replace("/var/folders", "/private/var/folders")},
                 }
             ],
-            'secrets': [
-                {
-                    'secret': self._SECRET_NAME,
-                    'remote_path': "/mnt"
-                }
-            ],
+            'secrets': [{'secret': self._SECRET_NAME, 'remote_path': "/mnt"}],
         }
 
         volume_util.create_local_volumes(self.liminal_config, None)

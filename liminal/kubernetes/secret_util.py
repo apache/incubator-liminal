@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 from time import sleep
 
-from kubernetes import client, config
+from kubernetes import client, config, shutil
 from kubernetes.client import V1Secret
 
 # noinspection PyBroadException
@@ -44,6 +44,7 @@ def get_secret_configs(liminal_config, base_dir):
     for volume_config in secrets_config:
         if 'secret' in volume_config and 'local_path_file' not in volume_config:
             secret_path = f"{os.getcwd()}/credentials-{volume_config['secret']}.txt"
+            shutil.copyfile(f"{os.path.dirname(os.path.abspath(__file__))}/license.txt", secret_path)
             open(secret_path, 'a').close()
             volume_config['local_path_file'] = secret_path
     return secrets_config
