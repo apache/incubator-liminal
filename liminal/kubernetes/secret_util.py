@@ -19,11 +19,11 @@
 import base64
 import logging
 import os
-import sys
+import sys, shutil
 from pathlib import Path
 from time import sleep
 
-from kubernetes import client, config, shutil
+from kubernetes import client, config
 from kubernetes.client import V1Secret
 
 # noinspection PyBroadException
@@ -38,7 +38,7 @@ _LOCAL_VOLUMES = set()
 _kubernetes = client.CoreV1Api()
 
 
-def get_secret_configs(liminal_config, base_dir):
+def get_secret_configs(liminal_config):
     secrets_config = liminal_config.get('secrets', [])
 
     for volume_config in secrets_config:
@@ -50,8 +50,8 @@ def get_secret_configs(liminal_config, base_dir):
     return secrets_config
 
 
-def create_local_secrets(liminal_config, base_dir):
-    secrets_config = get_secret_configs(liminal_config, base_dir)
+def create_local_secrets(liminal_config):
+    secrets_config = get_secret_configs(liminal_config)
 
     for secret_config in secrets_config:
         logging.info(f'Creating local kubernetes secret if needed: {secret_config}')

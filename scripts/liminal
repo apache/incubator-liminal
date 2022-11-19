@@ -163,8 +163,7 @@ def deploy_liminal_apps(path, clean):
         for config in configs_path:
             if config.get('secrets'):
                 logging.info(f'Secret volume is being created')
-                secret_util.create_local_secrets(config, os.path.dirname(
-                    files_util.resolve_pipeline_source_file(config['name'])))
+                secret_util.create_local_secrets(config)
 
 def is_file_empty(file):
     try:

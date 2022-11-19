@@ -49,7 +49,7 @@ class TestPythonTask(TestCase):
         }
 
         volume_util.create_local_volumes(self.liminal_config, None)
-        secret_util.create_local_secrets(self.liminal_config, None)
+        secret_util.create_local_secrets(self.liminal_config)
 
         liminal_apps_builder.build_liminal_apps(os.path.join(os.path.dirname(__file__), '../liminal'))
 

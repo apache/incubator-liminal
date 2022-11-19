@@ -115,7 +115,7 @@ class KubernetesPodExecutor(executor.Executor):
                     read_only=mount.get('read_only', False),
                 )
                 for mount in task.mounts
-                    ]
+            ],
         }
 
         config.pop('in_cluster', None)
