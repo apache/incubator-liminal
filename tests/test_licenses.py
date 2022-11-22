@@ -33,9 +33,8 @@ EXCLUDED_DIRS = [
     '.venv',
     'apache_liminal.egg-info',
     '.pytest_cache',
-    './credentials-aws.txt',
 ]
-EXCLUDED_FILES = ['DISCLAIMER-WIP', 'LICENSE.txt', '.autovenv']
+EXCLUDED_FILES = ['DISCLAIMER-WIP', 'LICENSE.txt', '.autovenv', './credentials-aws.txt']
 
 PYTHON_LICENSE_HEADER = """
 #
