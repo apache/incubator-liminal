@@ -33,7 +33,7 @@ EXCLUDED_DIRS = [
     '.venv',
     'apache_liminal.egg-info',
     '.pytest_cache',
-    'credentials-aws.txt',
+    './credentials-aws.txt',
 ]
 EXCLUDED_FILES = ['DISCLAIMER-WIP', 'LICENSE.txt', '.autovenv']
 
