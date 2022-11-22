@@ -31,4 +31,3 @@ apache_liminal.egg-info
 scripts/*.tar.gz
 scripts/*.whl
 dist
-./credentials-aws.txt
