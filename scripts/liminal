@@ -33,7 +33,7 @@ from liminal.build import liminal_apps_builder
 from liminal.core import environment
 from liminal.core.config.config import ConfigUtil
 from liminal.core.util import files_util
-from liminal.kubernetes import volume_util
+from liminal.kubernetes import volume_util, secret_util
 from liminal.logging.logging_setup import logging_initialization
 from liminal.runners.airflow import dag
 
@@ -158,6 +158,12 @@ def deploy_liminal_apps(path, clean):
         target_yml_name = os.path.join(environment.get_dags_dir(), relative_path)
         pathlib.Path(target_yml_name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(config_file, target_yml_name)
+        configs_path = ConfigUtil(os.path.dirname(config_file)).safe_load(is_render_variables=True,
+                                            soft_merge=True)
+        for config in configs_path:
+            if config.get('secrets'):
+                logging.info(f'Secret volume is being created')
+                secret_util.create_local_secrets(config)
 
 def is_file_empty(file):
     try:

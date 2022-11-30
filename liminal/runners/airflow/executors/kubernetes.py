@@ -66,6 +66,7 @@ class KubernetesPodExecutor(executor.Executor):
 
     def _volumes(self):
         volumes_config = self.liminal_config.get('volumes', [])
+        secrets_config = self.liminal_config.get('secrets', [])
         volumes = []
         for volume_config in volumes_config:
             name = volume_config['volume']
@@ -74,10 +75,20 @@ class KubernetesPodExecutor(executor.Executor):
                 claim_name = f'{name}-pvc'
             volume = V1Volume(name=name, persistent_volume_claim={'claimName': claim_name})
             volumes.append(volume)
+
+        for secret_config in secrets_config:
+            name = secret_config['secret']
+            secret = V1Volume(name=name, secret={'secretName': name})
+            volumes.append(secret)
+
         return volumes
 
     def __kubernetes_kwargs(self, task: ContainerTask):
         config = copy.deepcopy(self.executor_config)
+        for secret in task.secrets:
+            result = next(x for x in self.liminal_config['secrets'] if x['secret'] == secret['secret'])
+            task.mounts.append({'volume': result['secret'], 'path': result['remote_path']})
+
         kubernetes_kwargs = {
             'task_id': task.task_id,
             'image': task.image,

@@ -21,6 +21,10 @@ volumes:
   - volume: myvol1
     local:
       path: /tmp/liminal_tests
+secrets:
+  - secret: aws
+    remote_path: "/mnt"
+    local_path_file: "~/.aws/credentials"
 images:
   - image: my_python_task_img
     type: python
@@ -60,6 +64,10 @@ pipelines:
         env_vars:
           NUM_FILES: 10
           NUM_SPLITS: 3
+          AWS_CONFIG_FILE: "/mnt/credentials"
+          AWS_PROFILE: "dev"
+        secrets:
+          - secret: aws
         mounts:
           - mount: mymount
             volume: myvol1
