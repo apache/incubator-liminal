@@ -23,6 +23,7 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import yaml
 
 import click
 
@@ -32,7 +33,7 @@ from liminal.build import liminal_apps_builder
 from liminal.core import environment
 from liminal.core.config.config import ConfigUtil
 from liminal.core.util import files_util
-from liminal.kubernetes import volume_util
+from liminal.kubernetes import volume_util, secret_util
 from liminal.logging.logging_setup import logging_initialization
 from liminal.runners.airflow import dag
 
@@ -141,18 +142,36 @@ def docker_compose_command(command_name, args):
 def deploy_liminal_apps(path, clean):
     click.echo("deploying liminal yaml files")
     liminal_home = environment.get_liminal_home()
+    if (clean):
+        click.echo("cleaning liminal home directory")
+        shutil.rmtree(liminal_home)
     os.makedirs(liminal_home, exist_ok=True)
     os.makedirs(environment.get_dags_dir(), exist_ok=True)
 
     deploy_liminal_core_internal(liminal_home, clean)
     config_files = files_util.find_config_files(path)
     for config_file in config_files:
+        if (is_file_empty(config_file)):
+            continue
         click.echo(f"deploying liminal file: {config_file}")
         relative_path = os.path.relpath(config_file, os.path.dirname(path))
         target_yml_name = os.path.join(environment.get_dags_dir(), relative_path)
         pathlib.Path(target_yml_name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(config_file, target_yml_name)
+        configs_path = ConfigUtil(os.path.dirname(config_file)).safe_load(is_render_variables=True,
+                                            soft_merge=True)
+        for config in configs_path:
+            if config.get('secrets'):
+                logging.info(f'Secret volume is being created')
+                secret_util.create_local_secrets(config)
 
+def is_file_empty(file):
+    try:
+        with open(file, "r") as stream:
+            data_loaded = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
+    return data_loaded is None
 
 def liminal_is_running():
     stdout, stderr = docker_compose_command('ps', [])

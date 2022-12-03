@@ -21,6 +21,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 
 
 class ImageBuilder:
@@ -68,26 +69,36 @@ class ImageBuilder:
             docker_build_command = f'DOCKER_BUILDKIT=1 {docker_build_command}'
 
         logging.info(docker_build_command)
-
-        docker_build_out = ''
+        docker_build_out = []
         try:
-            docker_build_out = subprocess.check_output(
-                docker_build_command, shell=True, stderr=subprocess.STDOUT, timeout=960
+            build_start = time.time()
+            # Poll process.stdout to show stdout live
+            build_process = subprocess.Popen(
+                docker_build_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             )
+            logging.info('=' * 80)
+            timeout = 960
+            while time.time() < build_start + timeout:
+                output = build_process.stdout.readline()
+                if build_process.poll() is not None:
+                    break
+                if output:
+                    stdout_log_str = output.strip().decode('utf-8')
+                    docker_build_out.append(stdout_log_str)
+                    logging.info(stdout_log_str)
+            logging.info('=' * 80)
+            build_process.stdout.close()
+            build_process.wait(time.time() - (build_start + timeout))
         except subprocess.CalledProcessError as e:
-            docker_build_out = e.output
-            raise e
-        finally:
-            logging.info('=' * 80)
-            for line in str(docker_build_out)[2:-3].split('\\n'):
+            for line in str(e.output)[2:-3].split('\\n'):
                 logging.info(line)
-            logging.info('=' * 80)
+            raise e
 
         self.__remove_dir(temp_dir)
 
         logging.info(f'[X] Building image: {self.tag} (Success).')
 
-        return docker_build_out
+        return '\n'.join(docker_build_out)
 
     def __copy_source_code(self, temp_dir):
         self.__copy_dir(os.path.join(self.base_path, self.relative_source_path), temp_dir)
