@@ -85,9 +85,6 @@ class KubernetesPodExecutor(executor.Executor):
 
     def __kubernetes_kwargs(self, task: ContainerTask):
         config = copy.deepcopy(self.executor_config)
-        for secret in task.secrets:
-            result = next(x for x in self.liminal_config['secrets'] if x['secret'] == secret['secret'])
-            task.mounts.append({'volume': result['secret'], 'path': result['remote_path']})
 
         kubernetes_kwargs = {
             'task_id': task.task_id,
@@ -108,14 +105,22 @@ class KubernetesPodExecutor(executor.Executor):
             'cluster_context': os.environ.get('AIRFLOW__KUBERNETES__CLUSTER_CONTEXT', None),
             'cmds': task.cmds,
             'volume_mounts': [
-                V1VolumeMount(
-                    name=mount['volume'],
-                    mount_path=mount['path'],
-                    sub_path=mount.get('sub_path'),
-                    read_only=mount.get('read_only', False),
-                )
-                for mount in task.mounts
-            ],
+                                 V1VolumeMount(
+                                     name=mount['volume'],
+                                     mount_path=mount['path'],
+                                     sub_path=mount.get('sub_path'),
+                                     read_only=mount.get('read_only', False),
+                                 )
+                                 for mount in task.mounts
+                             ] + [
+                                 V1VolumeMount(
+                                     name=secret['secret'],
+                                     mount_path=secret['remote_path'],
+                                     sub_path=secret.get('sub_path'),
+                                     read_only=secret.get('read_only', False),
+                                 )
+                                 for secret in task.secrets
+                             ],
         }
 
         config.pop('in_cluster', None)

@@ -27,7 +27,6 @@ liminal.yml file.
 name: k8s_secret_example
 secrets:
   - secret: aws
-    remote_path: "/secrets"
     local_path_file: "~/.aws/credentials"
 executors:
   - executor: k8s
@@ -40,14 +39,10 @@ task_defaults:
     image: amazon/aws-cli:2.7.23
     executors: 2
     env_vars:
-      AWS_CONFIG_FILE: "/secrets/credentials"
-      AWS_PROFILE: "default"
-    secrets:
+      AWS_CONFIG_FILE: "/secret/credentials"
+    secret_mount:
       - secret: aws
-    mounts:
-      - mount: myaws-creds
-        volume: aws
-        path: /mnt/
+        remote_path: "/secret"
 pipelines:
   - pipeline: k8s_secret_example
     owner: Bosco Albert Baracus

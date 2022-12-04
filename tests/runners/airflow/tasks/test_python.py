@@ -148,7 +148,7 @@ class TestPythonTask(TestCase):
             'image': image,
             'env_vars': env_vars if env_vars is not None else {},
             'mounts': [{'mount': 'mymount', 'volume': self._VOLUME_NAME, 'path': '/mnt/vol1'}],
-            'secrets': [{'secret': self._SECRET_NAME}],
+            'secrets': [{'secret': self._SECRET_NAME, 'remote_path': '/mnt'}],
         }
 
         if executors:
