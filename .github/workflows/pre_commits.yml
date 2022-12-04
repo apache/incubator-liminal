@@ -13,7 +13,7 @@ on:
 jobs:
   linting:
     name: Run pre-commit hooks on py3.6
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       #----------------------------------------------
       # Checkout, SetUp Python, Load Cache and Run PreCommitChecks
