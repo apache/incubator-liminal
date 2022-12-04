@@ -38,7 +38,7 @@ class ContainerTask(task.Task, ABC):
     """
 
     def __init__(
-            self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
+        self, task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables=None
     ):
         super().__init__(task_id, dag, parent, trigger_rule, liminal_config, pipeline_config, task_config, variables)
         env = standalone_variable_backend.get_variable(ENV, DEFAULT)
