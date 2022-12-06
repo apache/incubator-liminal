@@ -28,7 +28,7 @@ yaml-files:
 
 rules:
   line-length:
-    max: 110
+    max: 140
     # level: warning
   brackets: enable
   colons: enable
