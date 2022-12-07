@@ -24,12 +24,15 @@ import boto3
 import numpy as np
 import pandas as pd
 import sagemaker
-from sagemaker.sklearn.estimator import SKLearn
-from sagemaker.sklearn.model import SKLearnModel
-
-from data_preparation.data_preparation import data_pipeline, DATASET_PUBLIC_URL, LABEL_COLUMN
+from data_preparation.data_preparation import (
+    DATASET_PUBLIC_URL,
+    LABEL_COLUMN,
+    data_pipeline,
+)
 from data_preparation.data_uploader import SagemakerDataUploader
 from data_train.train import feature_column_names
+from sagemaker.sklearn.estimator import SKLearn
+from sagemaker.sklearn.model import SKLearnModel
 
 FRAMEWORK_VERSION = "0.23-1"
 

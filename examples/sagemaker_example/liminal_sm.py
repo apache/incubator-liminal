@@ -17,13 +17,12 @@
 # under the License.
 
 import os
+import tempfile
 
 from sagemaker.deserializers import NumpyDeserializer
 from sagemaker.predictor import Predictor
 from sagemaker.serializers import NumpySerializer
-
-from sm_ops import sm_data_prep, sm_train, sm_deploy, sm_validate, create_sm_args_parser
-import tempfile
+from sm_ops import create_sm_args_parser, sm_data_prep, sm_deploy, sm_train, sm_validate
 
 COMM_PATH = os.getenv("COMM_PATH", tempfile.mkdtemp())
 os.makedirs(COMM_PATH, exist_ok=True)

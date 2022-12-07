@@ -17,12 +17,12 @@
 # under the License.
 
 import os
+import shutil
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse
-import sagemaker
-import boto3
 
-import shutil
+import boto3
+import sagemaker
 
 
 def get_uploader(output_uri_base):

@@ -19,11 +19,10 @@
 import argparse
 import os
 from io import BytesIO
-import pandas as pd
-import numpy as np
 
 import joblib
-
+import numpy as np
+import pandas as pd
 
 feature_column_names = ['carat', 'cut', 'color', 'clarity', 'depth', 'table', 'x', 'y', 'z']
 

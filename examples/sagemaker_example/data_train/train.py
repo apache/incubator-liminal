@@ -16,19 +16,18 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import argparse
+import os
 from pathlib import Path
 
 import joblib
+import numpy as np
+import pandas as pd
+from data_preparation.data_preparation import LABEL_COLUMN, TEST_CSV, TRAIN_CSV
+from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
-import numpy as np
-from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
-from data_preparation.data_preparation import LABEL_COLUMN, TRAIN_CSV, TEST_CSV
-import os
-import argparse
-import pandas as pd
-
 
 feature_column_names = ['carat', 'cut', 'color', 'clarity', 'depth', 'table', 'x', 'y', 'z']
 
