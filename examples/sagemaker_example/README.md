@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# sageMaker 
+# sageMaker
 
 Enable access to AWS STS AssumeRole:
 
