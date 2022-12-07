@@ -31,7 +31,7 @@ default_stages:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.0.1
     hooks:
       - id: check-case-conflict
       - id: check-merge-conflict
@@ -71,7 +71,7 @@ repos:
         pass_filenames: true
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.3.1
+    rev: v1.1.10
     hooks:
       - id: insert-license
         name: Add license for all md files
@@ -148,7 +148,7 @@ repos:
 
   # Python: Black formatter
   - repo: https://github.com/psf/black
-    rev: 22.10.0
+    rev: 21.12b0
     hooks:
       - id: black
         args: [--safe, --quiet, --config=./pyproject.toml]
@@ -165,7 +165,7 @@ repos:
 
   # Yaml: lint
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.28.0
+    rev: v1.26.3
     hooks:
       - id: yamllint
         name: Check YAML files with yamllint
@@ -185,14 +185,14 @@ repos:
 
   # PyUpgrade - 3.6
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v2.29.1
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
         exclude: ^scripts/|^docs
 
   - repo: https://github.com/asottile/blacken-docs
-    rev: v1.12.1
+    rev: v1.12.0
     hooks:
       - id: blacken-docs
         alias: black
