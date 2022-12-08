@@ -15,7 +15,7 @@ on:
 
 jobs:
   unittest:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
         run: ./run_tests.sh
   approve:
     needs: unittest
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
 
     steps:
       - run: | # approve the pull request
