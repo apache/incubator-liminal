@@ -34,8 +34,8 @@ WORKDIR /app
 COPY ./requirements.txt /app/
 
 # mount the secret in the correct location, then run pip install
-RUN python3 -m pip install --upgrade pip
-RUN {{mount}} pip3 install -r requirements.txt
+RUN python -m pip install --upgrade pip
+RUN {{mount}} pip install -r requirements.txt
 
 # Copy the current directory contents into the container at /app
 RUN echo "Copying source code.."

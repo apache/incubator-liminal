@@ -1,6 +1,6 @@
 ---
 name: APPROVE
- 
+
 on: pull_request # run on pull request events
 on:
   workflow_run:
@@ -16,7 +16,7 @@ permissions:
 jobs:
  approve:
    runs-on: ubuntu-22.04
- 
+
    steps:
      - run: | # approve the pull request
          curl --request POST \
