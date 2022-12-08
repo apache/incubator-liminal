@@ -20,7 +20,9 @@
 FROM {{python}}
 
 # Install aptitude build-essential
-#RUN apt-get install -y --reinstall build-essential
+RUN apt-get update && apt-get install -y --reinstall build-essential \
+                                                   make \
+                                                   gcc
 
 # Set the working directory to /app
 WORKDIR /app
@@ -32,7 +34,7 @@ WORKDIR /app
 COPY ./requirements.txt /app/
 
 # mount the secret in the correct location, then run pip install
-RUN pip install --upgrade pip
+RUN python -m pip install --upgrade pip
 RUN {{mount}} pip install -r requirements.txt
 
 # Copy the current directory contents into the container at /app

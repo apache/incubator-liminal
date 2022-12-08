@@ -15,16 +15,16 @@ on:
 
 jobs:
   unittest:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-20.04
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.3.0
+        uses: manusa/actions-setup-minikube@v2.7.1
         with:
-          minikube version: v1.16.0
-          kubernetes version: v1.19.2
+          minikube version: 'v1.26.1'
+          kubernetes version: 'v1.25.0'
           github token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Python
         uses: actions/setup-python@v1
@@ -34,5 +34,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run unittest
+      - name: Run unittest - runners
         run: ./run_tests.sh
+  approve:
+    needs: unittest
+    runs-on: ubuntu-20.04
+
+    steps:
+      - run: | # approve the pull request
+          curl --request POST \
+          --url https://api.github.com/repos/${{github.repository}}/pulls/${{github.event.number}}/reviews \
+          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'content-type: application/json' \
+          -d '{"event":"APPROVE"}'

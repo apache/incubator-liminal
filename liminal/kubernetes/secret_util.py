@@ -63,6 +63,11 @@ def create_secret(conf, namespace='default') -> None:
     _LOG.info(f'Requested secret {name}')
 
     if name not in _LOCAL_VOLUMES:
+        matching_secrets = _kubernetes.list_namespaced_secret(
+            namespace, field_selector=f'metadata.name={name}'
+        ).to_dict()['items']
+
+    if len(matching_secrets) == 0:
         _create_secret(namespace, conf, name)
         sleep(5)
 
