@@ -69,10 +69,7 @@ Let's build the images you need for the example:
 liminal build
 ```
 ##### The build will create docker images based on the liminal.yml file in the `images` section.
-Create a kubernetes local volume:
-```BASH
-liminal create
-```
+
 ```BASH
 liminal deploy --clean
 ```
@@ -160,7 +157,6 @@ source env/bin/activate
 pip uninstall apache-liminal
 pip install apache-liminal
 Liminal build
-Liminal create
 liminal deploy --clean
 liminal start
 ```
