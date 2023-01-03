@@ -91,24 +91,13 @@ cd incubator-liminal/examples/spark-app-demo/k8s
 ```
 
 #### Liminal build
+The build will create docker images based on the liminal.yml file in the `images` section and will create a kubernetes local volume.
 
-The build will create docker images based on the liminal.yml file in the `images` section.
-
+Be informed that all tasks use a mounted volume as defined in the pipeline YAML. \
+In our case the mounted volume will point to the liminal Iris Classification example.
+The training task trains a regression model using a public dataset. We then validate the model and deploy it to a model-store in the mounted volume.
 ```BASH
 liminal build
-```
-
-#### Liminal create
-
-All tasks use a mounted volume as defined in the pipeline YAML. \
-In our case the mounted volume will point to the liminal Iris Classification example. The training
-task trains a regression model using a public dataset. We then validate the model and deploy it to a
-model-store in the mounted volume.
-
-Create a kubernetes local volume:
-
-```BASH
-liminal create
 ```
 
 #### Liminal deploy

@@ -40,7 +40,7 @@ task_defaults:
     executors: 2
     env_vars:
       AWS_CONFIG_FILE: "/secret/credentials"
-    secret_mount:
+    secrets:
       - secret: aws
         remote_path: "/secret"
 pipelines:
