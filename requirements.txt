@@ -40,7 +40,7 @@ flatdict==3.4.0
 jinja2>=2.10.1, <2.11.0
 python-json-logger==2.0.1
 requests==2.26.0
-apache-airflow-providers-amazon==1.4.0
+apache-airflow-providers-amazon==7.2.1
 apache-airflow-providers-cncf-kubernetes==1.0.2
 #apache-airflow-providers-google==4.0.0
 #apache-airflow[google,amazon,apache.spark]==2.0.0
